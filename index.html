@@ -243,7 +243,7 @@
       <div style="text-align:center; background:#0f172a; padding:8px; border-radius:10px; margin-bottom:10px;">
         <canvas id="omrCanvas" width="794" height="1123" style="max-width:460px; border-radius:6px;"></canvas>
         <div style="color:#cbd5e1; font-size:0.74rem; margin-top:4px;">
-          Tips: Pastikan 4 kotak hitam sudut LJK terlihat utuh. Scan kamera saat ini membaca PG; jawaban B-S dimasukkan manual atau melalui CSV. Titik merah di layar menandakan bulatan yang terbaca terisi.
+          Tips: Pastikan 4 kotak hitam sudut LJK terlihat utuh. Scanner membaca PG dan B-S; periksa kembali jawaban kosong/ganda sebelum menyimpan. Titik merah menandakan bulatan terdeteksi terisi.
         </div>
       </div>
 
@@ -288,7 +288,9 @@
     <div class="sub-tabs">
       <button class="sub-tab active" onclick="switchReport('nilai_mc', this)">NILAI MC</button>
       <button class="sub-tab" onclick="switchReport('analisis_mc', this)">Analisis MC</button>
-      <button class="sub-tab" onclick="switchReport('grafik_mc', this)">Grafik & Saran</button>
+      <button class="sub-tab" onclick="switchReport('grafik_mc', this)">Grafik PG</button>
+      <button class="sub-tab" onclick="switchReport('grafik_bs', this)">Grafik B-S</button>
+      <button class="sub-tab" onclick="switchReport('grafik_ur', this)">Grafik Uraian</button>
       <button class="sub-tab" onclick="switchReport('nilai_ur', this)">NILAI UR</button>
       <button class="sub-tab" onclick="switchReport('analisis_ur', this)">Analisis UR</button>
       <button class="sub-tab" onclick="switchReport('nil_gab', this)">Nil Gab</button>
@@ -369,6 +371,7 @@ let state = {
 let currentReportTab = 'nilai_mc';
 let selectedRemedStudent = 0;
 let currentScannedPG = [];
+let currentScannedBS = [];
 let currentScannedUR = [];
 let loadedScanImage = null;
 let cameraStream = null;
@@ -458,6 +461,9 @@ function updateKunciPreview() {
   const k = state.config.kunciPG.slice(0, state.config.jmlPG);
   const blocks = k.match(/.{1,5}/g) || [];
   document.getElementById('kunciPreview').textContent = `Terisi ${k.length}/${state.config.jmlPG} soal • Blok 5-an: ${blocks.join(' | ')}`;
+  const bsKey = (state.config.kunciBS || '').slice(0, state.config.jmlBS || 0);
+  const bsPreview = document.getElementById('kunciBSPreview');
+  if (bsPreview) bsPreview.textContent = `Terisi ${bsKey.length}/${state.config.jmlBS || 0} kunci B-S`;
 }
 
 // ==================== MANAJEMEN SISWA ====================
@@ -546,6 +552,12 @@ function computeAllAnalytics() {
   const kBS=state.config.jmlBS||0,keyBS=(state.config.kunciBS||'').padEnd(kBS,'!');
   const bsMatrix=state.students.map(st=>{const ans=(st.bs||'').toUpperCase().replace(/\s/g,'').padEnd(kBS,'X'),row=[];let skor=0;for(let j=0;j<kBS;j++){const ok=(ans[j]==='B'||ans[j]==='S')&&ans[j]===keyBS[j]?1:0;row.push(ok);skor+=ok;}return {row,skor,nilai:kBS?skor/kBS*100:0,ans};});
   const objMatrix=state.students.map((st,i)=>{const total=kPG+kBS,skor=pgMatrix[i].skor+bsMatrix[i].skor,nilai=total?skor/total*100:0;return {skor,total,nilai,tuntas:nilai>=(kktp-0.5)?'Tuntas':'Remedial'};});
+  const itemsBS=Array.from({length:kBS},(_,j)=>{
+    let benar=0,salah=0,kosong=0,ganda=0,belumDinilai=0;
+    const keyReady=keyBS[j]==='B'||keyBS[j]==='S';
+    bsMatrix.forEach(m=>{const ans=m.ans[j]||'X';if(ans==='X')kosong++;else if(ans==='V')ganda++;else if(!keyReady)belumDinilai++;else if(ans===keyBS[j])benar++;else salah++;});
+    return {no:kPG+j+1,benar,salah,kosong,ganda,belumDinilai,tk:N?benar/N:0,keyReady};
+  });
   // 2. Matriks Skor Uraian & Nilai UR
   const totalMaxUR = state.config.maxUR.slice(0, kUR).reduce((a, b) => a + b, 0);
   const urMatrix = state.students.map(st => {
@@ -674,7 +686,7 @@ function computeAllAnalytics() {
                      (katDP === 'Soal diterima baik' ? 'Diterima' : 'Dipertimbangkan');
 
     sumVarItemsUR += variance(col);
-    itemsUR.push({ no: kPG + j + 1, tk, katTK, dp, katDP, rxy, valid, bankSoal });
+    itemsUR.push({ no: kPG + kBS + j + 1, tk, katTK, dp, katDP, rxy, valid, bankSoal });
   }
   const varTotalUR = variance(totalScoresUR);
   const cronbachUR = (kUR > 1 && varTotalUR > 0) ? (kUR / (kUR - 1)) * (1 - (sumVarItemsUR / varTotalUR)) : 0;
@@ -682,7 +694,7 @@ function computeAllAnalytics() {
 
   return {
     N, kPG, kBS, kUR, kktp, rTabel, pgMatrix, bsMatrix, objMatrix, urMatrix, gabungan,
-    itemsPG, kr20, relStatusPG,
+    itemsPG, itemsBS, kr20, relStatusPG,
     itemsUR, cronbachUR, relStatusUR
   };
 }
@@ -693,40 +705,40 @@ function getOMRLayout() {
   const jmlPG = state.config.jmlPG;
   const opsi = state.config.opsiPG;
   const letters = ['A', 'B', 'C', 'D', 'E'].slice(0, opsi);
-  const colsCount = Math.ceil(jmlPG / 10); // 10 soal per kolom (maks 5 kolom = 50 soal)
+  const jmlBS = state.config.jmlBS || 0;
+  const pgCols = Math.max(1, Math.ceil(jmlPG / 10));
+  const bsCols = Math.max(1, Math.ceil(jmlBS / 10));
   const bubbles = [];
 
-  // 1. Area Nomor Absen (2 digit: Puluhan 0-9, Satuan 0-9) di kanan atas
+  // Area nomor absen tetap di bagian kepala LJK.
   for (let d = 0; d < 2; d++) {
     for (let num = 0; num <= 9; num++) {
-      bubbles.push({
-        type: 'absen', digit: d, val: num,
-        nx: 0.72 + d * 0.08,
-        ny: 0.06 + num * 0.022
-      });
+      bubbles.push({ type: 'absen', digit: d, val: num, nx: 0.72 + d * 0.08, ny: 0.06 + num * 0.022 });
     }
   }
 
-  // 2. Area Jawaban Pilihan Ganda
-  const startY = 0.34;
-  const rowStep = 0.056; // 10 baris -> 0.34 .. 0.844
-  const colWidth = 0.90 / Math.max(3, colsCount);
+  // PG dan B-S memakai dua zona vertikal terpisah. Masing-masing kolom
+  // memuat maksimal 10 nomor sehingga konfigurasi sampai 50+50 tetap muat.
+  const pgStartY = 0.34, bsStartY = 0.635, rowStep = 0.024;
+  const pgColWidth = 0.90 / pgCols;
   for (let q = 0; q < jmlPG; q++) {
-    const colIdx = Math.floor(q / 10);
-    const rowIdx = q % 10;
-    const baseX = 0.08 + colIdx * colWidth;
-    const y = startY + rowIdx * rowStep;
+    const colIdx = Math.floor(q / 10), rowIdx = q % 10;
+    const baseX = 0.055 + colIdx * pgColWidth;
+    const gap = Math.min(0.034, (pgColWidth - 0.035) / Math.max(1, opsi - 1));
     for (let o = 0; o < opsi; o++) {
-      bubbles.push({
-        type: 'pg', qIndex: q, letter: letters[o],
-        nx: baseX + o * 0.036,
-        ny: y
-      });
+      bubbles.push({ type: 'pg', qIndex: q, letter: letters[o], nx: baseX + 0.025 + o * gap, ny: pgStartY + rowIdx * rowStep });
     }
   }
-  return { bubbles, letters, colsCount, startY, rowStep, colWidth };
-}
 
+  const bsColWidth = 0.90 / bsCols;
+  for (let q = 0; q < jmlBS; q++) {
+    const colIdx = Math.floor(q / 10), rowIdx = q % 10;
+    const baseX = 0.055 + colIdx * bsColWidth;
+    bubbles.push({ type: 'bs', qIndex: q, letter: 'B', nx: baseX + 0.045, ny: bsStartY + rowIdx * rowStep });
+    bubbles.push({ type: 'bs', qIndex: q, letter: 'S', nx: baseX + 0.105, ny: bsStartY + rowIdx * rowStep });
+  }
+  return { bubbles, letters, pgCols, bsCols, pgStartY, bsStartY, rowStep, pgColWidth, bsColWidth };
+}
 function renderLJKPreview() {
   const canvas = document.getElementById('ljkGeneratorCanvas');
   const ctx = canvas.getContext('2d');
@@ -776,7 +788,7 @@ function renderLJKPreview() {
   ctx.fillStyle = '#334155';
   ctx.fillText('PETUNJUK: Hitamkan penuh bulatan pilihan Anda menggunakan pensil 2B atau spidol hitam.', fx + 34, fy + 192);
 
-  // Render Grid Nomor Absen & Bulatan PG dari getOMRLayout()
+  // Render grid nomor absen, Pilihan Ganda, dan Benar-Salah
   const layout = getOMRLayout();
   ctx.strokeStyle = '#0f172a';
   ctx.fillStyle = '#0f172a';
@@ -807,16 +819,29 @@ function renderLJKPreview() {
     ctx.fillText(b.type === 'absen' ? String(b.val) : b.letter, cx, cy);
   });
 
-  // Nomor Soal di sebelah kiri tiap grup opsi
-  ctx.textAlign = 'right';
+  // Judul dan nomor soal PG
+  ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+  ctx.fillStyle = '#0f172a'; ctx.font = 'bold 11px sans-serif';
+  ctx.fillText(`PILIHAN GANDA (${state.config.jmlPG} SOAL)`, fx + 30, fy + 222);
+  ctx.font = 'bold 8.5px sans-serif';
   for (let q = 0; q < state.config.jmlPG; q++) {
-    const colIdx = Math.floor(q / 10);
-    const rowIdx = q % 10;
-    const baseX = fx + (0.08 + colIdx * layout.colWidth) * fw;
-    const y = fy + (layout.startY + rowIdx * layout.rowStep) * fh;
-    ctx.fillStyle = '#0f172a';
-    ctx.font = 'bold 10.5px sans-serif';
-    ctx.fillText(`${q + 1}.`, baseX - 14, y);
+    const colIdx = Math.floor(q / 10), rowIdx = q % 10;
+    const baseX = fx + (0.055 + colIdx * layout.pgColWidth) * fw;
+    const y = fy + (layout.pgStartY + rowIdx * layout.rowStep) * fh;
+    ctx.fillText(`${q + 1}.`, baseX, y + 3);
+  }
+
+  // Judul dan nomor soal B-S dengan dua pilihan bulatan B dan S
+  if (state.config.jmlBS > 0) {
+    ctx.font = 'bold 11px sans-serif';
+    ctx.fillText(`BENAR - SALAH (${state.config.jmlBS} SOAL)`, fx + 30, fy + 0.615 * fh);
+    ctx.font = 'bold 8.5px sans-serif';
+    for (let q = 0; q < state.config.jmlBS; q++) {
+      const colIdx = Math.floor(q / 10), rowIdx = q % 10;
+      const baseX = fx + (0.055 + colIdx * layout.bsColWidth) * fw;
+      const y = fy + (layout.bsStartY + rowIdx * layout.rowStep) * fh;
+      ctx.fillText(`${state.config.jmlPG + q}.`, baseX, y + 3);
+    }
   }
 
   // Kotak Skor Uraian (Jika ada soal uraian)
@@ -825,10 +850,10 @@ function renderLJKPreview() {
     const urY = fy + 0.89 * fh;
     ctx.strokeRect(fx + 34, urY, fw - 68, 54);
     ctx.font = 'bold 10px sans-serif';
-    ctx.fillText('DIISI GURU (SKOR URAIAN):', fx + 44, urY + 16);
+    ctx.fillText('URAIAN - JAWABAN PADA LEMBAR TERPISAH | SKOR DIISI GURU:', fx + 44, urY + 16);
     let ux = fx + 44;
     for (let u = 0; u < Math.min(state.config.jmlUR, 12); u++) {
-      const noSoal = state.config.jmlPG + u + 1;
+      const noSoal = state.config.jmlPG + (state.config.jmlBS || 0) + u + 1;
       ctx.strokeRect(ux, urY + 22, 44, 24);
       ctx.font = '9px sans-serif';
       ctx.fillText(`No.${noSoal}:`, ux + 3, urY + 34);
@@ -960,7 +985,7 @@ function reprocessOMR() {
   ctx.drawImage(loadedScanImage, 0, 0, W, H);
 
   const imgData = ctx.getImageData(0, 0, W, H);
-  const corners=detectFiducialCorners(imgData,W,H);if(!corners.found){ctx.drawImage(loadedScanImage,0,0,W,H);document.getElementById('scanResultSummary').textContent='Empat penanda sudut tidak terdeteksi. Foto ulang seluruh LJK; scan dibatalkan agar tidak salah membaca.';currentScannedPG=[];document.getElementById('scanAnswersEditor').innerHTML='';return;}
+  const corners=detectFiducialCorners(imgData,W,H);if(!corners.found){ctx.drawImage(loadedScanImage,0,0,W,H);document.getElementById('scanResultSummary').textContent='Empat penanda sudut tidak terdeteksi. Foto ulang seluruh LJK; scan dibatalkan agar tidak salah membaca.';currentScannedPG=[];currentScannedBS=[];document.getElementById('scanAnswersEditor').innerHTML='';document.getElementById('scanUraianInputs').innerHTML='';return;}
   // Gambar garis bingkai kalibrasi 4 sudut
   ctx.strokeStyle = corners.found ? '#10b981' : '#f59e0b';
   ctx.lineWidth = 3;
@@ -1008,6 +1033,7 @@ function reprocessOMR() {
   const layout = getOMRLayout();
   const absenScores = [[], []];
   const pgChoices=Array.from({length:state.config.jmlPG},()=>[]);
+  const bsChoices=Array.from({length:state.config.jmlBS||0},()=>[]);
 
   layout.bubbles.forEach(b => {
     const pt = mapPoint(b.nx, b.ny);
@@ -1022,7 +1048,10 @@ function reprocessOMR() {
 
     if (b.type === 'absen') {
       absenScores[b.digit].push({ val: b.val, fill, filled });
-    }else if(b.type==='pg'&&filled){pgChoices[b.qIndex].push(b.letter);
+    } else if (b.type === 'pg' && filled) {
+      pgChoices[b.qIndex].push(b.letter);
+    } else if (b.type === 'bs' && filled) {
+      bsChoices[b.qIndex].push(b.letter);
     }
   });
 
@@ -1037,47 +1066,66 @@ function reprocessOMR() {
   }
 
   // Konversi ke format huruf KORANUL (A-E, X=Kosong, V=Ganda)
-  currentScannedPG=pgChoices.map(a=>!a.length?'X':a.length>1?'V':a[0]);renderScannedEditor();
+  currentScannedPG = pgChoices.map(a => !a.length ? 'X' : a.length > 1 ? 'V' : a[0]);
+  currentScannedBS = bsChoices.map(a => !a.length ? 'X' : a.length > 1 ? 'V' : a[0]);
+  renderScannedEditor();
 }
 
 function renderScannedEditor() {
   const kPG = state.config.jmlPG;
-  const kunci = (state.config.kunciPG || '').toUpperCase().replace(/\s/g,'').padEnd(kPG, '!');
-  let benar = 0;
+  const kBS = state.config.jmlBS || 0;
+  const keyPG = (state.config.kunciPG || '').toUpperCase().replace(/\s/g, '').padEnd(kPG, '!');
+  const keyBS = (state.config.kunciBS || '').toUpperCase().replace(/\s/g, '').padEnd(kBS, '!');
+  let benarPG = 0, benarBS = 0;
   const ed = document.getElementById('scanAnswersEditor');
   ed.innerHTML = '';
 
-  for (let i = 0; i < kPG; i++) {
-    const ans = currentScannedPG[i] || 'X';
-    const isOk = ans === kunci[i];
-    if (isOk) benar++;
+  const heading = (label) => {
+    const h = document.createElement('div'); h.style.cssText = 'width:100%;font-weight:800;margin:7px 0 2px;color:#1e3a8a'; h.textContent = label; ed.appendChild(h);
+  };
+  const addChip = (label, ans, isOk, title, onCycle) => {
     const chip = document.createElement('button');
-    chip.className = 'btn btn-sm';
-    chip.style.background = isOk ? '#dcfce7' : '#fee2e2';
-    chip.style.color = isOk ? '#166534' : '#991b1b';
-    chip.style.border = '1px solid #cbd5e1';
-    chip.textContent = `${i+1}:${ans}`;
-    chip.title = `Klik untuk ubah jawaban No.${i+1} (Kunci: ${kunci[i]})`;
-    chip.onclick = () => {
-      const opts = ['A','B','C','D','E'].slice(0, state.config.opsiPG).concat(['X','V']);
-      const next = opts[(opts.indexOf(ans) + 1) % opts.length];
-      currentScannedPG[i] = next;
-      renderScannedEditor();
-    };
-    ed.appendChild(chip);
+    chip.className = 'btn btn-sm'; chip.style.background = isOk ? '#dcfce7' : (ans === 'X' || ans === 'V' ? '#fef3c7' : '#fee2e2');
+    chip.style.color = isOk ? '#166534' : '#92400e'; chip.style.border = '1px solid #cbd5e1';
+    chip.textContent = `${label}:${ans}`; chip.title = title; chip.onclick = onCycle; ed.appendChild(chip);
+  };
+
+  if (kPG > 0) {
+    heading('PILIHAN GANDA');
+    for (let i = 0; i < kPG; i++) {
+      const ans = currentScannedPG[i] || 'X', isOk = ans === keyPG[i];
+      if (isOk) benarPG++;
+      addChip(i + 1, ans, isOk, `Klik untuk ubah jawaban PG No.${i + 1} (Kunci: ${keyPG[i]})`, () => {
+        const opts = ['A','B','C','D','E'].slice(0, state.config.opsiPG).concat(['X','V']);
+        currentScannedPG[i] = opts[(opts.indexOf(ans) + 1) % opts.length]; renderScannedEditor();
+      });
+    }
   }
 
-  const nilaiPG = kPG > 0 ? ((benar / kPG) * 100).toFixed(1) : 0;
-  document.getElementById('scanResultSummary').innerHTML =
-    `<b>Terbaca:</b> ${currentScannedPG.join('')} <br><b>Skor PG:</b> ${benar}/${kPG} • <b>Nilai PG:</b> <span style="color:var(--primary); font-weight:800;">${nilaiPG}</span>`;
+  if (kBS > 0) {
+    heading('BENAR - SALAH');
+    for (let i = 0; i < kBS; i++) {
+      const ans = currentScannedBS[i] || 'X', isOk = ans === keyBS[i];
+      if (isOk) benarBS++;
+      addChip(`B-S ${kPG + i + 1}`, ans, isOk, `Klik untuk ubah jawaban B-S No.${kPG + i + 1} (Kunci: ${keyBS[i]})`, () => {
+        const opts = ['B','S','X','V']; currentScannedBS[i] = opts[(opts.indexOf(ans) + 1) % opts.length]; renderScannedEditor();
+      });
+    }
+  }
 
-  // Input skor uraian jika ada
+  const nilaiPG = kPG > 0 ? ((benarPG / kPG) * 100).toFixed(1) : '—';
+  const nilaiBS = kBS > 0 ? ((benarBS / kBS) * 100).toFixed(1) : '—';
+  document.getElementById('scanResultSummary').innerHTML =
+    `<b>PG:</b> ${currentScannedPG.join('')} • Skor ${benarPG}/${kPG} • Nilai ${nilaiPG}` +
+    (kBS ? `<br><b>B-S:</b> ${currentScannedBS.join('')} • Skor ${benarBS}/${kBS} • Nilai ${nilaiBS}` : '') +
+    `<br><small>Klik tombol jawaban untuk koreksi manual. X = kosong, V = terdeteksi ganda.</small>`;
+
   const urBox = document.getElementById('scanUraianInputs');
   urBox.innerHTML = '';
   const stIdx = parseInt(document.getElementById('scanStudentSelect').value) || 0;
   const existingUR = (state.students[stIdx] && state.students[stIdx].ur) || [];
   for (let u = 0; u < state.config.jmlUR; u++) {
-    const noU = kPG + u + 1;
+    const noU = kPG + kBS + u + 1;
     const maxS = state.config.maxUR[u] || 4;
     const val = existingUR[u] !== undefined ? existingUR[u] : 0;
     const div = document.createElement('div');
@@ -1085,11 +1133,11 @@ function renderScannedEditor() {
     urBox.appendChild(div);
   }
 }
-
 function saveScannedResult() {
   const stIdx = parseInt(document.getElementById('scanStudentSelect').value);
   if (isNaN(stIdx) || !state.students[stIdx]) return alert('Pilih siswa terlebih dahulu.');
-  state.students[stIdx].pg=currentScannedPG.join('');
+  state.students[stIdx].pg = currentScannedPG.join('');
+  state.students[stIdx].bs = currentScannedBS.join('');
   const urInputs = document.querySelectorAll('.scan-ur-in');
   if (urInputs.length > 0) {
     state.students[stIdx].ur = Array.from(urInputs).map(inp => parseFloat(inp.value) || 0);
@@ -1157,6 +1205,28 @@ function renderHeaderKop(title) {
       </tr>
     </table>
   `;
+}
+
+function chartBarRows(title, rows, maxValue) {
+  if (!rows.length) return `<div class="card"><h3>${title}</h3><p>Belum ada data untuk ditampilkan.</p></div>`;
+  const max = Math.max(1, maxValue || Math.max(0,...rows.map(x=>x.value)));
+  return `<div class="card"><h3>${title}</h3>${rows.map(r=>{
+    const pct=Math.max(0,Math.min(100,(r.value/max)*100));
+    return `<div class="bar-row"><div style="width:115px;white-space:normal;">${r.label}</div><div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${r.color||'#2563eb'}"></div></div><div style="width:58px;text-align:right"><b>${r.display!==undefined?r.display:r.value}</b></div></div>`;
+  }).join('')}</div>`;
+}
+function chartDonut(title, rows) {
+  const total=rows.reduce((a,r)=>a+Math.max(0,r.value),0);
+  if(!total) return `<div class="card"><h3>${title}</h3><p>Belum ada data untuk ditampilkan.</p></div>`;
+  let angle=0;const stops=rows.map(r=>{const start=angle;angle+=Math.max(0,r.value)/total*360;return `${r.color} ${start}deg ${angle}deg`;}).join(',');
+  return `<div class="card"><h3>${title}</h3><div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap"><div style="width:132px;height:132px;border-radius:50%;background:conic-gradient(${stops});position:relative;flex:none"><div style="position:absolute;inset:27px;border-radius:50%;background:white;display:grid;place-items:center;font-weight:800">${total}</div></div><div style="flex:1;min-width:150px">${rows.map(r=>`<div style="display:flex;justify-content:space-between;gap:10px;font-size:.82rem;margin:6px 0"><span><i style="display:inline-block;width:10px;height:10px;border-radius:2px;background:${r.color};margin-right:6px"></i>${r.label}</span><b>${r.value} (${Math.round(r.value/total*100)}%)</b></div>`).join('')}</div></div></div>`;
+}
+function chartLine(title, values, labels) {
+  if(!values.length) return `<div class="card"><h3>${title}</h3><p>Belum ada data untuk ditampilkan.</p></div>`;
+  const w=640,h=190,pad=28,max=Math.max(1,...values),min=Math.min(0,...values),range=Math.max(1,max-min);
+  const pts=values.map((v,i)=>`${pad+(values.length===1?0:i*(w-2*pad)/(values.length-1))},${h-pad-((v-min)/range)*(h-2*pad)}`).join(' ');
+  const dots=values.map((v,i)=>{const x=pad+(values.length===1?0:i*(w-2*pad)/(values.length-1)),y=h-pad-((v-min)/range)*(h-2*pad);return `<circle cx="${x}" cy="${y}" r="4" fill="#2563eb"><title>${labels[i]||i+1}: ${Number(v).toFixed(1)}</title></circle>`}).join('');
+  return `<div class="card"><h3>${title}</h3><div style="overflow-x:auto"><svg viewBox="0 0 ${w} ${h}" style="width:100%;min-width:320px;height:auto"><line x1="${pad}" y1="${pad}" x2="${pad}" y2="${h-pad}" stroke="#94a3b8"/><line x1="${pad}" y1="${h-pad}" x2="${w-pad}" y2="${h-pad}" stroke="#94a3b8"/><polyline points="${pts}" fill="none" stroke="#2563eb" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>${dots}</svg></div><small style="color:#64748b">Sumbu X mengikuti urutan ${labels.length===values.length?'siswa/soal':'data'}; arahkan kursor ke titik untuk melihat nilai.</small></div>`;
 }
 
 function renderReport() {
@@ -1243,7 +1313,12 @@ function renderReport() {
       return `<div class="bar-row"><div style="width:110px;">${lbl} (${cnt})</div><div class="bar-track"><div class="bar-fill" style="width:${pct}%; background:${color};"></div></div><div style="width:42px; text-align:right;"><b>${pct}%</b></div></div>`;
     };
 
-    box.innerHTML = renderHeaderKop('DIAGRAM ANALISIS & SARAN (GRFIK MC & Saran)') + `
+    const pgResponses = a.pgMatrix.reduce((o,m)=>{for(const ch of m.ans){if(ch==='X')o.kosong++;else if(ch==='V')o.ganda++;else if(a.itemsPG.length && ch===undefined){} }return o;},{kosong:0,ganda:0});
+    const pgCorrect=a.pgMatrix.reduce((sum,m)=>sum+m.skor,0);
+    const pgTotal=a.N*a.kPG;
+    const pgWrong=Math.max(0,pgTotal-pgCorrect-pgResponses.kosong-pgResponses.ganda);
+    const pgPerItem=a.itemsPG.map(it=>({label:`No.${it.no}`,value:Math.round(it.tk*100),display:`${Math.round(it.tk*100)}%`,color:it.katTK==='Mudah'?'#10b981':it.katTK==='Sedang'?'#3b82f6':'#ef4444'}));
+    box.innerHTML = renderHeaderKop('GRAFIK ANALISIS PILIHAN GANDA (PG) & SARAN') + `
       <div class="grid-2">
         <div class="card">
           <h3>Tingkat Kesukaran Soal PG</h3>
@@ -1258,11 +1333,41 @@ function renderReport() {
           ${bar('Siswa Tuntas', tuntas, a.N, '#1d4ed8')}
         </div>
       </div>
+      <div class="grid-2">
+        ${chartDonut('Komposisi Jawaban PG Seluruh Siswa',[{label:'Benar',value:pgCorrect,color:'#16a34a'},{label:'Salah',value:pgWrong,color:'#ef4444'},{label:'Kosong',value:pgResponses.kosong,color:'#f59e0b'},{label:'Ganda',value:pgResponses.ganda,color:'#7c3aed'}])}
+        ${chartBarRows('Persentase Jawaban Benar per Butir PG',pgPerItem,100)}
+      </div>
       <div class="card" style="background:#f8fafc;">
         <h3>Kesimpulan & Saran Otomatis (Sheet: Saran)</h3>
         <p style="font-size:0.84rem; margin:6px 0;"><b>1. Evaluasi Pembelajaran:</b> ${saranPembelajaran}</p>
         <p style="font-size:0.84rem; margin:6px 0;"><b>2. Evaluasi Kualitas Instrumen Soal:</b> ${saranSoal}</p>
       </div>`;
+  }
+
+  else if (currentReportTab === 'grafik_bs') {
+    if (!a.kBS) { box.innerHTML=renderHeaderKop('GRAFIK BENAR-SALAH (B-S)') + '<p>Jumlah soal B-S masih 0. Atur jumlah soal B-S dan isi kunci B/S pada menu Data & Kunci.</p>'; return; }
+    const total=a.N*a.kBS;
+    const benar=a.itemsBS.reduce((s,x)=>s+x.benar,0), salah=a.itemsBS.reduce((s,x)=>s+x.salah,0), kosong=a.itemsBS.reduce((s,x)=>s+x.kosong,0), ganda=a.itemsBS.reduce((s,x)=>s+x.ganda,0), belumDinilai=a.itemsBS.reduce((s,x)=>s+x.belumDinilai,0);
+    const perItem=a.itemsBS.map(x=>({label:`No.${x.no}`,value:Math.round(x.tk*100),display:x.keyReady?`${Math.round(x.tk*100)}%`:'Kunci belum diisi',color:'#0d9488'}));
+    const keyMissing=a.itemsBS.filter(x=>!x.keyReady).length;
+    box.innerHTML=renderHeaderKop('GRAFIK ANALISIS BENAR-SALAH (B-S)')+
+      (keyMissing?`<div class="card" style="background:#fff7ed;color:#9a3412"><b>Perhatian:</b> ${keyMissing} kunci B-S belum diisi. Grafik ketepatan untuk nomor tersebut belum dapat dihitung.</div>`:'')+
+      `<div class="grid-2">${chartDonut('Komposisi Respons B-S',[{label:'Benar',value:benar,color:'#16a34a'},{label:'Salah',value:salah,color:'#ef4444'},{label:'Kosong',value:kosong,color:'#f59e0b'},{label:'Ganda',value:ganda,color:'#7c3aed'},{label:'Belum dinilai',value:belumDinilai,color:'#64748b'}])}${chartBarRows('Ketepatan Jawaban per Butir B-S',perItem,100)}</div>
+      ${keyMissing===0?chartLine('Perbandingan Skor B-S per Siswa',a.bsMatrix.map(x=>x.nilai),state.students.map((x,i)=>`${i+1}. ${x.nama}`)):'<div class="card"><h3>Skor per Siswa</h3><p>Grafik nilai siswa akan aktif setelah seluruh kunci B-S dilengkapi.</p></div>'}
+      <div class="card"><h3>Rincian Respons per Pernyataan B-S</h3><div class="table-wrap"><table><thead><tr><th>No Soal</th><th>Kunci</th><th>Benar</th><th>Salah</th><th>Kosong</th><th>Ganda</th><th>Belum Dinilai</th><th>Ketepatan</th></tr></thead><tbody>${a.itemsBS.map((x,i)=>`<tr><td>${x.no}</td><td>${(state.config.kunciBS||'')[i]||'—'}</td><td>${x.benar}</td><td>${x.salah}</td><td>${x.kosong}</td><td>${x.ganda}</td><td>${x.belumDinilai}</td><td>${x.keyReady?Math.round(x.tk*100)+'%':'Belum tersedia'}</td></tr>`).join('')}</tbody></table></div></div>`;
+  }
+
+  else if (currentReportTab === 'grafik_ur') {
+    if (!a.kUR) { box.innerHTML=renderHeaderKop('GRAFIK SOAL URAIAN') + '<p>Jumlah soal Uraian masih 0. Atur jumlah soal Uraian pada menu Data & Kunci.</p>'; return; }
+    const maxTotal=state.config.maxUR.slice(0,a.kUR).reduce((s,v)=>s+(Number(v)||0),0);
+    const mean=a.urMatrix.length?a.urMatrix.reduce((s,x)=>s+x.nilai,0)/a.urMatrix.length:0;
+    const bands=[{label:'Rendah (0–59)',value:a.urMatrix.filter(x=>x.nilai<60).length,color:'#ef4444'},{label:'Sedang (60–79)',value:a.urMatrix.filter(x=>x.nilai>=60&&x.nilai<80).length,color:'#f59e0b'},{label:'Tinggi (80–100)',value:a.urMatrix.filter(x=>x.nilai>=80).length,color:'#16a34a'}];
+    const perItem=a.itemsUR.map((it,j)=>{const avg=a.N?a.urMatrix.reduce((sum,x)=>sum+x.row[j],0)/a.N:0;const max=Number(state.config.maxUR[j])||1;return {label:`No.${it.no}`,value:Math.round(avg/max*100),display:`${Math.round(avg/max*100)}%`,color:'#7c3aed'};});
+    box.innerHTML=renderHeaderKop('GRAFIK ANALISIS SOAL URAIAN')+
+      `<div class="grid-3"><div class="stat-box"><div class="num">${mean.toFixed(1)}</div><div class="lbl">Rata-rata Nilai Uraian</div></div><div class="stat-box"><div class="num">${Math.max(0,...a.urMatrix.map(x=>x.nilai)).toFixed(1)}</div><div class="lbl">Nilai Tertinggi</div></div><div class="stat-box"><div class="num">${maxTotal}</div><div class="lbl">Total Skor Maksimum</div></div></div>
+      <div class="grid-2">${chartBarRows('Rata-rata Capaian per Soal Uraian',perItem,100)}${chartDonut('Distribusi Capaian Siswa',bands)}</div>
+      ${chartLine('Grafik Nilai Uraian per Siswa',a.urMatrix.map(x=>x.nilai),state.students.map((x,i)=>`${i+1}. ${x.nama}`))}
+      <div class="card"><h3>Rata-rata Skor Tiap Soal Uraian</h3><div class="table-wrap"><table><thead><tr><th>No Soal</th><th>Skor Maksimum</th><th>Rata-rata Skor</th><th>Persentase Capaian</th><th>Kategori Kesukaran</th></tr></thead><tbody>${a.itemsUR.map((it,j)=>{const avg=a.N?a.urMatrix.reduce((sum,x)=>sum+x.row[j],0)/a.N:0;return `<tr><td>${it.no}</td><td>${state.config.maxUR[j]}</td><td>${avg.toFixed(2)}</td><td>${Math.round(it.tk*100)}%</td><td>${it.katTK}</td></tr>`}).join('')}</tbody></table></div></div>`;
   }
 
   else if (currentReportTab === 'nilai_ur') {
@@ -1363,7 +1468,7 @@ function renderReport() {
                 <td>${hasPG ? r + 1 : '-'}</td>
                 <td>${hasPG ? pRow[r] : '-'}</td>
                 <td>${hasPG ? `<span class="badge ${pRow[r]===1?'badge-tuntas':'badge-remed'}">${pRow[r]===1?'Tuntas':'Remedial'}</span>` : '-'}</td>
-                <td>${hasUR ? a.kPG + r + 1 : '-'}</td>
+                <td>${hasUR ? a.kPG + a.kBS + r + 1 : '-'}</td>
                 <td>${hasUR ? `${uRow[r]} / ${urMax}` : '-'}</td>
                 <td>${hasUR ? `<span class="badge ${urKet==='Tuntas'?'badge-tuntas':'badge-remed'}">${urKet}</span>` : '-'}</td>
               </tr>`;
@@ -1446,7 +1551,12 @@ function exportKoranulExcel() {
   ]);
   XLSX.utils.book_append_sheet(wb, wsDataMC, 'DATA MC');
 
-  if(a.kBS>0){const w=XLSX.utils.aoa_to_sheet([['DATA BENAR-SALAH'],['Kunci',state.config.kunciBS],['No','Nama','Jawaban','Skor','Nilai'],...state.students.map((st,i)=>[i+1,st.nama,st.bs||'',a.bsMatrix[i].skor,a.bsMatrix[i].nilai])]);XLSX.utils.book_append_sheet(wb,w,'DATA BS');}
+  if(a.kBS>0){
+    const w=XLSX.utils.aoa_to_sheet([['DATA BENAR-SALAH'],['Kunci',state.config.kunciBS],['No','Nama','Jawaban','Skor','Nilai'],...state.students.map((st,i)=>[i+1,st.nama,st.bs||'',a.bsMatrix[i].skor,Number(a.bsMatrix[i].nilai.toFixed(2))])]);
+    XLSX.utils.book_append_sheet(wb,w,'DATA BS');
+    const wa=XLSX.utils.aoa_to_sheet([['ANALISIS BUTIR BENAR-SALAH'],['Nomor Soal','Kunci','Benar','Salah','Kosong','Ganda','Belum Dinilai','Tingkat Ketepatan'],...a.itemsBS.map((it,i)=>[it.no,(state.config.kunciBS||'')[i]||'',it.benar,it.salah,it.kosong,it.ganda,it.belumDinilai,it.keyReady?Number((it.tk*100).toFixed(2))+'%':'Kunci belum diisi'])]);
+    XLSX.utils.book_append_sheet(wb,wa,'Analisis BS');
+  }
   // 3. Sheet: NILAI MC
   const wsNilaiMC = XLSX.utils.aoa_to_sheet([
     ['DAFTAR NILAI SOAL OBJEKTIF (PG + B-S)'],
@@ -1473,7 +1583,7 @@ function exportKoranulExcel() {
     const wsDataUR = XLSX.utils.aoa_to_sheet([
       ['DATA JAWABAN SOAL URAIAN'],
       ['Skor Maksimum', '', ...state.config.maxUR],
-      ['NO', 'NAMA', ...state.config.maxUR.map((_, j) => a.kPG + j + 1)],
+      ['NO', 'NAMA', ...state.config.maxUR.map((_, j) => a.kPG + a.kBS + j + 1)],
       ...state.students.map((s, i) => [i + 1, s.nama, ...a.urMatrix[i].row])
     ]);
     XLSX.utils.book_append_sheet(wb, wsDataUR, 'DATA UR');
