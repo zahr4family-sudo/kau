@@ -101,6 +101,9 @@
       body * { visibility: hidden; }
       #printArea, #printArea * { visibility: visible; }
       #printArea { position: absolute; left: 0; top: 0; width: 100%; background: #fff; }
+      #printArea .print-page { width: 100%; min-height: 310mm; box-sizing: border-box; page-break-after: always; break-after: page; padding: 0; }
+      #printArea .print-page:last-child { page-break-after: auto; break-after: auto; }
+      #printArea img { width: 100%; height: auto; display: block; }
       @page { size: 215mm 330mm; margin: 8mm; } /* Ukuran Folio F4 sesuai KORANUL */
     }
   </style>
@@ -200,6 +203,13 @@
       <p style="font-size:0.82rem; color:var(--muted); margin-top:0;">
         LJK dilengkapi <b>4 kotak jangkar hitam (fiducial marker)</b> di keempat sudut agar kamera HP mengenali posisi bulatan secara presisi. Gunakan kertas HVS putih ukuran A4 atau F4 dan pensil 2B / spidol hitam.
       </p>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:10px;margin:12px 0;padding:12px;border:1px solid #cbd5e1;border-radius:10px;background:#f8fafc;">
+        <div><label for="ljkPGCols">Kolom gelembung PG (1–5)</label><input type="number" id="ljkPGCols" min="1" max="5" value="2" onchange="updateLJKLayoutConfig()"></div>
+        <div><label for="ljkPGRows">Baris per kolom PG (4–10)</label><input type="number" id="ljkPGRows" min="4" max="10" value="10" onchange="updateLJKLayoutConfig()"></div>
+        <div><label for="ljkBSCols">Kolom gelembung B-S (1–5)</label><input type="number" id="ljkBSCols" min="1" max="5" value="2" onchange="updateLJKLayoutConfig()"></div>
+        <div><label for="ljkBSRows">Baris per kolom B-S (4–10)</label><input type="number" id="ljkBSRows" min="4" max="10" value="10" onchange="updateLJKLayoutConfig()"></div>
+      </div>
+      <small id="ljkLayoutInfo" style="display:block;color:var(--muted);margin-bottom:10px">Atur kepadatan gelembung. Jika kapasitas tidak cukup, aplikasi menambah kolom otomatis sampai batas aman.</small>
       <div class="toolbar">
         <button class="btn btn-primary" onclick="renderLJKPreview()">🔄 Perbarui Preview LJK</button>
         <button class="btn btn-success" onclick="printLJK()">🖨️ Cetak / Simpan PDF LJK</button>
@@ -349,7 +359,7 @@ let state = {
     tglPeriksa: '30 September 2025', kktp: 70, tempat: 'Bandung'
   },
   config: {
-    jmlPG: 20, opsiPG: 4, jmlBS: 0, kunciBS: '', jmlUR: 5,
+    jmlPG: 20, opsiPG: 4, jmlBS: 0, kunciBS: '', jmlUR: 5, pgCols: 2, pgRows: 10, bsCols: 2, bsRows: 10,
     kunciPG: 'BBACABCCBCCBABBCCAAC',
     maxUR: [3, 3, 3, 3, 4],
     bobotPG: 0.7, bobotUR: 0.3
@@ -379,7 +389,7 @@ let cameraStream = null;
 function initApp() {
   const saved = localStorage.getItem('koranul_pwa_state_v1');
   if(saved){try{state=JSON.parse(saved);}catch(e){}}
-  state.config.jmlBS=Number(state.config.jmlBS||0);state.config.kunciBS=state.config.kunciBS||'';state.students=(state.students||[]).map(st=>({...st,bs:st.bs||'',ur:st.ur||[]}));
+  state.config.jmlBS=Number(state.config.jmlBS||0);state.config.kunciBS=state.config.kunciBS||'';state.config.pgCols=Number(state.config.pgCols||2);state.config.pgRows=Number(state.config.pgRows||10);state.config.bsCols=Number(state.config.bsCols||2);state.config.bsRows=Number(state.config.bsRows||10);state.students=(state.students||[]).map(st=>({...st,bs:st.bs||'',ur:st.ur||[]}));
   syncInputsFromState();
   renderStudentsTable();
   renderInputJawabanTable();
@@ -411,6 +421,7 @@ function syncInputsFromState() {
   document.getElementById('inOpsiPG').value = state.config.opsiPG;
   document.getElementById('inJmlUR').value = state.config.jmlUR;
   document.getElementById('inJmlBS').value=state.config.jmlBS||0;document.getElementById('inKunciBS').value=state.config.kunciBS||'';
+  ['ljkPGCols','ljkPGRows','ljkBSCols','ljkBSRows'].forEach((id,i)=>{const vals=[state.config.pgCols,state.config.pgRows,state.config.bsCols,state.config.bsRows];const el=document.getElementById(id);if(el)el.value=vals[i];});
   document.getElementById('inKunciPG').value = state.config.kunciPG;
   document.getElementById('inMaxUR').value = state.config.maxUR.join(',');
   updateKunciPreview();
@@ -436,6 +447,7 @@ function saveState() {
   };
   state.config.jmlPG = Math.min(50, Math.max(1, parseInt(document.getElementById('inJmlPG').value) || 20));
   state.config.opsiPG = parseInt(document.getElementById('inOpsiPG').value) || 4;
+  ['pgCols','pgRows','bsCols','bsRows'].forEach((k,i)=>{const ids=['ljkPGCols','ljkPGRows','ljkBSCols','ljkBSRows'];const el=document.getElementById(ids[i]);if(el)state.config[k]=Math.max(i%2===0?1:4,Math.min(i%2===0?5:10,parseInt(el.value)|| (i%2===0?2:10)));});
   state.config.jmlBS=Math.min(50,Math.max(0,parseInt(document.getElementById('inJmlBS').value)||0));state.config.kunciBS=(document.getElementById('inKunciBS').value||'').toUpperCase().replace(/[^BS]/g,'').slice(0,state.config.jmlBS);
   state.config.jmlUR = Math.min(40, Math.max(0, parseInt(document.getElementById('inJmlUR').value) || 0));
   state.config.kunciPG = document.getElementById('inKunciPG').value.toUpperCase();
@@ -556,7 +568,7 @@ function computeAllAnalytics() {
     let benar=0,salah=0,kosong=0,ganda=0,belumDinilai=0;
     const keyReady=keyBS[j]==='B'||keyBS[j]==='S';
     bsMatrix.forEach(m=>{const ans=m.ans[j]||'X';if(ans==='X')kosong++;else if(ans==='V')ganda++;else if(!keyReady)belumDinilai++;else if(ans===keyBS[j])benar++;else salah++;});
-    return {no:kPG+j+1,benar,salah,kosong,ganda,belumDinilai,tk:N?benar/N:0,keyReady};
+    return {no:getBSQuestionNo(j),benar,salah,kosong,ganda,belumDinilai,tk:N?benar/N:0,keyReady};
   });
   // 2. Matriks Skor Uraian & Nilai UR
   const totalMaxUR = state.config.maxUR.slice(0, kUR).reduce((a, b) => a + b, 0);
@@ -701,44 +713,44 @@ function computeAllAnalytics() {
 
 // ==================== PEMBUAT LJK & LAYOUT KOORDINAT OMR ====================
 // Koordinat ternormalisasi (0..1) di dalam area bingkai 4 fiducial marker
-function getOMRLayout() {
-  const jmlPG = state.config.jmlPG;
-  const opsi = state.config.opsiPG;
-  const letters = ['A', 'B', 'C', 'D', 'E'].slice(0, opsi);
-  const jmlBS = state.config.jmlBS || 0;
-  const pgCols = Math.max(1, Math.ceil(jmlPG / 10));
-  const bsCols = Math.max(1, Math.ceil(jmlBS / 10));
-  const bubbles = [];
-
-  // Area nomor absen tetap di bagian kepala LJK.
-  for (let d = 0; d < 2; d++) {
-    for (let num = 0; num <= 9; num++) {
-      bubbles.push({ type: 'absen', digit: d, val: num, nx: 0.72 + d * 0.08, ny: 0.06 + num * 0.022 });
-    }
-  }
-
-  // PG dan B-S memakai dua zona vertikal terpisah. Masing-masing kolom
-  // memuat maksimal 10 nomor sehingga konfigurasi sampai 50+50 tetap muat.
-  const pgStartY = 0.34, bsStartY = 0.635, rowStep = 0.024;
-  const pgColWidth = 0.90 / pgCols;
-  for (let q = 0; q < jmlPG; q++) {
-    const colIdx = Math.floor(q / 10), rowIdx = q % 10;
-    const baseX = 0.055 + colIdx * pgColWidth;
-    const gap = Math.min(0.034, (pgColWidth - 0.035) / Math.max(1, opsi - 1));
-    for (let o = 0; o < opsi; o++) {
-      bubbles.push({ type: 'pg', qIndex: q, letter: letters[o], nx: baseX + 0.025 + o * gap, ny: pgStartY + rowIdx * rowStep });
-    }
-  }
-
-  const bsColWidth = 0.90 / bsCols;
-  for (let q = 0; q < jmlBS; q++) {
-    const colIdx = Math.floor(q / 10), rowIdx = q % 10;
-    const baseX = 0.055 + colIdx * bsColWidth;
-    bubbles.push({ type: 'bs', qIndex: q, letter: 'B', nx: baseX + 0.045, ny: bsStartY + rowIdx * rowStep });
-    bubbles.push({ type: 'bs', qIndex: q, letter: 'S', nx: baseX + 0.105, ny: bsStartY + rowIdx * rowStep });
-  }
-  return { bubbles, letters, pgCols, bsCols, pgStartY, bsStartY, rowStep, pgColWidth, bsColWidth };
+// Nomor global B-S selalu meneruskan PG: PG 1..N, lalu B-S N+1..N+M.
+function getBSQuestionNo(index) {
+  const pgCount = Math.max(0, Number(state.config.jmlPG) || 0);
+  return pgCount + Number(index || 0) + 1;
 }
+
+function getOMRLayout() {
+  const jmlPG = state.config.jmlPG, opsi = state.config.opsiPG;
+  const letters = ['A','B','C','D','E'].slice(0, opsi);
+  const jmlBS = state.config.jmlBS || 0, bubbles = [];
+  const pgRows = Math.min(10,Math.max(Number(state.config.pgRows)||4,Math.ceil(jmlPG/5),4));
+  const bsRows = Math.min(10,Math.max(Number(state.config.bsRows)||4,Math.ceil(jmlBS/5),4));
+  const pgCols = Math.min(5,Math.max(Number(state.config.pgCols)||1,Math.ceil(jmlPG/pgRows)));
+  const bsCols = Math.min(5,Math.max(Number(state.config.bsCols)||1,Math.ceil(jmlBS/bsRows))); 
+  for(let d=0;d<2;d++) for(let num=0;num<=9;num++) bubbles.push({type:'absen',digit:d,val:num,nx:0.72+d*0.08,ny:0.06+num*0.022});
+  const pgStartY=0.34, bsStartY=0.635;
+  const pgRowStep=0.22/Math.max(1,pgRows-1), bsRowStep=0.205/Math.max(1,bsRows-1);
+  const pgColWidth=0.90/pgCols, bsColWidth=0.90/bsCols;
+  for(let q=0;q<jmlPG;q++){
+    const colIdx=Math.floor(q/pgRows), rowIdx=q%pgRows, baseX=0.055+colIdx*pgColWidth;
+    const gap=Math.min(0.034,(pgColWidth-0.035)/Math.max(1,opsi-1));
+    for(let o=0;o<opsi;o++) bubbles.push({type:'pg',qIndex:q,letter:letters[o],nx:baseX+0.025+o*gap,ny:pgStartY+rowIdx*pgRowStep});
+  }
+  for(let q=0;q<jmlBS;q++){
+    const colIdx=Math.floor(q/bsRows),rowIdx=q%bsRows,baseX=0.055+colIdx*bsColWidth;
+    bubbles.push({type:'bs',qIndex:q,letter:'B',nx:baseX+0.045,ny:bsStartY+rowIdx*bsRowStep});
+    bubbles.push({type:'bs',qIndex:q,letter:'S',nx:baseX+0.105,ny:bsStartY+rowIdx*bsRowStep});
+  }
+  return {bubbles,letters,pgCols,bsCols,pgRows,bsRows,pgStartY,bsStartY,pgRowStep,bsRowStep,pgColWidth,bsColWidth};
+}
+function updateLJKLayoutConfig(){
+  const ids=['ljkPGCols','ljkPGRows','ljkBSCols','ljkBSRows'];
+  const keys=['pgCols','pgRows','bsCols','bsRows'];
+  ids.forEach((id,i)=>{const el=document.getElementById(id);if(el)state.config[keys[i]]=Math.max(i%2===0?1:4,Math.min(i%2===0?5:10,parseInt(el.value)|| (i%2===0?2:10)));});
+  localStorage.setItem('koranul_pwa_state_v1',JSON.stringify(state));
+  renderLJKPreview();
+}
+
 function renderLJKPreview() {
   const canvas = document.getElementById('ljkGeneratorCanvas');
   const ctx = canvas.getContext('2d');
@@ -825,9 +837,9 @@ function renderLJKPreview() {
   ctx.fillText(`PILIHAN GANDA (${state.config.jmlPG} SOAL)`, fx + 30, fy + 222);
   ctx.font = 'bold 8.5px sans-serif';
   for (let q = 0; q < state.config.jmlPG; q++) {
-    const colIdx = Math.floor(q / 10), rowIdx = q % 10;
+    const colIdx = Math.floor(q / layout.pgRows), rowIdx = q % layout.pgRows;
     const baseX = fx + (0.055 + colIdx * layout.pgColWidth) * fw;
-    const y = fy + (layout.pgStartY + rowIdx * layout.rowStep) * fh;
+    const y = fy + (layout.pgStartY + rowIdx * layout.pgRowStep) * fh;
     ctx.fillText(`${q + 1}.`, baseX, y + 3);
   }
 
@@ -837,39 +849,48 @@ function renderLJKPreview() {
     ctx.fillText(`BENAR - SALAH (${state.config.jmlBS} SOAL)`, fx + 30, fy + 0.615 * fh);
     ctx.font = 'bold 8.5px sans-serif';
     for (let q = 0; q < state.config.jmlBS; q++) {
-      const colIdx = Math.floor(q / 10), rowIdx = q % 10;
+      const colIdx = Math.floor(q / layout.bsRows), rowIdx = q % layout.bsRows;
       const baseX = fx + (0.055 + colIdx * layout.bsColWidth) * fw;
-      const y = fy + (layout.bsStartY + rowIdx * layout.rowStep) * fh;
-      ctx.fillText(`${state.config.jmlPG + q}.`, baseX, y + 3);
+      const y = fy + (layout.bsStartY + rowIdx * layout.bsRowStep) * fh;
+      ctx.fillText(`${getBSQuestionNo(q)}.`, baseX, y + 3);
     }
   }
 
-  // Kotak Skor Uraian (Jika ada soal uraian)
-  ctx.textAlign = 'left';
-  if (state.config.jmlUR > 0) {
-    const urY = fy + 0.89 * fh;
-    ctx.strokeRect(fx + 34, urY, fw - 68, 54);
-    ctx.font = 'bold 10px sans-serif';
-    ctx.fillText('URAIAN - JAWABAN PADA LEMBAR TERPISAH | SKOR DIISI GURU:', fx + 44, urY + 16);
-    let ux = fx + 44;
-    for (let u = 0; u < Math.min(state.config.jmlUR, 12); u++) {
-      const noSoal = state.config.jmlPG + (state.config.jmlBS || 0) + u + 1;
-      ctx.strokeRect(ux, urY + 22, 44, 24);
-      ctx.font = '9px sans-serif';
-      ctx.fillText(`No.${noSoal}:`, ux + 3, urY + 34);
-      ux += 50;
-    }
+  const info=document.getElementById('ljkLayoutInfo');
+  if(info) info.textContent=`Layout aktif: PG ${layout.pgCols} kolom × ${layout.pgRows} baris (No. 1–${Number(state.config.jmlPG)||0}); B-S ${layout.bsCols} kolom × ${layout.bsRows} baris (No. ${Number(state.config.jmlPG)||0}+1–${getBSQuestionNo((Number(state.config.jmlBS)||1)-1)}). Nomor B-S otomatis melanjutkan PG.`;
+
+  // Penanda bahwa lembar jawaban uraian disertakan sebagai halaman lanjutan saat cetak.
+  if(state.config.jmlUR>0){
+    ctx.textAlign='left';ctx.fillStyle='#0f172a';ctx.font='bold 10px sans-serif';
+    ctx.fillText(`LEMBAR JAWABAN URAIAN: ${state.config.jmlUR} SOAL (HALAMAN LANJUTAN)`,fx+34,fy+0.91*fh);
   }
 }
 
+function buildUraianPrintPages(){
+  const total=Number(state.config.jmlUR)||0;if(!total)return '';
+  const perPage=3,pages=Math.ceil(total/perPage);let html='';
+  for(let pg=0;pg<pages;pg++){
+    const first=pg*perPage+1,last=Math.min(total,first+perPage-1);
+    html+=`<section class="print-page" style="font-family:Arial,sans-serif;color:#111;padding:8mm 7mm;">
+      <div style="border:2px solid #111;padding:7mm;min-height:290mm;">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2px solid #111;padding-bottom:5mm;">
+      <div><h2 style="margin:0 0 4px;font-size:18px;">LEMBAR JAWABAN URAIAN</h2><b>${escapePrintText(state.meta.sekolah)}</b><div>${escapePrintText(state.meta.jenisTes)} • ${escapePrintText(state.meta.mapel)}</div><div>Kelas: ${escapePrintText(state.meta.kelas)} • ${escapePrintText(state.meta.tglTes)}</div></div>
+      <div style="border:1px solid #111;padding:12px 16px;min-width:150px;">Nama: ___________________<br><br>NIS/No. Absen: ___________</div></div>
+      <p style="font-size:11px;margin:5mm 0;">Tuliskan jawaban dengan jelas pada ruang yang tersedia. Lembar ini dinilai secara manual oleh guru.</p>`;
+    for(let q=first;q<=last;q++){
+      const no=state.config.jmlPG+(state.config.jmlBS||0)+q;
+      html+=`<div style="margin-top:5mm;break-inside:avoid;"><b>Soal Uraian ${no}</b><div style="height:57mm;border:1px solid #777;margin-top:2mm;background:repeating-linear-gradient(to bottom,transparent 0,transparent 8mm,#d1d5db 8.1mm,#d1d5db 8.3mm);"></div></div>`;
+    }
+    html+=`<div style="text-align:right;font-size:10px;margin-top:6mm;">Halaman uraian ${pg+1}/${pages}</div></div></section>`;
+  }return html;
+}
+function escapePrintText(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function printLJK() {
   renderLJKPreview();
-  const dataUrl = document.getElementById('ljkGeneratorCanvas').toDataURL('image/png');
-  const pa = document.getElementById('printArea');
-  pa.style.display = 'block';
-  pa.innerHTML = `<img src="${dataUrl}" style="width:100%; height:auto;" />`;
-  window.print();
-  pa.style.display = 'none';
+  const dataUrl=document.getElementById('ljkGeneratorCanvas').toDataURL('image/png');
+  const pa=document.getElementById('printArea');pa.style.display='block';
+  pa.innerHTML=`<section class="print-page"><img src="${dataUrl}" alt="LJK PG dan Benar Salah"></section>${buildUraianPrintPages()}`;
+  window.print();pa.style.display='none';
 }
 
 function downloadLJKImage() {
@@ -1107,7 +1128,7 @@ function renderScannedEditor() {
     for (let i = 0; i < kBS; i++) {
       const ans = currentScannedBS[i] || 'X', isOk = ans === keyBS[i];
       if (isOk) benarBS++;
-      addChip(`B-S ${kPG + i + 1}`, ans, isOk, `Klik untuk ubah jawaban B-S No.${kPG + i + 1} (Kunci: ${keyBS[i]})`, () => {
+      addChip(`B-S ${getBSQuestionNo(i)}`, ans, isOk, `Klik untuk ubah jawaban B-S No.${getBSQuestionNo(i)} (Kunci: ${keyBS[i]})`, () => {
         const opts = ['B','S','X','V']; currentScannedBS[i] = opts[(opts.indexOf(ans) + 1) % opts.length]; renderScannedEditor();
       });
     }
