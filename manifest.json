@@ -2,7 +2,7 @@
   "id": "./",
   "name": "KORANUL OMR &amp; Analisis",
   "short_name": "KORANUL",
-  "description": "Aplikasi koreksi LJK, input nilai, analisis soal, dan rekap siswa.",
+  "description": "Aplikasi Koreksi dan Analisis Ulangan.",
   "lang": "id-ID",
   "start_url": "./index.html",
   "scope": "./",
