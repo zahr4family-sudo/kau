@@ -23,17 +23,22 @@
       --border: #cbd5e1;
     }
     * { box-sizing: border-box; font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; }
-    body { margin: 0; background: var(--bg); color: var(--text); padding-bottom: 76px; }
+    body { margin: 0; background: var(--bg); color: var(--text); padding-bottom: 78px; }
     header {
       background: linear-gradient(135deg, var(--primary-dark), var(--primary));
-      color: #fff; padding: 14px 16px; position: sticky; top: 0; z-index: 50;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.15); display: flex; justify-content: space-between; align-items: center;
+      color: #fff; padding: 12px 16px; position: sticky; top: 0; z-index: 50;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15); display: flex; justify-content: space-between; align-items: center; gap: 8px;
     }
-    header h1 { margin: 0; font-size: 1.05rem; letter-spacing: 0.3px; }
-    header small { display: block; font-size: 0.72rem; opacity: 0.85; }
+    header h1 { margin: 0; font-size: 1.02rem; letter-spacing: 0.3px; }
+    header small { display: block; font-size: 0.72rem; opacity: 0.9; }
+    .hdr-actions { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+    .save-pill {
+      background: rgba(255,255,255,0.16); color: #fff; padding: 4px 8px; border-radius: 99px;
+      font-size: 0.68rem; font-weight: 600; white-space: nowrap;
+    }
     .btn-export-top {
-      background: #10b981; color: #fff; border: none; padding: 8px 12px; border-radius: 8px;
-      font-weight: 700; font-size: 0.78rem; cursor: pointer;
+      background: #10b981; color: #fff; border: none; padding: 8px 11px; border-radius: 8px;
+      font-weight: 700; font-size: 0.76rem; cursor: pointer; white-space: nowrap;
     }
     .container { max-width: 980px; margin: 0 auto; padding: 12px; }
     .card {
@@ -52,16 +57,17 @@
     input:focus, select:focus { outline: none; border-color: var(--primary); }
     .btn {
       display: inline-flex; align-items: center; justify-content: center; gap: 6px;
-      padding: 9px 14px; border: none; border-radius: 8px; font-weight: 600; font-size: 0.85rem;
+      padding: 9px 14px; border: none; border-radius: 8px; font-weight: 600; font-size: 0.84rem;
       cursor: pointer; transition: 0.15s;
     }
+    .btn:active { transform: scale(0.98); }
     .btn-primary { background: var(--primary); color: #fff; }
     .btn-success { background: var(--accent); color: #fff; }
     .btn-danger { background: var(--danger); color: #fff; }
     .btn-warning { background: var(--warning); color: #fff; }
     .btn-outline { background: #fff; color: var(--primary); border: 1px solid var(--primary); }
-    .btn-sm { padding: 5px 9px; font-size: 0.76rem; }
-    .toolbar { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
+    .btn-sm { padding: 6px 10px; font-size: 0.76rem; }
+    .toolbar { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; align-items: center; }
     .table-wrap { overflow-x: auto; max-height: 460px; border: 1px solid var(--border); border-radius: 8px; }
     table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
     th, td { border: 1px solid #e2e8f0; padding: 6px 8px; text-align: left; white-space: nowrap; }
@@ -90,6 +96,10 @@
     .sub-tab.active { background: var(--primary); color: #fff; border-color: var(--primary); }
     /* Camera & Canvas OMR */
     .scanner-box { position: relative; width: 100%; max-width: 520px; margin: 0 auto; background: #000; border-radius: 10px; overflow: hidden; }
+    .scanner-guide {
+      position: absolute; inset: 5%; border: 2px dashed rgba(16,185,129,0.75); border-radius: 8px;
+      pointer-events: none; box-shadow: inset 0 0 0 9999px rgba(0,0,0,0.12);
+    }
     video, #omrCanvas { width: 100%; display: block; }
     .stat-box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 10px; text-align: center; }
     .stat-box .num { font-size: 1.3rem; font-weight: 800; color: var(--primary); }
@@ -97,14 +107,16 @@
     .bar-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; font-size: 0.78rem; }
     .bar-track { flex: 1; height: 14px; background: #e2e8f0; border-radius: 99px; overflow: hidden; }
     .bar-fill { height: 100%; background: var(--primary); transition: width 0.3s; }
+    .ljk-preview-stack { display: flex; flex-direction: column; gap: 14px; align-items: center; background: #cbd5e1; padding: 12px; border-radius: 10px; overflow-x: auto; }
+    .ljk-preview-stack canvas { max-width: 100%; height: auto; background: #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
     @media print {
       body * { visibility: hidden; }
       #printArea, #printArea * { visibility: visible; }
       #printArea { position: absolute; left: 0; top: 0; width: 100%; background: #fff; }
-      #printArea .print-page { width: 100%; min-height: 310mm; box-sizing: border-box; page-break-after: always; break-after: page; padding: 0; }
+      #printArea .print-page { width: 100%; box-sizing: border-box; page-break-after: always; break-after: page; padding: 0; margin: 0; }
       #printArea .print-page:last-child { page-break-after: auto; break-after: auto; }
       #printArea img { width: 100%; height: auto; display: block; }
-      @page { size: 215mm 330mm; margin: 8mm; } /* Ukuran Folio F4 sesuai KORANUL */
+      @page { size: 215mm 330mm; margin: 6mm; }
     }
   </style>
 </head>
@@ -115,7 +127,10 @@
     <h1>KORANUL OMR & ANALISIS</h1>
     <small id="hdrSubtitle">Koreksi LJK & Analisis Butir Soal</small>
   </div>
-  <button class="btn-export-top" onclick="exportKoranulExcel()">📥 Unduh Excel (.xlsx)</button>
+  <div class="hdr-actions">
+    <span id="saveStatusBadge" class="save-pill">💾 Tersimpan</span>
+    <button class="btn-export-top" onclick="exportKoranulExcel()">📥 Excel (.xlsx)</button>
+  </div>
 </header>
 
 <div class="container">
@@ -125,20 +140,20 @@
     <div class="card">
       <h2>1. Data Identitas Ujian (Sheet: data)</h2>
       <div class="grid-2">
-        <div><label>Nama Sekolah</label><input id="inSekolah" value="SDN Nagreg 05" onchange="saveState()" /></div>
-        <div><label>Mata Pelajaran</label><input id="inMapel" value="PAI" onchange="saveState()" /></div>
-        <div><label>Kepala Sekolah</label><input id="inKepsek" value="Aep Sudrajat, S.Pd" onchange="saveState()" /></div>
-        <div><label>NIP Kepala Sekolah</label><input id="inNipKepsek" value="19690513 199703 1 006" onchange="saveState()" /></div>
-        <div><label>Guru Pengajar</label><input id="inGuru" value="Apipudin, S.Pd.I" onchange="saveState()" /></div>
-        <div><label>NIP Guru</label><input id="inNipGuru" value="19760917 200901 2 002" onchange="saveState()" /></div>
-        <div><label>Jenis Tes</label><input id="inJenisTes" value="PENILAIAN SUMATIF AKHIR SEMESTER" onchange="saveState()" /></div>
-        <div><label>Materi Pokok</label><input id="inMateri" value="BAB I - BAB V" onchange="saveState()" /></div>
-        <div><label>Kelas / Semester</label><input id="inKelas" value="I (Satu)/ Ganjil" onchange="saveState()" /></div>
-        <div><label>Tahun Pelajaran</label><input id="inTapel" value="2025 - 2026" onchange="saveState()" /></div>
-        <div><label>Tanggal Tes</label><input id="inTglTes" value="29 September 2025" onchange="saveState()" /></div>
-        <div><label>Tanggal Periksa</label><input id="inTglPeriksa" value="30 September 2025" onchange="saveState()" /></div>
-        <div><label>Nilai KKTP / KKM</label><input type="number" id="inKktp" value="70" onchange="saveState()" /></div>
-        <div><label>Tempat TTD</label><input id="inTempat" value="Bandung" onchange="saveState()" /></div>
+        <div><label>Nama Sekolah</label><input id="inSekolah" value="SDN Nagreg" oninput="saveState()" onchange="saveState()" /></div>
+        <div><label>Mata Pelajaran</label><input id="inMapel" value="PAI" oninput="saveState()" onchange="saveState()" /></div>
+        <div><label>Kepala Sekolah</label><input id="inKepsek" value="Aep Sudrajat, S.Pd" oninput="saveState()" onchange="saveState()" /></div>
+        <div><label>NIP Kepala Sekolah</label><input id="inNipKepsek" value="19000000 000000 0 000" oninput="saveState()" onchange="saveState()" /></div>
+        <div><label>Guru Pengajar</label><input id="inGuru" value="Apipudin, S.Pd.I" oninput="saveState()" onchange="saveState()" /></div>
+        <div><label>NIP Guru</label><input id="inNipGuru" value="19000000 000000 0 000" oninput="saveState()" onchange="saveState()" /></div>
+        <div><label>Jenis Tes</label><input id="inJenisTes" value="PENILAIAN SUMATIF AKHIR SEMESTER" oninput="saveState()" onchange="saveState()" /></div>
+        <div><label>Materi Pokok</label><input id="inMateri" value="BAB I - BAB V" oninput="saveState()" onchange="saveState()" /></div>
+        <div><label>Kelas / Semester</label><input id="inKelas" value="I (Satu)/ Ganjil" oninput="saveState()" onchange="saveState()" /></div>
+        <div><label>Tahun Pelajaran</label><input id="inTapel" value="2025 - 2026" oninput="saveState()" onchange="saveState()" /></div>
+        <div><label>Tanggal Tes</label><input id="inTglTes" value="29 September 2025" oninput="saveState()" onchange="saveState()" /></div>
+        <div><label>Tanggal Periksa</label><input id="inTglPeriksa" value="30 September 2025" oninput="saveState()" onchange="saveState()" /></div>
+        <div><label>Nilai KKTP / KKM</label><input type="number" id="inKktp" value="70" oninput="saveState()" onchange="saveState()" /></div>
+        <div><label>Tempat TTD</label><input id="inTempat" value="Bandung" oninput="saveState()" onchange="saveState()" /></div>
       </div>
     </div>
 
@@ -147,19 +162,23 @@
       <div class="grid-3">
         <div>
           <label>Jumlah Soal Pilihan Ganda (1–50)</label>
-          <input type="number" id="inJmlPG" min="1" max="50" value="20" onchange="updateQuestionConfig()" />
+          <input type="number" id="inJmlPG" min="1" max="50" value="20" oninput="updateQuestionConfig()" onchange="updateQuestionConfig()" />
         </div>
         <div>
           <label>Opsi Pilihan Ganda</label>
-          <select id="inOpsiPG" onchange="saveState()">
+          <select id="inOpsiPG" onchange="updateQuestionConfig()">
             <option value="3">A - C (3 Opsi / SD Rendah)</option>
             <option value="4" selected>A - D (4 Opsi / SD-SMP)</option>
             <option value="5">A - E (5 Opsi / SMA-SMK)</option>
           </select>
         </div>
-        <div><label>Jumlah Soal Benar-Salah (0–50)</label><input type="number" id="inJmlBS" min="0" max="50" value="0" onchange="updateQuestionConfig()" /></div><div>
+        <div>
+          <label>Jumlah Soal Benar-Salah (0–50)</label>
+          <input type="number" id="inJmlBS" min="0" max="50" value="0" oninput="updateQuestionConfig()" onchange="updateQuestionConfig()" />
+        </div>
+        <div>
           <label>Jumlah Soal Uraian (0–40)</label>
-          <input type="number" id="inJmlUR" min="0" max="40" value="5" onchange="updateQuestionConfig()" />
+          <input type="number" id="inJmlUR" min="0" max="40" value="5" oninput="updateQuestionConfig()" onchange="updateQuestionConfig()" />
         </div>
       </div>
       <div style="margin-top:10px;">
@@ -167,18 +186,24 @@
         <input id="inKunciPG" value="BBACABCCBCCBABBCCAAC" placeholder="Contoh: BBACABCCBC..." oninput="this.value=this.value.toUpperCase().replace(/[^A-E]/g,''); saveState();" />
         <small style="color:var(--muted);" id="kunciPreview">Blok 5-an: BBACA | CCBCC | CBABB | CCAAC</small>
       </div>
-      <div style="margin-top:10px;"><label>Kunci Benar-Salah (B=Benar, S=Salah)</label><input id="inKunciBS" value="" placeholder="BSSBB" oninput="this.value=this.value.toUpperCase().replace(/[^BS]/g,'');saveState();" /><small id="kunciBSPreview"></small></div><div style="margin-top:10px;" id="urMaxContainer">
+      <div style="margin-top:10px;">
+        <label>Kunci Benar-Salah (B=Benar, S=Salah)</label>
+        <input id="inKunciBS" value="" placeholder="BSSBB" oninput="this.value=this.value.toUpperCase().replace(/[^BS]/g,''); saveState();" />
+        <small style="color:var(--muted);" id="kunciBSPreview"></small>
+      </div>
+      <div style="margin-top:10px;" id="urMaxContainer">
         <label>Skor Maksimum Tiap Soal Uraian (pisahkan koma)</label>
-        <input id="inMaxUR" value="3,3,3,3,4" onchange="saveState()" />
+        <input id="inMaxUR" value="3,3,3,3,4" oninput="saveState()" onchange="saveState()" />
       </div>
     </div>
 
     <div class="card">
       <h2>3. Daftar Peserta Ujian (Maks. 200 Siswa)</h2>
       <div class="toolbar">
-        <button class="btn btn-primary btn-sm" onclick="addStudent()">+ Tambah Siswa</button><label class="btn btn-outline btn-sm" style="margin:0;cursor:pointer;">⬆️ Import CSV<input type="file" accept=".csv,text/csv" style="display:none" onchange="importStudentsCSV(event)"></label><button class="btn btn-outline btn-sm" onclick="downloadCSVTemplate()">Template CSV</button>
+        <button class="btn btn-primary btn-sm" onclick="addStudent()">+ Tambah Siswa</button>
+        <label class="btn btn-outline btn-sm" style="margin:0;cursor:pointer;">⬆️ Import CSV<input type="file" accept=".csv,text/csv" style="display:none" onchange="importStudentsCSV(event)"></label>
+        <button class="btn btn-outline btn-sm" onclick="downloadCSVTemplate()">Template CSV</button>
         <button class="btn btn-outline btn-sm" onclick="bulkImportStudents()">📋 Paste Daftar Nama</button>
-        <button class="btn btn-danger btn-sm" onclick="resetDemoData()">🔄 Muat Contoh Data</button>
       </div>
       <div class="table-wrap">
         <table>
@@ -194,6 +219,19 @@
         </table>
       </div>
     </div>
+
+    <div class="card" style="border-color:#cbd5e1; background:#f8fafc;">
+      <h2>4. Penyimpanan Permanen, Cadangan & Reset Pengaturan</h2>
+      <p style="font-size:0.8rem; color:var(--muted); margin-top:0;">
+        Semua perubahan otomatis tersimpan permanen di penyimpanan lokal browser (<b>localStorage + IndexedDB</b>) sehingga tidak akan hilang saat halaman di-refresh atau aplikasi ditutup.
+      </p>
+      <div class="toolbar" style="margin-bottom:0;">
+        <button class="btn btn-outline btn-sm" onclick="exportBackupJSON()">💾 Unduh Cadangan (.json)</button>
+        <label class="btn btn-outline btn-sm" style="margin:0;cursor:pointer;">📂 Pulihkan Cadangan (.json)<input type="file" accept=".json,application/json" style="display:none" onchange="importBackupJSON(event)"></label>
+        <button class="btn btn-warning btn-sm" onclick="startFreshExam()">🧹 Kosongkan Jawaban & Siswa</button>
+        <button class="btn btn-danger btn-sm" onclick="resetToDefaultSettings()">🔄 Reset / Kembali ke Pengaturan Awal</button>
+      </div>
+    </div>
   </section>
 
   <!-- ==================== TAB 2: BUAT & CETAK LJK ==================== -->
@@ -201,22 +239,33 @@
     <div class="card">
       <h2>Pembuat Lembar Jawaban Komputer (LJK) Siap Cetak</h2>
       <p style="font-size:0.82rem; color:var(--muted); margin-top:0;">
-        LJK dilengkapi <b>4 kotak jangkar hitam (fiducial marker)</b> di keempat sudut agar kamera HP mengenali posisi bulatan secara presisi. Gunakan kertas HVS putih ukuran A4 atau F4 dan pensil 2B / spidol hitam.
+        LJK dilengkapi <b>4 kotak jangkar hitam (fiducial marker)</b> di keempat sudut agar kamera HP mengenali posisi bulatan secara presisi. Jika total soal ringkas (misal $\le 50$ nomor), LJK dan ruang jawaban Uraian otomatis ditata rapi dalam <b>1 halaman</b>.
       </p>
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:10px;margin:12px 0;padding:12px;border:1px solid #cbd5e1;border-radius:10px;background:#f8fafc;">
-        <div><label for="ljkPGCols">Kolom gelembung PG (1–5)</label><input type="number" id="ljkPGCols" min="1" max="5" value="2" onchange="updateLJKLayoutConfig()"></div>
-        <div><label for="ljkPGRows">Baris per kolom PG (4–10)</label><input type="number" id="ljkPGRows" min="4" max="10" value="10" onchange="updateLJKLayoutConfig()"></div>
-        <div><label for="ljkBSCols">Kolom gelembung B-S (1–5)</label><input type="number" id="ljkBSCols" min="1" max="5" value="2" onchange="updateLJKLayoutConfig()"></div>
-        <div><label for="ljkBSRows">Baris per kolom B-S (4–10)</label><input type="number" id="ljkBSRows" min="4" max="10" value="10" onchange="updateLJKLayoutConfig()"></div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:12px 0;padding:12px;border:1px solid #cbd5e1;border-radius:10px;background:#f8fafc;">
+        <div><label for="ljkPGCols">Kolom PG (Otomatis/1–5)</label><input type="number" id="ljkPGCols" min="0" max="5" value="0" onchange="updateLJKLayoutConfig()" title="0 = Otomatis efisien sesuai jumlah soal"></div>
+        <div><label for="ljkPGRows">Maks Baris/Kolom PG (5–15)</label><input type="number" id="ljkPGRows" min="5" max="15" value="10" onchange="updateLJKLayoutConfig()"></div>
+        <div><label for="ljkBSCols">Kolom B-S (Otomatis/1–5)</label><input type="number" id="ljkBSCols" min="0" max="5" value="0" onchange="updateLJKLayoutConfig()" title="0 = Otomatis efisien sesuai jumlah soal"></div>
+        <div><label for="ljkBSRows">Maks Baris/Kolom B-S (4–12)</label><input type="number" id="ljkBSRows" min="4" max="12" value="8" onchange="updateLJKLayoutConfig()"></div>
+        <div>
+          <label for="ljkUraianMode">Penempatan Uraian</label>
+          <select id="ljkUraianMode" onchange="updateLJKLayoutConfig()">
+            <option value="auto" selected>Otomatis 1 Halaman (jika muat)</option>
+            <option value="single">Paksa Gabung 1 Halaman</option>
+            <option value="separate">Selalu Halaman Terpisah</option>
+          </select>
+        </div>
       </div>
-      <small id="ljkLayoutInfo" style="display:block;color:var(--muted);margin-bottom:10px">Atur kepadatan gelembung. Jika kapasitas tidak cukup, aplikasi menambah kolom otomatis sampai batas aman.</small>
+      <div id="ljkLayoutInfo" style="font-size:0.8rem; padding:8px 10px; border-radius:8px; background:#eff6ff; color:#1e3a8a; margin-bottom:10px;">
+        Menghitung tata letak LJK...
+      </div>
       <div class="toolbar">
         <button class="btn btn-primary" onclick="renderLJKPreview()">🔄 Perbarui Preview LJK</button>
         <button class="btn btn-success" onclick="printLJK()">🖨️ Cetak / Simpan PDF LJK</button>
         <button class="btn btn-outline" onclick="downloadLJKImage()">🖼️ Unduh Gambar LJK (.png)</button>
       </div>
-      <div style="overflow-x:auto; text-align:center; background:#cbd5e1; padding:12px; border-radius:10px;">
-        <canvas id="ljkGeneratorCanvas" width="794" height="1123" style="max-width:100%; height:auto; background:#fff; box-shadow:0 4px 12px rgba(0,0,0,0.2);"></canvas>
+      <div class="ljk-preview-stack" id="ljkPreviewStack">
+        <canvas id="ljkGeneratorCanvas" width="794" height="1123"></canvas>
+        <canvas id="ljkUraianCanvas2" width="794" height="1123" style="display:none;"></canvas>
       </div>
     </div>
   </section>
@@ -224,45 +273,54 @@
   <!-- ==================== TAB 3: SCAN KAMERA / FOTO OMR ==================== -->
   <section id="tab-scan" class="tab-page">
     <div class="card">
-      <h2>Pemindai LJK via Kamera / Foto (OMR)</h2>
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px; border-bottom:1px solid #e2e8f0; padding-bottom:6px; margin-bottom:10px;">
+        <h2 style="border:none; margin:0; padding:0;">Pemindai LJK via Kamera / Foto (OMR)</h2>
+        <span class="badge badge-tuntas" id="scanCounterBadge">Terscan Sesi Ini: 0 LJK</span>
+      </div>
+
       <div class="toolbar">
         <button class="btn btn-primary" onclick="startCamera()">📷 Buka Kamera</button>
         <button class="btn btn-success" onclick="captureFromVideo()">⚡ Jepret & Koreksi</button>
         <label class="btn btn-outline" style="margin:0; cursor:pointer;">
-          📁 Pilih Foto LJK
-          <input type="file" accept="image/*" capture="environment" style="display:none;" onchange="loadImageFile(event)" />
+          📁 Pilih / Foto LJK
+          <input id="omrFileInput" type="file" accept="image/*" capture="environment" style="display:none;" onchange="loadImageFile(event)" />
         </label>
-        <button class="btn btn-danger btn-sm" onclick="stopCamera()">⏹️ Tutup Kamera</button>
+        <button class="btn btn-warning btn-sm" onclick="prepareNextScan(false)">🔄 Scan Ulang / Bersihkan</button>
+        <button class="btn btn-danger btn-sm" id="btnStopCam" style="display:none;" onclick="stopCamera()">⏹️ Tutup Kamera</button>
       </div>
 
       <div class="scanner-box" id="videoBox" style="display:none; margin-bottom:10px;">
         <video id="cameraVideo" autoplay playsinline></video>
+        <div class="scanner-guide"></div>
       </div>
 
       <div class="grid-2" style="margin-bottom:10px;">
         <div>
           <label>Nomor Absen Siswa Terdeteksi (Bisa Diubah Manual)</label>
-          <select id="scanStudentSelect"></select>
+          <select id="scanStudentSelect" onchange="syncScanUraianForStudent()"></select>
         </div>
         <div>
-          <label>Ambang Gelap Bulatan (Sensitivitas OMR: <span id="lblThresh">58</span>%)</label>
-          <input type="range" id="omrThreshold" min="35" max="80" value="58" oninput="document.getElementById('lblThresh').textContent=this.value; reprocessOMR();" />
+          <label>Sensitivitas Kehitaman Bulatan: <span id="lblThresh">58</span>%</label>
+          <input type="range" id="omrThreshold" min="30" max="85" value="58" oninput="document.getElementById('lblThresh').textContent=this.value; reprocessOMR();" />
         </div>
       </div>
 
       <div style="text-align:center; background:#0f172a; padding:8px; border-radius:10px; margin-bottom:10px;">
-        <canvas id="omrCanvas" width="794" height="1123" style="max-width:460px; border-radius:6px;"></canvas>
-        <div style="color:#cbd5e1; font-size:0.74rem; margin-top:4px;">
-          Tips: Pastikan 4 kotak hitam sudut LJK terlihat utuh. Scanner membaca PG dan B-S; periksa kembali jawaban kosong/ganda sebelum menyimpan. Titik merah menandakan bulatan terdeteksi terisi.
+        <canvas id="omrCanvas" width="794" height="1123" style="max-width:460px; border-radius:6px; margin:0 auto;"></canvas>
+        <div style="color:#cbd5e1; font-size:0.74rem; margin-top:6px;">
+          Pastikan 4 kotak hitam sudut LJK masuk ke dalam foto. Lingkaran <b>hijau/merah</b> = terdeteksi terisi; titik <b>biru muda</b> = pusat bacaan kosong.
         </div>
       </div>
 
       <div class="card" style="background:#f8fafc; margin-bottom:0;">
         <h3 style="margin:0 0 8px 0; font-size:0.9rem;">Hasil Pembacaan LJK & Koreksi Cepat</h3>
-        <div id="scanResultSummary" style="font-size:0.84rem; margin-bottom:8px;">Belum ada LJK dipindai.</div>
+        <div id="scanResultSummary" style="font-size:0.84rem; margin-bottom:8px;">Belum ada LJK dipindai. Buka kamera atau pilih foto LJK untuk mulai memindai.</div>
         <div id="scanAnswersEditor" style="display:flex; flex-wrap:wrap; gap:4px; margin-bottom:10px;"></div>
         <div id="scanUraianInputs" class="grid-3" style="margin-bottom:10px;"></div>
-        <button class="btn btn-success" style="width:100%;" onclick="saveScannedResult()">💾 Simpan Nilai Siswa Ini ke Rekap KORANUL</button>
+        <div class="grid-2">
+          <button class="btn btn-success" style="width:100%;" onclick="saveScannedResult(true)">💾 Simpan & Lanjut Scan Berikutnya ➡️</button>
+          <button class="btn btn-outline" style="width:100%;" onclick="saveScannedResult(false)">💾 Simpan Saja (Tetap di Siswa Ini)</button>
+        </div>
       </div>
     </div>
   </section>
@@ -270,9 +328,9 @@
   <!-- ==================== TAB 4: INPUT MANUAL & REKAP JAWABAN ==================== -->
   <section id="tab-input" class="tab-page">
     <div class="card">
-      <h2>Input / Edit Jawaban PG (`DATA MC`) & Skor Uraian (`DATA UR`)</h2>
+      <h2>Input / Edit Jawaban PG (`DATA MC`), B-S & Skor Uraian (`DATA UR`)</h2>
       <p style="font-size:0.78rem; color:var(--muted);">
-        Anda dapat mengisi atau mengedit langsung jawaban PG, Benar-Salah (B/S), (misal: <code>BBACABCCBC...</code>) maupun skor tiap nomor soal Uraian di tabel ini.
+        Anda dapat mengisi atau mengedit langsung jawaban PG (misal: <code>BBACABCCBC...</code>), Benar-Salah (<code>B/S</code>), maupun skor tiap nomor soal Uraian di tabel ini.
       </p>
       <div class="table-wrap">
         <table>
@@ -282,7 +340,10 @@
               <th>Nama Siswa</th>
               <th>Jawaban PG (1–<span class="lblJmlPG">20</span>)</th>
               <th>Skor PG</th>
-              <th>Nilai PG</th><th>Jawaban B-S</th><th>Skor B-S</th><th>Nilai B-S</th>
+              <th>Nilai PG</th>
+              <th>Jawaban B-S</th>
+              <th>Skor B-S</th>
+              <th>Nilai B-S</th>
               <th>Skor Uraian (per nomor)</th>
               <th>Nilai UR</th>
             </tr>
@@ -330,7 +391,7 @@
 </nav>
 
 <script>
-// ==================== TABEL R PRODUCT MOMENT (TARAF SIGNIFIKANSI 5% SEPERTI PROSES MC!N883:O981) ====================
+// ==================== TABEL R PRODUCT MOMENT (TARAF SIGNIFIKANSI 5%) ====================
 const R_TABLE_005 = {
   3:0.997, 4:0.950, 5:0.878, 6:0.811, 7:0.754, 8:0.707, 9:0.666, 10:0.632,
   11:0.602, 12:0.576, 13:0.553, 14:0.532, 15:0.514, 16:0.497, 17:0.482, 18:0.468, 19:0.456, 20:0.444,
@@ -349,54 +410,165 @@ function getRTable(n) {
   return 0.195;
 }
 
-// ==================== STATE APLIKASI ====================
-let state = {
-  meta: {
-    sekolah: 'SDN Nagreg 05', kepsek: 'Aep Sudrajat, S.Pd', nipKepsek: '19690513 199703 1 006',
-    guru: 'Apipudin, S.Pd.I', nipGuru: '19760917 200901 2 002', mapel: 'PAI',
-    jenisTes: 'PENILAIAN SUMATIF AKHIR SEMESTER', materi: 'BAB I - BAB V',
-    kelas: 'I (Satu)/ Ganjil', tapel: '2025 - 2026', tglTes: '29 September 2025',
-    tglPeriksa: '30 September 2025', kktp: 70, tempat: 'Bandung'
-  },
-  config: {
-    jmlPG: 20, opsiPG: 4, jmlBS: 0, kunciBS: '', jmlUR: 5, pgCols: 2, pgRows: 10, bsCols: 2, bsRows: 10,
-    kunciPG: 'BBACABCCBCCBABBCCAAC',
-    maxUR: [3, 3, 3, 3, 4],
-    bobotPG: 0.7, bobotUR: 0.3
-  },
-  students: [
-    { nis: '001', nama: 'ADEVA AZZAHRA GUMILANG', pg: 'XXAAAAAAAAAABBAXBXXX', bs: '', ur: [1,1,1,1,1], remedial: 94 },
-    { nis: '002', nama: 'ADZKIA SHAKILA ZAHRA', pg: 'BVBVCBCCCCCVCVCCAVVA', bs: '', ur: [2,2,3,2,2], remedial: 94 },
-    { nis: '003', nama: 'AGUNG PIRMAN PAUZI', pg: 'BBCCABAACCAACBBCBACC', bs: '', ur: [1,1,1,1,1], remedial: 94 },
-    { nis: '004', nama: 'ALDEN FAUJI RESMANA', pg: 'BBBCBCCACCCCBCBBCABA', bs: '', ur: [3,3,1,3,4], remedial: 94 },
-    { nis: '005', nama: 'FADLY FAKHRY ATHAHAFIS', pg: 'BBAAACABCCCCABBCAACC', bs: '', ur: [3,2,3,2,3], remedial: null },
-    { nis: '006', nama: 'INDRA ARDIANSYAH', pg: 'BBCBACAABCBCABBCCACC', bs: '', ur: [3,2,3,3,2], remedial: null },
-    { nis: '007', nama: 'KEYLA JASMINE', pg: 'BBCBACAACCCABBCCCACC', bs: '', ur: [1,1,3,2,1], remedial: 94 },
-    { nis: '008', nama: 'MUHAMMAD ALI ZAINAL ABIDIN', pg: 'BBAAAABBCCBBABBAAAAC', bs: '', ur: [1,1,1,1,1], remedial: null },
-    { nis: '009', nama: 'MUHAMMAD ZIDAN NUGRAHA', pg: 'BBACABCCBCCBABBCCAAC', bs: '', ur: [3,2,3,3,3], remedial: null },
-    { nis: '010', nama: 'EARLITA ARSYFA SALSABILA', pg: 'ABACBAABBVAAACAVBBCC', bs: '', ur: [3,3,3,1,4], remedial: 94 }
-  ]
-};
+// ==================== PENGATURAN AWAL (DEFAULT FACTORY STATE) ====================
+function getDefaultState() {
+  return {
+    meta: {
+      sekolah: 'SDN Nagreg', kepsek: 'Aep Sudrajat, S.Pd', nipKepsek: '19000000 000000 0 000',
+      guru: 'Apipudin, S.Pd.I', nipGuru: '19000000 000000 0 000', mapel: 'PAI dan Budi Pekerti',
+      jenisTes: 'PENILAIAN SUMATIF AKHIR SEMESTER', materi: 'BAB I - BAB V',
+      kelas: 'I (Satu)/ Ganjil', tapel: '2025 - 2026', tglTes: '29 September 2025',
+      tglPeriksa: '30 September 2025', kktp: 70, tempat: 'Bandung'
+    },
+    config: {
+      jmlPG: 20, opsiPG: 4, jmlBS: 0, kunciBS: '', jmlUR: 5,
+      pgCols: 0, pgRows: 10, bsCols: 0, bsRows: 8, uraianMode: 'auto',
+      kunciPG: 'BBACABCCBCCBABBCCAAC',
+      maxUR: [3, 3, 3, 3, 4],
+      bobotPG: 0.7, bobotUR: 0.3
+    },
+    students: [
+      { nis: '001', nama: 'ADEVA AZZAHRA GUMILANG', pg: 'XXAAAAAAAAAABBAXBXXX', bs: '', ur: [1,1,1,1,1], remedial: 94 },
+      { nis: '002', nama: 'ADZKIA SHAKILA ZAHRA', pg: 'BVBVCBCCCCCVCVCCAVVA', bs: '', ur: [2,2,3,2,2], remedial: 94 },
+      { nis: '003', nama: 'AGUNG PIRMAN PAUZI', pg: 'BBCCABAACCAACBBCBACC', bs: '', ur: [1,1,1,1,1], remedial: 94 },
+      { nis: '004', nama: 'ALDEN FAUJI RESMANA', pg: 'BBBCBCCACCCCBCBBCABA', bs: '', ur: [3,3,1,3,4], remedial: 94 },
+      { nis: '005', nama: 'FADLY FAKHRY ATHAHAFIS', pg: 'BBAAACABCCCCABBCAACC', bs: '', ur: [3,2,3,2,3], remedial: null },
+      { nis: '006', nama: 'INDRA ARDIANSYAH', pg: 'BBCBACAABCBCABBCCACC', bs: '', ur: [3,2,3,3,2], remedial: null },
+      { nis: '007', nama: 'KEYLA JASMINE', pg: 'BBCBACAACCCABBCCCACC', bs: '', ur: [1,1,3,2,1], remedial: 94 },
+      { nis: '008', nama: 'MUHAMMAD ALI ZAINAL ABIDIN', pg: 'BBAAAABBCCBBABBAAAAC', bs: '', ur: [1,1,1,1,1], remedial: null },
+      { nis: '009', nama: 'MUHAMMAD ZIDAN NUGRAHA', pg: 'BBACABCCBCCBABBCCAAC', bs: '', ur: [3,2,3,3,3], remedial: null },
+      { nis: '010', nama: 'EARLITA ARSYFA SALSABILA', pg: 'ABACBAABBVAAACAVBBCC', bs: '', ur: [3,3,3,1,4], remedial: 94 }
+    ]
+  };
+}
 
+let state = getDefaultState();
 let currentReportTab = 'nilai_mc';
 let selectedRemedStudent = 0;
 let currentScannedPG = [];
 let currentScannedBS = [];
-let currentScannedUR = [];
 let loadedScanImage = null;
 let cameraStream = null;
+let sessionScanCount = 0;
 
-function initApp() {
-  const saved = localStorage.getItem('koranul_pwa_state_v1');
-  if(saved){try{state=JSON.parse(saved);}catch(e){}}
-  state.config.jmlBS=Number(state.config.jmlBS||0);state.config.kunciBS=state.config.kunciBS||'';state.config.pgCols=Number(state.config.pgCols||2);state.config.pgRows=Number(state.config.pgRows||10);state.config.bsCols=Number(state.config.bsCols||2);state.config.bsRows=Number(state.config.bsRows||10);state.students=(state.students||[]).map(st=>({...st,bs:st.bs||'',ur:st.ur||[]}));
+// ==================== PENYIMPANAN PERMANEN (LOCALSTORAGE + INDEXEDDB + PERSIST) ====================
+const STORAGE_KEY_V2 = 'koranul_pwa_state_v2';
+const STORAGE_KEY_V1 = 'koranul_pwa_state_v1';
+const IDB_NAME = 'koranul_permanent_db';
+const IDB_STORE = 'state_store';
+
+function openIDB() {
+  return new Promise((resolve, reject) => {
+    if (!window.indexedDB) return reject(new Error('IndexedDB tidak tersedia'));
+    const req = indexedDB.open(IDB_NAME, 1);
+    req.onupgradeneeded = () => {
+      const db = req.result;
+      if (!db.objectStoreNames.contains(IDB_STORE)) db.createObjectStore(IDB_STORE);
+    };
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+async function saveToIDB(dataObj) {
+  try {
+    const db = await openIDB();
+    const tx = db.transaction(IDB_STORE, 'readwrite');
+    tx.objectStore(IDB_STORE).put(JSON.stringify(dataObj), STORAGE_KEY_V2);
+  } catch (e) {}
+}
+
+async function loadFromIDB() {
+  try {
+    const db = await openIDB();
+    return await new Promise((resolve) => {
+      const tx = db.transaction(IDB_STORE, 'readonly');
+      const req = tx.objectStore(IDB_STORE).get(STORAGE_KEY_V2);
+      req.onsuccess = () => resolve(req.result ? JSON.parse(req.result) : null);
+      req.onerror = () => resolve(null);
+    });
+  } catch (e) {
+    return null;
+  }
+}
+
+function persistNow() {
+  try {
+    const serialized = JSON.stringify(state);
+    localStorage.setItem(STORAGE_KEY_V2, serialized);
+    localStorage.setItem(STORAGE_KEY_V1, serialized);
+    saveToIDB(state);
+    const badge = document.getElementById('saveStatusBadge');
+    if (badge) {
+      const now = new Date();
+      const hh = String(now.getHours()).padStart(2, '0');
+      const mm = String(now.getMinutes()).padStart(2, '0');
+      badge.textContent = `💾 Tersimpan ${hh}:${mm}`;
+    }
+  } catch (e) {
+    console.warn('Gagal menyimpan ke localStorage:', e);
+  }
+}
+
+function normalizeLoadedState(raw) {
+  const def = getDefaultState();
+  if (!raw || typeof raw !== 'object') return def;
+  const merged = {
+    meta: { ...def.meta, ...(raw.meta || {}) },
+    config: { ...def.config, ...(raw.config || {}) },
+    students: Array.isArray(raw.students) ? raw.students : def.students
+  };
+  merged.config.jmlPG = Math.min(50, Math.max(1, Number(merged.config.jmlPG) || 20));
+  merged.config.opsiPG = Math.min(5, Math.max(3, Number(merged.config.opsiPG) || 4));
+  merged.config.jmlBS = Math.min(50, Math.max(0, Number(merged.config.jmlBS) || 0));
+  merged.config.jmlUR = Math.min(40, Math.max(0, Number(merged.config.jmlUR) || 0));
+  merged.config.kunciBS = (merged.config.kunciBS || '').toUpperCase().replace(/[^BS]/g, '');
+  merged.config.kunciPG = (merged.config.kunciPG || '').toUpperCase().replace(/[^A-E]/g, '');
+  merged.config.pgCols = Number(merged.config.pgCols ?? 0);
+  merged.config.pgRows = Number(merged.config.pgRows || 10);
+  merged.config.bsCols = Number(merged.config.bsCols ?? 0);
+  merged.config.bsRows = Number(merged.config.bsRows || 8);
+  merged.config.uraianMode = merged.config.uraianMode || 'auto';
+  merged.students = merged.students.map(st => ({
+    nis: st.nis || '',
+    nama: (st.nama || '').toUpperCase(),
+    pg: (st.pg || '').toUpperCase(),
+    bs: (st.bs || '').toUpperCase(),
+    ur: Array.isArray(st.ur) ? st.ur : [],
+    remedial: st.remedial !== undefined ? st.remedial : null
+  }));
+  return merged;
+}
+
+async function initApp() {
+  if (navigator.storage && navigator.storage.persist) {
+    navigator.storage.persist().catch(() => {});
+  }
+  let loaded = null;
+  const rawV2 = localStorage.getItem(STORAGE_KEY_V2) || localStorage.getItem(STORAGE_KEY_V1);
+  if (rawV2) {
+    try { loaded = JSON.parse(rawV2); } catch (e) {}
+  }
+  if (!loaded) {
+    loaded = await loadFromIDB();
+  }
+  if (loaded) {
+    state = normalizeLoadedState(loaded);
+  }
+  persistNow();
   syncInputsFromState();
   renderStudentsTable();
   renderInputJawabanTable();
   renderLJKPreview();
+  drawScannerIdleCanvas();
   renderReport();
+
+  window.addEventListener('beforeunload', persistNow);
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') persistNow();
+  });
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('./sw.js').catch(()=>{});
+    navigator.serviceWorker.register('./sw.js').catch(() => {});
   }
 }
 
@@ -420,15 +592,29 @@ function syncInputsFromState() {
   document.getElementById('inJmlPG').value = state.config.jmlPG;
   document.getElementById('inOpsiPG').value = state.config.opsiPG;
   document.getElementById('inJmlUR').value = state.config.jmlUR;
-  document.getElementById('inJmlBS').value=state.config.jmlBS||0;document.getElementById('inKunciBS').value=state.config.kunciBS||'';
-  ['ljkPGCols','ljkPGRows','ljkBSCols','ljkBSRows'].forEach((id,i)=>{const vals=[state.config.pgCols,state.config.pgRows,state.config.bsCols,state.config.bsRows];const el=document.getElementById(id);if(el)el.value=vals[i];});
+  document.getElementById('inJmlBS').value = state.config.jmlBS || 0;
+  document.getElementById('inKunciBS').value = state.config.kunciBS || '';
+
+  const cMap = {
+    ljkPGCols: state.config.pgCols,
+    ljkPGRows: state.config.pgRows,
+    ljkBSCols: state.config.bsCols,
+    ljkBSRows: state.config.bsRows,
+    ljkUraianMode: state.config.uraianMode || 'auto'
+  };
+  Object.entries(cMap).forEach(([id, val]) => {
+    const el = document.getElementById(id);
+    if (el) el.value = val;
+  });
+
   document.getElementById('inKunciPG').value = state.config.kunciPG;
   document.getElementById('inMaxUR').value = state.config.maxUR.join(',');
   updateKunciPreview();
+  document.querySelectorAll('.lblJmlPG').forEach(el => el.textContent = state.config.jmlPG);
   document.getElementById('hdrSubtitle').textContent = `${m.sekolah} • ${m.mapel} (${m.kelas})`;
 }
 
-function saveState() {
+function saveState(skipTableRerender = false) {
   state.meta = {
     sekolah: document.getElementById('inSekolah').value,
     kepsek: document.getElementById('inKepsek').value,
@@ -447,10 +633,11 @@ function saveState() {
   };
   state.config.jmlPG = Math.min(50, Math.max(1, parseInt(document.getElementById('inJmlPG').value) || 20));
   state.config.opsiPG = parseInt(document.getElementById('inOpsiPG').value) || 4;
-  ['pgCols','pgRows','bsCols','bsRows'].forEach((k,i)=>{const ids=['ljkPGCols','ljkPGRows','ljkBSCols','ljkBSRows'];const el=document.getElementById(ids[i]);if(el)state.config[k]=Math.max(i%2===0?1:4,Math.min(i%2===0?5:10,parseInt(el.value)|| (i%2===0?2:10)));});
-  state.config.jmlBS=Math.min(50,Math.max(0,parseInt(document.getElementById('inJmlBS').value)||0));state.config.kunciBS=(document.getElementById('inKunciBS').value||'').toUpperCase().replace(/[^BS]/g,'').slice(0,state.config.jmlBS);
+  state.config.jmlBS = Math.min(50, Math.max(0, parseInt(document.getElementById('inJmlBS').value) || 0));
+  state.config.kunciBS = (document.getElementById('inKunciBS').value || '').toUpperCase().replace(/[^BS]/g, '').slice(0, state.config.jmlBS);
   state.config.jmlUR = Math.min(40, Math.max(0, parseInt(document.getElementById('inJmlUR').value) || 0));
   state.config.kunciPG = document.getElementById('inKunciPG').value.toUpperCase();
+
   const maxArr = document.getElementById('inMaxUR').value.split(',').map(x => parseFloat(x.trim()) || 4);
   while (maxArr.length < state.config.jmlUR) maxArr.push(4);
   state.config.maxUR = maxArr.slice(0, state.config.jmlUR);
@@ -458,10 +645,13 @@ function saveState() {
   updateKunciPreview();
   document.querySelectorAll('.lblJmlPG').forEach(el => el.textContent = state.config.jmlPG);
   document.getElementById('hdrSubtitle').textContent = `${state.meta.sekolah} • ${state.meta.mapel} (${state.meta.kelas})`;
-  localStorage.setItem('koranul_pwa_state_v1', JSON.stringify(state));
-  renderStudentsTable();
-  renderInputJawabanTable();
-  renderReport();
+  persistNow();
+
+  if (!skipTableRerender) {
+    renderStudentsTable();
+    renderInputJawabanTable();
+    renderReport();
+  }
 }
 
 function updateQuestionConfig() {
@@ -478,36 +668,116 @@ function updateKunciPreview() {
   if (bsPreview) bsPreview.textContent = `Terisi ${bsKey.length}/${state.config.jmlBS || 0} kunci B-S`;
 }
 
+// ==================== BACKUP, RESTORE & RESET PENGATURAN AWAL ====================
+function exportBackupJSON() {
+  persistNow();
+  const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `Cadangan_KORANUL_${(state.meta.mapel || 'Ujian').replace(/\s+/g, '_')}.json`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+function importBackupJSON(ev) {
+  const file = ev.target.files && ev.target.files[0];
+  if (!file) return;
+  const rd = new FileReader();
+  rd.onload = () => {
+    try {
+      const parsed = JSON.parse(String(rd.result || '{}'));
+      state = normalizeLoadedState(parsed);
+      persistNow();
+      syncInputsFromState();
+      renderStudentsTable();
+      renderInputJawabanTable();
+      renderLJKPreview();
+      renderReport();
+      alert('Data cadangan berhasil dipulihkan dan disimpan permanen!');
+    } catch (err) {
+      alert('File cadangan tidak valid: ' + err.message);
+    }
+    ev.target.value = '';
+  };
+  rd.readAsText(file, 'UTF-8');
+}
+
+function startFreshExam() {
+  if (!confirm('Kosongkan daftar siswa & semua jawaban untuk memulai ujian baru? (Identitas sekolah tetap dipertahankan)')) return;
+  state.students = [{ nis: '001', nama: 'SISWA 1', pg: '', bs: '', ur: [], remedial: null }];
+  sessionScanCount = 0;
+  document.getElementById('scanCounterBadge').textContent = 'Terscan Sesi Ini: 0 LJK';
+  persistNow();
+  syncInputsFromState();
+  renderStudentsTable();
+  renderInputJawabanTable();
+  renderReport();
+  prepareNextScan(false);
+}
+
+async function resetToDefaultSettings() {
+  if (!confirm('Kembalikan seluruh pengaturan, kunci jawaban, dan data siswa ke pengaturan awal (default)?')) return;
+  state = getDefaultState();
+  sessionScanCount = 0;
+  document.getElementById('scanCounterBadge').textContent = 'Terscan Sesi Ini: 0 LJK';
+  localStorage.removeItem(STORAGE_KEY_V2);
+  localStorage.removeItem(STORAGE_KEY_V1);
+  persistNow();
+  syncInputsFromState();
+  renderStudentsTable();
+  renderInputJawabanTable();
+  renderLJKPreview();
+  prepareNextScan(false);
+  renderReport();
+  alert('Aplikasi berhasil dikembalikan ke pengaturan awal.');
+}
+
 // ==================== MANAJEMEN SISWA ====================
 function renderStudentsTable() {
   const tbody = document.getElementById('tbodySiswa');
   const sel = document.getElementById('scanStudentSelect');
+  const prevSelVal = sel.value;
   tbody.innerHTML = '';
   sel.innerHTML = '';
+
   state.students.forEach((s, idx) => {
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td>${idx + 1}</td>
-      <td><input value="${s.nis || ''}" onchange="state.students[${idx}].nis=this.value; saveState();" style="padding:4px 6px;" /></td>
-      <td><input value="${s.nama}" onchange="state.students[${idx}].nama=this.value.toUpperCase(); saveState();" style="padding:4px 6px;" /></td>
+      <td><input value="${escapeAttr(s.nis || '')}" oninput="state.students[${idx}].nis=this.value; persistNow();" onchange="saveState();" style="padding:4px 6px;" /></td>
+      <td><input value="${escapeAttr(s.nama)}" oninput="state.students[${idx}].nama=this.value.toUpperCase(); persistNow();" onchange="saveState();" style="padding:4px 6px;" /></td>
       <td><button class="btn btn-danger btn-sm" onclick="deleteStudent(${idx})">Hapus</button></td>
     `;
     tbody.appendChild(tr);
 
+    const hasScanned = (s.pg && s.pg.length > 0) || (s.bs && s.bs.length > 0);
     const opt = document.createElement('option');
     opt.value = idx;
-    opt.textContent = `${String(idx + 1).padStart(2, '0')} - ${s.nama}`;
+    opt.textContent = `${String(idx + 1).padStart(2, '0')} - ${s.nama}${hasScanned ? ' ✓' : ''}`;
     sel.appendChild(opt);
   });
+
+  if (prevSelVal !== '' && Number(prevSelVal) < state.students.length) {
+    sel.value = prevSelVal;
+  }
+}
+
+function escapeAttr(v) {
+  return String(v ?? '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
 function addStudent() {
   if (state.students.length >= 200) return alert('Maksimum 200 siswa.');
-  state.students.push({ nis: '', nama: `SISWA BARU ${state.students.length + 1}`, pg: '', bs: '', ur: [], remedial: null });
+  state.students.push({
+    nis: String(state.students.length + 1).padStart(3, '0'),
+    nama: `SISWA BARU ${state.students.length + 1}`,
+    pg: '', bs: '', ur: [], remedial: null
+  });
   saveState();
 }
 
 function deleteStudent(idx) {
+  if (state.students.length <= 1) return alert('Minimal harus ada 1 baris peserta.');
   state.students.splice(idx, 1);
   saveState();
 }
@@ -527,14 +797,64 @@ function bulkImportStudents() {
   saveState();
 }
 
+function parseCSV(t) {
+  const rows = []; let r = [], c = '', q = false;
+  for (let i = 0; i < t.length; i++) {
+    const x = t[i], n = t[i + 1];
+    if (x === '"' && q && n === '"') { c += '"'; i++; }
+    else if (x === '"') q = !q;
+    else if ((x === ',' || x === ';') && !q) { r.push(c.trim()); c = ''; }
+    else if ((x === '\n' || x === '\r') && !q) {
+      if (x === '\r' && n === '\n') i++;
+      r.push(c.trim());
+      if (r.some(v => v)) rows.push(r);
+      r = []; c = '';
+    } else c += x;
+  }
+  r.push(c.trim());
+  if (r.some(v => v)) rows.push(r);
+  return rows;
+}
 
-function parseCSV(t){const rows=[];let r=[],c='',q=false;for(let i=0;i<t.length;i++){const x=t[i],n=t[i+1];if(x==='"'&&q&&n==='"'){c+='"';i++;}else if(x==='"')q=!q;else if((x===','||x===';')&&!q){r.push(c.trim());c='';}else if((x==='\n'||x==='\r')&&!q){if(x==='\r'&&n==='\n')i++;r.push(c.trim());if(r.some(v=>v))rows.push(r);r=[];c='';}else c+=x;}r.push(c.trim());if(r.some(v=>v))rows.push(r);return rows;}
-function importStudentsCSV(e){const f=e.target.files&&e.target.files[0];if(!f)return;const rd=new FileReader();rd.onload=()=>{try{const rows=parseCSV(String(rd.result||'').replace(/^\uFEFF/,''));if(rows.length<2)throw Error('CSV harus berisi header dan data');const h=rows[0].map(x=>x.toLowerCase()),ix=(...a)=>h.findIndex(x=>a.includes(x)),ni=ix('nis','nisn'),nn=ix('nama','nama_siswa'),ip=ix('pg','jawaban_pg'),ib=ix('bs','jawaban_bs'),iu=ix('ur','uraian'),ir=ix('remedial');if(nn<0)throw Error('Kolom nama wajib');const d=rows.slice(1).map((r,i)=>({nis:ni>=0?r[ni]||'':String(i+1).padStart(3,'0'),nama:(r[nn]||'').toUpperCase(),pg:ip>=0?(r[ip]||'').toUpperCase():'',bs:ib>=0?(r[ib]||'').toUpperCase().replace(/[^BSXV]/g,''):'',ur:iu>=0?(r[iu]||'').split(/[|;]/).filter(Boolean).map(Number):[],remedial:ir>=0&&r[ir]!==''?Number(r[ir]):null})).filter(x=>x.nama);if(!d.length||d.length>200)throw Error('Jumlah siswa harus 1–200');const replace=confirm(`${d.length} siswa ditemukan. OK=ganti daftar; Cancel=tambahkan.`);state.students=replace?d:state.students.concat(d).slice(0,200);saveState();alert('Impor CSV berhasil.');}catch(x){alert('Impor gagal: '+x.message);}e.target.value='';};rd.readAsText(f,'UTF-8');}
-function downloadCSVTemplate(){const b=new Blob(['\uFEFFnis,nama,pg,bs,ur,remedial\n001,CONTOH SISWA,ABCD,BSSB,3|2|4,\n'],{type:'text/csv;charset=utf-8'}),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='template_import_koranul.csv';a.click();URL.revokeObjectURL(a.href);}
+function importStudentsCSV(e) {
+  const f = e.target.files && e.target.files[0];
+  if (!f) return;
+  const rd = new FileReader();
+  rd.onload = () => {
+    try {
+      const rows = parseCSV(String(rd.result || '').replace(/^\uFEFF/, ''));
+      if (rows.length < 2) throw Error('CSV harus berisi header dan data');
+      const h = rows[0].map(x => x.toLowerCase()), ix = (...a) => h.findIndex(x => a.includes(x));
+      const ni = ix('nis', 'nisn'), nn = ix('nama', 'nama_siswa'), ip = ix('pg', 'jawaban_pg'), ib = ix('bs', 'jawaban_bs'), iu = ix('ur', 'uraian'), ir = ix('remedial');
+      if (nn < 0) throw Error('Kolom nama wajib');
+      const d = rows.slice(1).map((r, i) => ({
+        nis: ni >= 0 ? r[ni] || '' : String(i + 1).padStart(3, '0'),
+        nama: (r[nn] || '').toUpperCase(),
+        pg: ip >= 0 ? (r[ip] || '').toUpperCase() : '',
+        bs: ib >= 0 ? (r[ib] || '').toUpperCase().replace(/[^BSXV]/g, '') : '',
+        ur: iu >= 0 ? (r[iu] || '').split(/[|;]/).filter(Boolean).map(Number) : [],
+        remedial: ir >= 0 && r[ir] !== '' ? Number(r[ir]) : null
+      })).filter(x => x.nama);
+      if (!d.length || d.length > 200) throw Error('Jumlah siswa harus 1–200');
+      const replace = confirm(`${d.length} siswa ditemukan. OK = ganti daftar; Cancel = tambahkan.`);
+      state.students = replace ? d : state.students.concat(d).slice(0, 200);
+      saveState();
+      alert('Impor CSV berhasil dan tersimpan permanen.');
+    } catch (x) {
+      alert('Impor gagal: ' + x.message);
+    }
+    e.target.value = '';
+  };
+  rd.readAsText(f, 'UTF-8');
+}
 
-function resetDemoData() {
-  localStorage.removeItem('koranul_pwa_state_v1');
-  location.reload();
+function downloadCSVTemplate() {
+  const b = new Blob(['\uFEFFnis,nama,pg,bs,ur,remedial\n001,CONTOH SISWA,ABCD,BSSB,3|2|4,\n'], { type: 'text/csv;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(b);
+  a.download = 'template_import_koranul.csv';
+  a.click();
+  URL.revokeObjectURL(a.href);
 }
 
 // ==================== MESIN ANALISIS STATISTIK KORANUL ====================
@@ -542,13 +862,12 @@ function computeAllAnalytics() {
   const N = state.students.length;
   const kPG = state.config.jmlPG;
   const kUR = state.config.jmlUR;
-  const kunci = (state.config.kunciPG || '').toUpperCase().replace(/\s/g,'').padEnd(kPG, '!');
+  const kunci = (state.config.kunciPG || '').toUpperCase().replace(/\s/g, '').padEnd(kPG, '!');
   const kktp = state.meta.kktp;
   const rTabel = getRTable(N);
 
-  // 1. Matriks Skor PG (0/1) & Nilai PG
   const pgMatrix = state.students.map(st => {
-    const ans = (st.pg || '').toUpperCase().replace(/\s/g,'').padEnd(kPG, 'X');
+    const ans = (st.pg || '').toUpperCase().replace(/\s/g, '').padEnd(kPG, 'X');
     const row = [];
     let skor = 0;
     for (let j = 0; j < kPG; j++) {
@@ -561,16 +880,41 @@ function computeAllAnalytics() {
     return { row, skor, nilai, tuntas, ans };
   });
 
-  const kBS=state.config.jmlBS||0,keyBS=(state.config.kunciBS||'').padEnd(kBS,'!');
-  const bsMatrix=state.students.map(st=>{const ans=(st.bs||'').toUpperCase().replace(/\s/g,'').padEnd(kBS,'X'),row=[];let skor=0;for(let j=0;j<kBS;j++){const ok=(ans[j]==='B'||ans[j]==='S')&&ans[j]===keyBS[j]?1:0;row.push(ok);skor+=ok;}return {row,skor,nilai:kBS?skor/kBS*100:0,ans};});
-  const objMatrix=state.students.map((st,i)=>{const total=kPG+kBS,skor=pgMatrix[i].skor+bsMatrix[i].skor,nilai=total?skor/total*100:0;return {skor,total,nilai,tuntas:nilai>=(kktp-0.5)?'Tuntas':'Remedial'};});
-  const itemsBS=Array.from({length:kBS},(_,j)=>{
-    let benar=0,salah=0,kosong=0,ganda=0,belumDinilai=0;
-    const keyReady=keyBS[j]==='B'||keyBS[j]==='S';
-    bsMatrix.forEach(m=>{const ans=m.ans[j]||'X';if(ans==='X')kosong++;else if(ans==='V')ganda++;else if(!keyReady)belumDinilai++;else if(ans===keyBS[j])benar++;else salah++;});
-    return {no:getBSQuestionNo(j),benar,salah,kosong,ganda,belumDinilai,tk:N?benar/N:0,keyReady};
+  const kBS = state.config.jmlBS || 0;
+  const keyBS = (state.config.kunciBS || '').padEnd(kBS, '!');
+  const bsMatrix = state.students.map(st => {
+    const ans = (st.bs || '').toUpperCase().replace(/\s/g, '').padEnd(kBS, 'X');
+    const row = [];
+    let skor = 0;
+    for (let j = 0; j < kBS; j++) {
+      const ok = (ans[j] === 'B' || ans[j] === 'S') && ans[j] === keyBS[j] ? 1 : 0;
+      row.push(ok);
+      skor += ok;
+    }
+    return { row, skor, nilai: kBS ? (skor / kBS) * 100 : 0, ans };
   });
-  // 2. Matriks Skor Uraian & Nilai UR
+
+  const objMatrix = state.students.map((st, i) => {
+    const total = kPG + kBS;
+    const skor = pgMatrix[i].skor + bsMatrix[i].skor;
+    const nilai = total ? (skor / total) * 100 : 0;
+    return { skor, total, nilai, tuntas: nilai >= (kktp - 0.5) ? 'Tuntas' : 'Remedial' };
+  });
+
+  const itemsBS = Array.from({ length: kBS }, (_, j) => {
+    let benar = 0, salah = 0, kosong = 0, ganda = 0, belumDinilai = 0;
+    const keyReady = keyBS[j] === 'B' || keyBS[j] === 'S';
+    bsMatrix.forEach(m => {
+      const ans = m.ans[j] || 'X';
+      if (ans === 'X') kosong++;
+      else if (ans === 'V') ganda++;
+      else if (!keyReady) belumDinilai++;
+      else if (ans === keyBS[j]) benar++;
+      else salah++;
+    });
+    return { no: getBSQuestionNo(j), benar, salah, kosong, ganda, belumDinilai, tk: N ? benar / N : 0, keyReady };
+  });
+
   const totalMaxUR = state.config.maxUR.slice(0, kUR).reduce((a, b) => a + b, 0);
   const urMatrix = state.students.map(st => {
     const row = [];
@@ -585,7 +929,6 @@ function computeAllAnalytics() {
     return { row, skor, nilai, tuntas };
   });
 
-  // 3. Nilai Gabungan & Perbaikan (Sesuai formula PROSES MC!CE218 & CL218)
   const bPG = kUR === 0 ? 1 : state.config.bobotPG;
   const bUR = kUR === 0 ? 0 : state.config.bobotUR;
   const gabungan = state.students.map((st, i) => {
@@ -594,7 +937,6 @@ function computeAllAnalytics() {
     const nGab = (nPG * bPG) + (nUR * bUR);
     const ketGab = nGab < (kktp - 0.5) ? 'Remedial' : 'Tuntas';
 
-    // Perbaikan sesuai PROSES MC!CL218:
     const nRem = st.remedial !== null && st.remedial !== '' && !isNaN(st.remedial) ? parseFloat(st.remedial) : null;
     let nAkhir = nGab;
     if (nRem !== null) {
@@ -610,12 +952,11 @@ function computeAllAnalytics() {
     return { nPG, nUR, nGab, ketGab, nRem, nAkhir, ketAkhir };
   });
 
-  // Helper Korelasi Pearson Product Moment
   function pearson(xArr, yArr) {
     const n = xArr.length;
     if (n < 2) return 0;
-    const mx = xArr.reduce((a,b)=>a+b,0)/n;
-    const my = yArr.reduce((a,b)=>a+b,0)/n;
+    const mx = xArr.reduce((a, b) => a + b, 0) / n;
+    const my = yArr.reduce((a, b) => a + b, 0) / n;
     let num = 0, dx2 = 0, dy2 = 0;
     for (let i = 0; i < n; i++) {
       const dx = xArr[i] - mx;
@@ -628,15 +969,13 @@ function computeAllAnalytics() {
     return den === 0 ? 0 : num / den;
   }
 
-  // Helper Varians Populasi / Sampel Excel VAR
   function variance(arr) {
     const n = arr.length;
     if (n < 2) return 0;
-    const m = arr.reduce((a,b)=>a+b,0)/n;
-    return arr.reduce((s,v)=>s + Math.pow(v - m, 2), 0) / (n - 1);
+    const m = arr.reduce((a, b) => a + b, 0) / n;
+    return arr.reduce((s, v) => s + Math.pow(v - m, 2), 0) / (n - 1);
   }
 
-  // 4. Analisis Butir Soal PG (Sesuai PROSES MC!D884:K933)
   const totalScoresPG = pgMatrix.map(p => p.skor);
   const sortedIdxPG = [...Array(N).keys()].sort((a, b) => totalScoresPG[b] - totalScoresPG[a]);
   const halfN = Math.max(1, Math.floor(N / 2));
@@ -647,7 +986,7 @@ function computeAllAnalytics() {
   let sumPQ = 0;
   for (let j = 0; j < kPG; j++) {
     const col = pgMatrix.map(p => p.row[j]);
-    const jmlBenar = col.reduce((a,b)=>a+b,0);
+    const jmlBenar = col.reduce((a, b) => a + b, 0);
     const tk = N > 0 ? jmlBenar / N : 0;
     const katTK = tk >= 0.71 ? 'Mudah' : (tk >= 0.31 ? 'Sedang' : 'Sukar');
 
@@ -670,7 +1009,6 @@ function computeAllAnalytics() {
   const kr20 = (kPG > 1 && varTotalPG > 0) ? (kPG / (kPG - 1)) * (1 - (sumPQ / varTotalPG)) : 0;
   const relStatusPG = kr20 > rTabel ? 'Reliabel' : 'Tdk Reliabel';
 
-  // 5. Analisis Butir Soal Uraian (Sesuai Proses UR & Cronbach Alpha)
   const totalScoresUR = urMatrix.map(u => u.skor);
   const sortedIdxUR = [...Array(N).keys()].sort((a, b) => totalScoresUR[b] - totalScoresUR[a]);
   const upperUR = sortedIdxUR.slice(0, halfN);
@@ -681,7 +1019,7 @@ function computeAllAnalytics() {
   for (let j = 0; j < kUR; j++) {
     const maxS = state.config.maxUR[j] || 4;
     const col = urMatrix.map(u => u.row[j]);
-    const meanItem = N > 0 ? col.reduce((a,b)=>a+b,0) / N : 0;
+    const meanItem = N > 0 ? col.reduce((a, b) => a + b, 0) / N : 0;
     const tk = maxS > 0 ? meanItem / maxS : 0;
     const katTK = tk >= 0.71 ? 'Mudah' : (tk >= 0.31 ? 'Sedang' : 'Sukar');
 
@@ -711,43 +1049,154 @@ function computeAllAnalytics() {
   };
 }
 
-// ==================== PEMBUAT LJK & LAYOUT KOORDINAT OMR ====================
-// Koordinat ternormalisasi (0..1) di dalam area bingkai 4 fiducial marker
-// Nomor global B-S selalu meneruskan PG: PG 1..N, lalu B-S N+1..N+M.
+// ==================== PEMBUAT LJK EFISIEN & KOORDINAT OMR ====================
 function getBSQuestionNo(index) {
   const pgCount = Math.max(0, Number(state.config.jmlPG) || 0);
   return pgCount + Number(index || 0) + 1;
 }
 
+/**
+ * Menghitung tata letak terpadu LJK (No. Absen, PG, B-S, dan Uraian dalam 1 halaman jika muat).
+ * Koordinat (nx, ny) selalu dinormalisasi 0..1 terhadap pusat 4 fiducial marker.
+ */
 function getOMRLayout() {
-  const jmlPG = state.config.jmlPG, opsi = state.config.opsiPG;
-  const letters = ['A','B','C','D','E'].slice(0, opsi);
-  const jmlBS = state.config.jmlBS || 0, bubbles = [];
-  const pgRows = Math.min(10,Math.max(Number(state.config.pgRows)||4,Math.ceil(jmlPG/5),4));
-  const bsRows = Math.min(10,Math.max(Number(state.config.bsRows)||4,Math.ceil(jmlBS/5),4));
-  const pgCols = Math.min(5,Math.max(Number(state.config.pgCols)||1,Math.ceil(jmlPG/pgRows)));
-  const bsCols = Math.min(5,Math.max(Number(state.config.bsCols)||1,Math.ceil(jmlBS/bsRows))); 
-  for(let d=0;d<2;d++) for(let num=0;num<=9;num++) bubbles.push({type:'absen',digit:d,val:num,nx:0.72+d*0.08,ny:0.06+num*0.022});
-  const pgStartY=0.34, bsStartY=0.635;
-  const pgRowStep=0.22/Math.max(1,pgRows-1), bsRowStep=0.205/Math.max(1,bsRows-1);
-  const pgColWidth=0.90/pgCols, bsColWidth=0.90/bsCols;
-  for(let q=0;q<jmlPG;q++){
-    const colIdx=Math.floor(q/pgRows), rowIdx=q%pgRows, baseX=0.055+colIdx*pgColWidth;
-    const gap=Math.min(0.034,(pgColWidth-0.035)/Math.max(1,opsi-1));
-    for(let o=0;o<opsi;o++) bubbles.push({type:'pg',qIndex:q,letter:letters[o],nx:baseX+0.025+o*gap,ny:pgStartY+rowIdx*pgRowStep});
+  const jmlPG = Math.max(0, Number(state.config.jmlPG) || 0);
+  const opsi = Math.min(5, Math.max(3, Number(state.config.opsiPG) || 4));
+  const letters = ['A', 'B', 'C', 'D', 'E'].slice(0, opsi);
+  const jmlBS = Math.max(0, Number(state.config.jmlBS) || 0);
+  const jmlUR = Math.max(0, Number(state.config.jmlUR) || 0);
+  const uraianMode = state.config.uraianMode || 'auto';
+
+  // Penentuan kolom & baris PG otomatis yang efisien (maks 5 kolom)
+  const userPGCols = Number(state.config.pgCols) || 0;
+  const maxPGRows = Math.min(15, Math.max(5, Number(state.config.pgRows) || 10));
+  const autoPGCols = jmlPG <= 10 ? 2 : (jmlPG <= 20 ? 2 : (jmlPG <= 30 ? 3 : (jmlPG <= 40 ? 4 : 5)));
+  const minPGColsNeeded = Math.max(1, Math.ceil(jmlPG / maxPGRows));
+  const pgCols = Math.min(5, Math.max(userPGCols > 0 ? userPGCols : autoPGCols, minPGColsNeeded));
+  const pgRows = Math.max(1, Math.ceil(jmlPG / pgCols));
+
+  // Penentuan kolom & baris B-S otomatis yang efisien
+  const userBSCols = Number(state.config.bsCols) || 0;
+  const maxBSRows = Math.min(12, Math.max(4, Number(state.config.bsRows) || 8));
+  const autoBSCols = jmlBS <= 6 ? 2 : (jmlBS <= 16 ? 2 : (jmlBS <= 24 ? 3 : (jmlBS <= 32 ? 4 : 5)));
+  const minBSColsNeeded = jmlBS > 0 ? Math.max(1, Math.ceil(jmlBS / maxBSRows)) : 1;
+  const bsCols = jmlBS > 0 ? Math.min(5, Math.max(userBSCols > 0 ? userBSCols : autoBSCols, minBSColsNeeded)) : 0;
+  const bsRows = jmlBS > 0 ? Math.max(1, Math.ceil(jmlBS / bsCols)) : 0;
+
+  const bubbles = [];
+
+  // 1. Grid Nomor Absen (2 digit: Puluhan & Satuan) di kanan atas
+  for (let d = 0; d < 2; d++) {
+    for (let num = 0; num <= 9; num++) {
+      bubbles.push({
+        type: 'absen',
+        digit: d,
+        val: num,
+        nx: 0.818 + d * 0.068,
+        ny: 0.056 + num * 0.0185
+      });
+    }
   }
-  for(let q=0;q<jmlBS;q++){
-    const colIdx=Math.floor(q/bsRows),rowIdx=q%bsRows,baseX=0.055+colIdx*bsColWidth;
-    bubbles.push({type:'bs',qIndex:q,letter:'B',nx:baseX+0.045,ny:bsStartY+rowIdx*bsRowStep});
-    bubbles.push({type:'bs',qIndex:q,letter:'S',nx:baseX+0.105,ny:bsStartY+rowIdx*bsRowStep});
+
+  // 2. Grid Pilihan Ganda (mulai di bawah kotak identitas)
+  const pgHeaderY = 0.258;
+  const pgStartY = 0.285;
+  const pgRowStep = 0.0218;
+  const pgColWidth = 0.904 / pgCols;
+  const bubbleR_norm = 0.0102; // ~7.4px pada lebar frame 720px
+
+  for (let q = 0; q < jmlPG; q++) {
+    const colIdx = Math.floor(q / pgRows);
+    const rowIdx = q % pgRows;
+    const baseX = 0.052 + colIdx * pgColWidth;
+    const numOffset = 0.032;
+    const availW = pgColWidth - numOffset - 0.014;
+    const gap = Math.min(0.030, availW / Math.max(1, opsi - 1));
+    for (let o = 0; o < opsi; o++) {
+      bubbles.push({
+        type: 'pg',
+        qIndex: q,
+        letter: letters[o],
+        nx: baseX + numOffset + o * gap,
+        ny: pgStartY + rowIdx * pgRowStep
+      });
+    }
   }
-  return {bubbles,letters,pgCols,bsCols,pgRows,bsRows,pgStartY,bsStartY,pgRowStep,bsRowStep,pgColWidth,bsColWidth};
+
+  let curY = jmlPG > 0 ? (pgStartY + (pgRows - 1) * pgRowStep + 0.024) : pgHeaderY;
+
+  // 3. Grid Benar - Salah (langsung menyambung di bawah PG tanpa ruang terbuang)
+  let bsHeaderY = curY;
+  let bsStartY = curY + 0.026;
+  const bsRowStep = 0.0218;
+  const bsColWidth = bsCols > 0 ? (0.904 / bsCols) : 0.45;
+
+  if (jmlBS > 0) {
+    for (let q = 0; q < jmlBS; q++) {
+      const colIdx = Math.floor(q / bsRows);
+      const rowIdx = q % bsRows;
+      const baseX = 0.052 + colIdx * bsColWidth;
+      const numOffset = 0.036;
+      const gap = Math.min(0.044, (bsColWidth - numOffset - 0.02) / 1.5);
+      bubbles.push({
+        type: 'bs',
+        qIndex: q,
+        letter: 'B',
+        nx: baseX + numOffset,
+        ny: bsStartY + rowIdx * bsRowStep
+      });
+      bubbles.push({
+        type: 'bs',
+        qIndex: q,
+        letter: 'S',
+        nx: baseX + numOffset + gap,
+        ny: bsStartY + rowIdx * bsRowStep
+      });
+    }
+    curY = bsStartY + (bsRows - 1) * bsRowStep + 0.024;
+  }
+
+  // 4. Penempatan Lembar Jawaban Uraian (Integrasi 1 Halaman jika muat!)
+  const maxPageY = 0.972;
+  const availUraianH = Math.max(0, maxPageY - curY - 0.026);
+  // Tinggi minimum nyaman per nomor uraian di halaman 1 (~46px = 0.044 frame height)
+  const minPerUraianH = uraianMode === 'single' ? 0.026 : 0.044;
+  let urOnPage1 = 0;
+
+  if (jmlUR > 0 && uraianMode !== 'separate') {
+    const maxFit = Math.floor(availUraianH / minPerUraianH);
+    if (uraianMode === 'single') {
+      urOnPage1 = jmlUR;
+    } else {
+      // Mode otomatis: muat sebanyak mungkin (seluruhnya jika muat, terutama saat total soal <= 50)
+      urOnPage1 = Math.min(jmlUR, Math.max(0, maxFit));
+    }
+  }
+  const urOnPage2 = Math.max(0, jmlUR - urOnPage1);
+
+  return {
+    bubbles, letters, bubbleR_norm,
+    pgCols, pgRows, pgHeaderY, pgStartY, pgRowStep, pgColWidth,
+    bsCols, bsRows, bsHeaderY, bsStartY, bsRowStep, bsColWidth,
+    uraianStartY: curY, availUraianH, urOnPage1, urOnPage2
+  };
 }
-function updateLJKLayoutConfig(){
-  const ids=['ljkPGCols','ljkPGRows','ljkBSCols','ljkBSRows'];
-  const keys=['pgCols','pgRows','bsCols','bsRows'];
-  ids.forEach((id,i)=>{const el=document.getElementById(id);if(el)state.config[keys[i]]=Math.max(i%2===0?1:4,Math.min(i%2===0?5:10,parseInt(el.value)|| (i%2===0?2:10)));});
-  localStorage.setItem('koranul_pwa_state_v1',JSON.stringify(state));
+
+function updateLJKLayoutConfig() {
+  const getNum = (id, min, max, fallback) => {
+    const el = document.getElementById(id);
+    if (!el) return fallback;
+    const v = parseInt(el.value);
+    if (isNaN(v)) return fallback;
+    return Math.max(min, Math.min(max, v));
+  };
+  state.config.pgCols = getNum('ljkPGCols', 0, 5, 0);
+  state.config.pgRows = getNum('ljkPGRows', 5, 15, 10);
+  state.config.bsCols = getNum('ljkBSCols', 0, 5, 0);
+  state.config.bsRows = getNum('ljkBSRows', 4, 12, 8);
+  const modeEl = document.getElementById('ljkUraianMode');
+  if (modeEl) state.config.uraianMode = modeEl.value || 'auto';
+  persistNow();
   renderLJKPreview();
 }
 
@@ -758,8 +1207,8 @@ function renderLJKPreview() {
   ctx.fillStyle = '#ffffff';
   ctx.fillRect(0, 0, W, H);
 
-  // 4 Fiducial Anchor Markers (Hitam Pekat)
-  const margin = 36, mkSize = 28;
+  // 4 Fiducial Anchor Markers (Hitam Pekat di keempat sudut)
+  const margin = 24, mkSize = 26;
   const anchors = [
     [margin, margin],
     [W - margin - mkSize, margin],
@@ -769,128 +1218,313 @@ function renderLJKPreview() {
   ctx.fillStyle = '#000000';
   anchors.forEach(([ax, ay]) => ctx.fillRect(ax, ay, mkSize, mkSize));
 
-  // Bingkai Dalam
-  const fx = margin + mkSize / 2;
-  const fy = margin + mkSize / 2;
-  const fw = W - 2 * fx;
-  const fh = H - 2 * fy;
+  // Area frame ternormalisasi antara pusat 4 marker
+  const fx = margin + mkSize / 2; // 37
+  const fy = margin + mkSize / 2; // 37
+  const fw = W - 2 * fx;          // 720
+  const fh = H - 2 * fy;          // 1049
 
+  // Bingkai luar bersih di dalam area marker
   ctx.strokeStyle = '#0f172a';
-  ctx.lineWidth = 1.5;
-  ctx.strokeRect(fx + 22, fy + 10, fw - 44, fh - 20);
+  ctx.lineWidth = 1.4;
+  ctx.strokeRect(fx + 20, fy + 8, fw - 40, fh - 16);
 
-  // Kop LJK
+  // --- KOP LJK & IDENTITAS SISWA RINGKAS ---
+  const leftBoxX = fx + 28;
+  const leftBoxW = fw * 0.70;
+  ctx.strokeStyle = '#334155';
+  ctx.lineWidth = 1;
+  ctx.strokeRect(leftBoxX, fy + 14, leftBoxW, 86);
+
   ctx.fillStyle = '#0f172a';
-  ctx.font = 'bold 17px sans-serif';
-  ctx.fillText('LEMBAR JAWABAN KOMPUTER (LJK)', fx + 34, fy + 38);
-  ctx.font = 'bold 13px sans-serif';
-  ctx.fillText(state.meta.sekolah.toUpperCase(), fx + 34, fy + 58);
-  ctx.font = '11px sans-serif';
-  ctx.fillText(`${state.meta.jenisTes} • Mapel: ${state.meta.mapel}`, fx + 34, fy + 76);
-  ctx.fillText(`Kelas: ${state.meta.kelas} • Tanggal: ${state.meta.tglTes}`, fx + 34, fy + 92);
-
-  // Kotak Nama & Kelas
-  ctx.strokeRect(fx + 34, fy + 105, 430, 68);
-  ctx.font = 'bold 11px sans-serif';
-  ctx.fillText('NAMA SISWA : __________________________________________', fx + 44, fy + 128);
-  ctx.fillText('NIS / KELAS   : ______________________   TANDA TANGAN: ________', fx + 44, fy + 156);
-
-  // Petunjuk Hitamkan
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'alphabetic';
+  ctx.font = 'bold 14.5px sans-serif';
+  ctx.fillText('LEMBAR JAWABAN KOMPUTER (LJK)', leftBoxX + 10, fy + 33);
+  ctx.font = 'bold 11.5px sans-serif';
+  ctx.fillText(state.meta.sekolah.toUpperCase(), leftBoxX + 10, fy + 50);
   ctx.font = '10px sans-serif';
   ctx.fillStyle = '#334155';
-  ctx.fillText('PETUNJUK: Hitamkan penuh bulatan pilihan Anda menggunakan pensil 2B atau spidol hitam.', fx + 34, fy + 192);
+  ctx.fillText(`${state.meta.jenisTes} • Mapel: ${state.meta.mapel}`, leftBoxX + 10, fy + 66);
+  ctx.fillText(`Kelas: ${state.meta.kelas} • Tahun: ${state.meta.tapel} • Tgl: ${state.meta.tglTes}`, leftBoxX + 10, fy + 81);
+  ctx.fillText(`Materi: ${state.meta.materi}`, leftBoxX + 10, fy + 94);
 
-  // Render grid nomor absen, Pilihan Ganda, dan Benar-Salah
-  const layout = getOMRLayout();
-  ctx.strokeStyle = '#0f172a';
+  // Kotak Identitas Siswa & Cara Menghitamkan
+  const idBoxY = fy + 106;
+  ctx.strokeStyle = '#334155';
+  ctx.strokeRect(leftBoxX, idBoxY, leftBoxW, 132);
   ctx.fillStyle = '#0f172a';
+  ctx.font = 'bold 10.5px sans-serif';
+  ctx.fillText('NAMA SISWA  : _______________________________________________', leftBoxX + 10, idBoxY + 24);
+  ctx.fillText('NIS / KELAS   : ______________________   PARAF: _______________', leftBoxX + 10, idBoxY + 50);
 
-  // Header Kotak Absen
-  const absX = fx + 0.68 * fw;
-  const absY = fy + 0.02 * fh;
-  ctx.strokeRect(absX, absY, 0.24 * fw, 0.26 * fh);
-  ctx.font = 'bold 10px sans-serif';
-  ctx.fillText('NO. ABSEN', absX + 42, absY + 14);
+  // Garis pemisah petunjuk di dalam kotak identitas
+  ctx.strokeStyle = '#cbd5e1';
+  ctx.beginPath();
+  ctx.moveTo(leftBoxX + 8, idBoxY + 64);
+  ctx.lineTo(leftBoxX + leftBoxW - 8, idBoxY + 64);
+  ctx.stroke();
+
+  ctx.fillStyle = '#1e293b';
+  ctx.font = 'bold 9.5px sans-serif';
+  ctx.fillText('PETUNJUK PENGISIAN:', leftBoxX + 10, idBoxY + 80);
   ctx.font = '9px sans-serif';
-  ctx.fillText('Puluhan   Satuan', absX + 22, absY + 28);
+  ctx.fillStyle = '#334155';
+  ctx.fillText('1. Hitamkan penuh bulatan jawaban menggunakan pensil 2B atau spidol hitam.', leftBoxX + 10, idBoxY + 95);
+  ctx.fillText('2. Hitamkan juga 2 digit Nomor Absen Anda pada kotak di sebelah kanan.', leftBoxX + 10, idBoxY + 109);
 
-  const rBubble = 8.5;
+  // Contoh visual benar vs salah
+  ctx.fillText('Contoh Benar:', leftBoxX + 10, idBoxY + 124);
+  ctx.beginPath(); ctx.arc(leftBoxX + 82, idBoxY + 121, 5.5, 0, Math.PI * 2); ctx.fillStyle = '#0f172a'; ctx.fill();
+  ctx.fillStyle = '#334155';
+  ctx.fillText('Contoh Salah:', leftBoxX + 115, idBoxY + 124);
+  [185, 205, 225].forEach((dx, idx) => {
+    const cx = leftBoxX + dx, cy = idBoxY + 121;
+    ctx.beginPath(); ctx.arc(cx, cy, 5.5, 0, Math.PI * 2); ctx.strokeStyle = '#0f172a'; ctx.stroke();
+    ctx.beginPath();
+    if (idx === 0) { ctx.moveTo(cx - 4, cy - 4); ctx.lineTo(cx + 4, cy + 4); ctx.moveTo(cx + 4, cy - 4); ctx.lineTo(cx - 4, cy + 4); }
+    else if (idx === 1) { ctx.moveTo(cx - 3, cy); ctx.lineTo(cx, cy + 3); ctx.lineTo(cx + 5, cy - 4); }
+    else { ctx.arc(cx, cy, 2, 0, Math.PI * 2); ctx.fill(); }
+    ctx.stroke();
+  });
+
+  const layout = getOMRLayout();
+
+  // Kotak Nomor Absen (kanan atas sejajar kop & identitas)
+  const absX = fx + 0.765 * fw;
+  const absY = fy + 14;
+  const absW = 0.195 * fw;
+  const absH = 224;
+  ctx.strokeStyle = '#0f172a';
+  ctx.lineWidth = 1.2;
+  ctx.strokeRect(absX, absY, absW, absH);
+  ctx.fillStyle = '#e2e8f0';
+  ctx.fillRect(absX, absY, absW, 20);
+  ctx.fillStyle = '#0f172a';
+  ctx.font = 'bold 9.5px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('NOMOR ABSEN', absX + absW / 2, absY + 13.5);
+  ctx.font = '8.5px sans-serif';
+  ctx.fillText('Puluhan   Satuan', absX + absW / 2, absY + 31);
+
+  // Gambar semua bulatan (Absen, PG, B-S)
+  const rBubble = layout.bubbleR_norm * fw;
   layout.bubbles.forEach(b => {
     const cx = fx + b.nx * fw;
     const cy = fy + b.ny * fh;
     ctx.beginPath();
     ctx.arc(cx, cy, rBubble, 0, Math.PI * 2);
     ctx.strokeStyle = '#1e293b';
-    ctx.lineWidth = 1.2;
+    ctx.lineWidth = 1.15;
     ctx.stroke();
 
     ctx.fillStyle = '#475569';
-    ctx.font = 'bold 8.5px sans-serif';
+    ctx.font = 'bold 8px sans-serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText(b.type === 'absen' ? String(b.val) : b.letter, cx, cy);
+    ctx.fillText(b.type === 'absen' ? String(b.val) : b.letter, cx, cy + 0.3);
   });
 
-  // Judul dan nomor soal PG
-  ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
-  ctx.fillStyle = '#0f172a'; ctx.font = 'bold 11px sans-serif';
-  ctx.fillText(`PILIHAN GANDA (${state.config.jmlPG} SOAL)`, fx + 30, fy + 222);
+  // --- SEKSI I: PILIHAN GANDA ---
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'alphabetic';
+  const secPGY = fy + layout.pgHeaderY * fh;
+  ctx.fillStyle = '#e2e8f0';
+  ctx.fillRect(leftBoxX, secPGY - 12, fw - 56, 17);
+  ctx.fillStyle = '#0f172a';
+  ctx.font = 'bold 10px sans-serif';
+  ctx.fillText(`I. PILIHAN GANDA (${state.config.jmlPG} SOAL)`, leftBoxX + 6, secPGY);
+
+  // Garis pemisah antar kolom PG agar rapi
+  ctx.strokeStyle = '#e2e8f0';
+  ctx.lineWidth = 0.9;
+  for (let c = 1; c < layout.pgCols; c++) {
+    const divX = fx + (0.046 + c * layout.pgColWidth) * fw;
+    ctx.beginPath();
+    ctx.moveTo(divX, secPGY + 7);
+    ctx.lineTo(divX, fy + (layout.pgStartY + (layout.pgRows - 1) * layout.pgRowStep + 0.012) * fh);
+    ctx.stroke();
+  }
+
+  ctx.fillStyle = '#0f172a';
   ctx.font = 'bold 8.5px sans-serif';
   for (let q = 0; q < state.config.jmlPG; q++) {
-    const colIdx = Math.floor(q / layout.pgRows), rowIdx = q % layout.pgRows;
-    const baseX = fx + (0.055 + colIdx * layout.pgColWidth) * fw;
+    const colIdx = Math.floor(q / layout.pgRows);
+    const rowIdx = q % layout.pgRows;
+    const baseX = fx + (0.052 + colIdx * layout.pgColWidth) * fw;
     const y = fy + (layout.pgStartY + rowIdx * layout.pgRowStep) * fh;
-    ctx.fillText(`${q + 1}.`, baseX, y + 3);
+    ctx.fillText(`${String(q + 1).padStart(2, '0')}.`, baseX, y + 3);
   }
 
-  // Judul dan nomor soal B-S dengan dua pilihan bulatan B dan S
+  // --- SEKSI II: BENAR - SALAH (jika ada) ---
   if (state.config.jmlBS > 0) {
-    ctx.font = 'bold 11px sans-serif';
-    ctx.fillText(`BENAR - SALAH (${state.config.jmlBS} SOAL)`, fx + 30, fy + 0.615 * fh);
+    const secBSY = fy + layout.bsHeaderY * fh;
+    ctx.fillStyle = '#e2e8f0';
+    ctx.fillRect(leftBoxX, secBSY - 12, fw - 56, 17);
+    ctx.fillStyle = '#0f172a';
+    ctx.font = 'bold 10px sans-serif';
+    ctx.fillText(`II. BENAR - SALAH (${state.config.jmlBS} SOAL • B = Benar, S = Salah)`, leftBoxX + 6, secBSY);
+
+    ctx.strokeStyle = '#e2e8f0';
+    for (let c = 1; c < layout.bsCols; c++) {
+      const divX = fx + (0.046 + c * layout.bsColWidth) * fw;
+      ctx.beginPath();
+      ctx.moveTo(divX, secBSY + 7);
+      ctx.lineTo(divX, fy + (layout.bsStartY + (layout.bsRows - 1) * layout.bsRowStep + 0.012) * fh);
+      ctx.stroke();
+    }
+
+    ctx.fillStyle = '#0f172a';
     ctx.font = 'bold 8.5px sans-serif';
     for (let q = 0; q < state.config.jmlBS; q++) {
-      const colIdx = Math.floor(q / layout.bsRows), rowIdx = q % layout.bsRows;
-      const baseX = fx + (0.055 + colIdx * layout.bsColWidth) * fw;
+      const colIdx = Math.floor(q / layout.bsRows);
+      const rowIdx = q % layout.bsRows;
+      const baseX = fx + (0.052 + colIdx * layout.bsColWidth) * fw;
       const y = fy + (layout.bsStartY + rowIdx * layout.bsRowStep) * fh;
-      ctx.fillText(`${getBSQuestionNo(q)}.`, baseX, y + 3);
+      ctx.fillText(`${String(getBSQuestionNo(q)).padStart(2, '0')}.`, baseX, y + 3);
     }
   }
 
-  const info=document.getElementById('ljkLayoutInfo');
-  if(info) info.textContent=`Layout aktif: PG ${layout.pgCols} kolom × ${layout.pgRows} baris (No. 1–${Number(state.config.jmlPG)||0}); B-S ${layout.bsCols} kolom × ${layout.bsRows} baris (No. ${Number(state.config.jmlPG)||0}+1–${getBSQuestionNo((Number(state.config.jmlBS)||1)-1)}). Nomor B-S otomatis melanjutkan PG.`;
+  // --- SEKSI III: JAWABAN URAIAN PADA HALAMAN 1 (JIKA MUAT) ---
+  const romawiUraian = state.config.jmlBS > 0 ? 'III' : 'II';
+  if (state.config.jmlUR > 0 && layout.urOnPage1 > 0) {
+    const secURY = fy + layout.uraianStartY * fh;
+    ctx.fillStyle = '#e2e8f0';
+    ctx.fillRect(leftBoxX, secURY - 12, fw - 56, 17);
+    ctx.fillStyle = '#0f172a';
+    ctx.font = 'bold 10px sans-serif';
+    const labelUraian = layout.urOnPage2 > 0
+      ? `${romawiUraian}. JAWABAN URAIAN (Bagian 1: ${layout.urOnPage1} dari ${state.config.jmlUR} Soal)`
+      : `${romawiUraian}. JAWABAN URAIAN (${state.config.jmlUR} SOAL)`;
+    ctx.fillText(labelUraian, leftBoxX + 6, secURY);
 
-  // Penanda bahwa lembar jawaban uraian disertakan sebagai halaman lanjutan saat cetak.
-  if(state.config.jmlUR>0){
-    ctx.textAlign='left';ctx.fillStyle='#0f172a';ctx.font='bold 10px sans-serif';
-    ctx.fillText(`LEMBAR JAWABAN URAIAN: ${state.config.jmlUR} SOAL (HALAMAN LANJUTAN)`,fx+34,fy+0.91*fh);
+    const boxTop = secURY + 8;
+    const boxBottom = fy + 0.974 * fh;
+    const totalBoxH = Math.max(40, boxBottom - boxTop);
+    const itemH = totalBoxH / layout.urOnPage1;
+
+    for (let u = 0; u < layout.urOnPage1; u++) {
+      const noSoal = state.config.jmlPG + (state.config.jmlBS || 0) + u + 1;
+      const y0 = boxTop + u * itemH;
+      const y1 = y0 + itemH - 4;
+
+      ctx.strokeStyle = '#94a3b8';
+      ctx.lineWidth = 0.9;
+      ctx.strokeRect(leftBoxX, y0, fw - 56, itemH - 4);
+
+      ctx.fillStyle = '#0f172a';
+      ctx.font = 'bold 9.5px sans-serif';
+      ctx.fillText(`${noSoal}.`, leftBoxX + 6, y0 + 13);
+
+      // Garis tulis tipis di dalam kotak uraian
+      ctx.strokeStyle = '#cbd5e1';
+      ctx.lineWidth = 0.7;
+      const lineSpacing = 15;
+      for (let ly = y0 + 17; ly < y1 - 3; ly += lineSpacing) {
+        ctx.beginPath();
+        ctx.moveTo(leftBoxX + 26, ly);
+        ctx.lineTo(leftBoxX + fw - 62, ly);
+        ctx.stroke();
+      }
+    }
+  } else if (state.config.jmlUR > 0 && layout.urOnPage1 === 0) {
+    const secURY = fy + layout.uraianStartY * fh;
+    ctx.fillStyle = '#f1f5f9';
+    ctx.fillRect(leftBoxX, secURY - 10, fw - 56, 22);
+    ctx.fillStyle = '#0f172a';
+    ctx.font = 'bold 9.5px sans-serif';
+    ctx.fillText(`${romawiUraian}. LEMBAR JAWABAN URAIAN (${state.config.jmlUR} SOAL) TERSEDIA PADA HALAMAN 2`, leftBoxX + 8, secURY + 4);
+  }
+
+  // Render Halaman 2 (hanya jika ada Uraian lanjutan)
+  const canvas2 = document.getElementById('ljkUraianCanvas2');
+  if (layout.urOnPage2 > 0) {
+    canvas2.style.display = 'block';
+    renderUraianContinuationCanvas(canvas2, layout.urOnPage1, state.config.jmlUR);
+  } else {
+    canvas2.style.display = 'none';
+  }
+
+  // Info Ringkasan Efisiensi Halaman
+  const totalSoal = (Number(state.config.jmlPG) || 0) + (Number(state.config.jmlBS) || 0) + (Number(state.config.jmlUR) || 0);
+  const infoEl = document.getElementById('ljkLayoutInfo');
+  if (infoEl) {
+    if (layout.urOnPage2 === 0) {
+      infoEl.style.background = '#dcfce7';
+      infoEl.style.color = '#166534';
+      infoEl.innerHTML = `✅ <b>Efisien 1 Halaman:</b> Total <b>${totalSoal} nomor</b> (${state.config.jmlPG} PG${state.config.jmlBS ? ' + ' + state.config.jmlBS + ' B-S' : ''}${state.config.jmlUR ? ' + ' + state.config.jmlUR + ' Uraian' : ''}) termuat rapi dalam <b>1 lembar halaman</b>.`;
+    } else {
+      infoEl.style.background = '#eff6ff';
+      infoEl.style.color = '#1e3a8a';
+      infoEl.innerHTML = `📄 <b>2 Halaman:</b> Halaman 1 memuat seluruh PG${state.config.jmlBS ? ', B-S' : ''}${layout.urOnPage1 > 0 ? ` + ${layout.urOnPage1} soal Uraian pertama` : ''}; Halaman 2 memuat ${layout.urOnPage2} soal Uraian sisanya.`;
+    }
   }
 }
 
-function buildUraianPrintPages(){
-  const total=Number(state.config.jmlUR)||0;if(!total)return '';
-  const perPage=3,pages=Math.ceil(total/perPage);let html='';
-  for(let pg=0;pg<pages;pg++){
-    const first=pg*perPage+1,last=Math.min(total,first+perPage-1);
-    html+=`<section class="print-page" style="font-family:Arial,sans-serif;color:#111;padding:8mm 7mm;">
-      <div style="border:2px solid #111;padding:7mm;min-height:290mm;">
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2px solid #111;padding-bottom:5mm;">
-      <div><h2 style="margin:0 0 4px;font-size:18px;">LEMBAR JAWABAN URAIAN</h2><b>${escapePrintText(state.meta.sekolah)}</b><div>${escapePrintText(state.meta.jenisTes)} • ${escapePrintText(state.meta.mapel)}</div><div>Kelas: ${escapePrintText(state.meta.kelas)} • ${escapePrintText(state.meta.tglTes)}</div></div>
-      <div style="border:1px solid #111;padding:12px 16px;min-width:150px;">Nama: ___________________<br><br>NIS/No. Absen: ___________</div></div>
-      <p style="font-size:11px;margin:5mm 0;">Tuliskan jawaban dengan jelas pada ruang yang tersedia. Lembar ini dinilai secara manual oleh guru.</p>`;
-    for(let q=first;q<=last;q++){
-      const no=state.config.jmlPG+(state.config.jmlBS||0)+q;
-      html+=`<div style="margin-top:5mm;break-inside:avoid;"><b>Soal Uraian ${no}</b><div style="height:57mm;border:1px solid #777;margin-top:2mm;background:repeating-linear-gradient(to bottom,transparent 0,transparent 8mm,#d1d5db 8.1mm,#d1d5db 8.3mm);"></div></div>`;
+function renderUraianContinuationCanvas(canvas, startIdx, totalUR) {
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, W, H);
+
+  const pad = 38;
+  ctx.strokeStyle = '#0f172a';
+  ctx.lineWidth = 1.5;
+  ctx.strokeRect(pad, pad, W - 2 * pad, H - 2 * pad);
+
+  ctx.fillStyle = '#0f172a';
+  ctx.font = 'bold 15px sans-serif';
+  ctx.fillText('LEMBAR JAWABAN URAIAN (LANJUTAN)', pad + 14, pad + 26);
+  ctx.font = '10.5px sans-serif';
+  ctx.fillText(`${state.meta.sekolah} • Mapel: ${state.meta.mapel} • Kelas: ${state.meta.kelas}`, pad + 14, pad + 44);
+  ctx.fillText('Nama Siswa: _______________________________   No. Absen: ________', pad + 14, pad + 64);
+
+  ctx.beginPath();
+  ctx.moveTo(pad, pad + 74);
+  ctx.lineTo(W - pad, pad + 74);
+  ctx.stroke();
+
+  const count = totalUR - startIdx;
+  const topY = pad + 86;
+  const availH = H - pad - 18 - topY;
+  const boxH = Math.min(180, availH / Math.max(1, count));
+
+  for (let i = 0; i < count; i++) {
+    const uIdx = startIdx + i;
+    const noSoal = state.config.jmlPG + (state.config.jmlBS || 0) + uIdx + 1;
+    const y0 = topY + i * boxH;
+    const y1 = y0 + boxH - 8;
+
+    ctx.strokeStyle = '#64748b';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(pad + 14, y0, W - 2 * pad - 28, boxH - 8);
+
+    ctx.fillStyle = '#0f172a';
+    ctx.font = 'bold 10.5px sans-serif';
+    ctx.fillText(`Soal Uraian No. ${noSoal}`, pad + 22, y0 + 16);
+
+    ctx.strokeStyle = '#cbd5e1';
+    ctx.lineWidth = 0.8;
+    for (let ly = y0 + 34; ly < y1 - 6; ly += 20) {
+      ctx.beginPath();
+      ctx.moveTo(pad + 22, ly);
+      ctx.lineTo(W - pad - 22, ly);
+      ctx.stroke();
     }
-    html+=`<div style="text-align:right;font-size:10px;margin-top:6mm;">Halaman uraian ${pg+1}/${pages}</div></div></section>`;
-  }return html;
+  }
 }
-function escapePrintText(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+
 function printLJK() {
   renderLJKPreview();
-  const dataUrl=document.getElementById('ljkGeneratorCanvas').toDataURL('image/png');
-  const pa=document.getElementById('printArea');pa.style.display='block';
-  pa.innerHTML=`<section class="print-page"><img src="${dataUrl}" alt="LJK PG dan Benar Salah"></section>${buildUraianPrintPages()}`;
-  window.print();pa.style.display='none';
+  const dataUrl1 = document.getElementById('ljkGeneratorCanvas').toDataURL('image/png');
+  const canvas2 = document.getElementById('ljkUraianCanvas2');
+  const hasPage2 = canvas2 && canvas2.style.display !== 'none';
+  const pa = document.getElementById('printArea');
+  pa.style.display = 'block';
+  pa.innerHTML = `<section class="print-page"><img src="${dataUrl1}" alt="LJK Halaman 1"></section>` +
+    (hasPage2 ? `<section class="print-page"><img src="${canvas2.toDataURL('image/png')}" alt="LJK Halaman 2"></section>` : '');
+  window.print();
+  pa.style.display = 'none';
 }
 
 function downloadLJKImage() {
@@ -899,19 +1533,53 @@ function downloadLJKImage() {
   link.download = `LJK_${state.meta.mapel}_${state.config.jmlPG}PG.png`;
   link.href = document.getElementById('ljkGeneratorCanvas').toDataURL('image/png');
   link.click();
+
+  const canvas2 = document.getElementById('ljkUraianCanvas2');
+  if (canvas2 && canvas2.style.display !== 'none') {
+    setTimeout(() => {
+      const link2 = document.createElement('a');
+      link2.download = `LJK_${state.meta.mapel}_Uraian_Hal2.png`;
+      link2.href = canvas2.toDataURL('image/png');
+      link2.click();
+    }, 350);
+  }
 }
 
-// ==================== PEMINDAI KAMERA & DETEKSI OMR ====================
+// ==================== PEMINDAI KAMERA & DETEKSI OMR PRESISI TINGGI ====================
+function drawScannerIdleCanvas() {
+  const canvas = document.getElementById('omrCanvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#1e293b';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.strokeStyle = '#334155';
+  ctx.setLineDash([10, 8]);
+  ctx.strokeRect(48, 48, canvas.width - 96, canvas.height - 96);
+  ctx.setLineDash([]);
+  ctx.fillStyle = '#cbd5e1';
+  ctx.font = 'bold 22px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('SIAP MEMINDAI LJK', canvas.width / 2, canvas.height / 2 - 14);
+  ctx.font = '15px sans-serif';
+  ctx.fillStyle = '#94a3b8';
+  ctx.fillText('Tekan "Buka Kamera" atau "Pilih / Foto LJK"', canvas.width / 2, canvas.height / 2 + 18);
+  ctx.textAlign = 'left';
+}
+
 async function startCamera() {
   try {
+    if (cameraStream) {
+      stopCamera();
+    }
     cameraStream = await navigator.mediaDevices.getUserMedia({
-      video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 1920 } }
+      video: { facingMode: 'environment', width: { ideal: 1600 }, height: { ideal: 2200 } }
     });
     const video = document.getElementById('cameraVideo');
     video.srcObject = cameraStream;
     document.getElementById('videoBox').style.display = 'block';
+    document.getElementById('btnStopCam').style.display = 'inline-flex';
   } catch (err) {
-    alert('Tidak dapat membuka kamera langsung (' + err.message + '). Gunakan tombol "Pilih Foto LJK" untuk memotret dengan aplikasi kamera HP.');
+    alert('Tidak dapat membuka kamera langsung (' + err.message + '). Gunakan tombol "Pilih / Foto LJK" untuk memotret dengan kamera HP.');
   }
 }
 
@@ -920,12 +1588,15 @@ function stopCamera() {
     cameraStream.getTracks().forEach(t => t.stop());
     cameraStream = null;
   }
+  const video = document.getElementById('cameraVideo');
+  if (video) video.srcObject = null;
   document.getElementById('videoBox').style.display = 'none';
+  document.getElementById('btnStopCam').style.display = 'none';
 }
 
 function captureFromVideo() {
   const video = document.getElementById('cameraVideo');
-  if (!video.srcObject) return alert('Buka kamera terlebih dahulu!');
+  if (!video.srcObject || !video.videoWidth) return alert('Buka kamera terlebih dahulu!');
   const off = document.createElement('canvas');
   off.width = video.videoWidth;
   off.height = video.videoHeight;
@@ -935,66 +1606,225 @@ function captureFromVideo() {
 }
 
 function loadImageFile(ev) {
-  const file = ev.target.files[0];
+  const input = ev.target;
+  const file = input.files && input.files[0];
   if (!file) return;
+  const objUrl = URL.createObjectURL(file);
   const img = new Image();
   img.onload = () => {
     const off = document.createElement('canvas');
-    off.width = img.width;
-    off.height = img.height;
+    off.width = img.naturalWidth || img.width;
+    off.height = img.naturalHeight || img.height;
     off.getContext('2d').drawImage(img, 0, 0);
     loadedScanImage = off;
+    URL.revokeObjectURL(objUrl);
+    // Reset input value agar dapat langsung memilih/memotret lembar LJK berikutnya tanpa perlu refresh/reset!
+    input.value = '';
     reprocessOMR();
   };
-  img.src = URL.createObjectURL(file);
+  img.onerror = () => {
+    URL.revokeObjectURL(objUrl);
+    input.value = '';
+    alert('Gagal memuat gambar LJK. Silakan coba lagi.');
+  };
+  img.src = objUrl;
 }
 
-// Deteksi 4 sudut kotak hitam (fiducial markers) & pembacaan bulatan OMR
+function prepareNextScan(advanceStudent = true) {
+  loadedScanImage = null;
+  currentScannedPG = [];
+  currentScannedBS = [];
+  const fileInput = document.getElementById('omrFileInput');
+  if (fileInput) fileInput.value = '';
+
+  document.getElementById('scanAnswersEditor').innerHTML = '';
+  document.getElementById('scanUraianInputs').innerHTML = '';
+  drawScannerIdleCanvas();
+
+  if (advanceStudent && state.students.length > 0) {
+    const sel = document.getElementById('scanStudentSelect');
+    const curIdx = parseInt(sel.value) || 0;
+    // Cari siswa berikutnya yang belum memiliki jawaban PG/BS, atau lanjut ke nomor berikutnya
+    let nextIdx = (curIdx + 1) % state.students.length;
+    for (let step = 1; step <= state.students.length; step++) {
+      const candidate = (curIdx + step) % state.students.length;
+      const st = state.students[candidate];
+      if ((!st.pg || st.pg.length === 0) && (!st.bs || st.bs.length === 0)) {
+        nextIdx = candidate;
+        break;
+      }
+    }
+    sel.value = nextIdx;
+    document.getElementById('scanResultSummary').innerHTML =
+      `<span style="color:#059669;font-weight:700;">✅ Data tersimpan!</span> Siap memindai LJK berikutnya (Target berikutnya: <b>${nextIdx + 1}. ${state.students[nextIdx].nama}</b>).`;
+  } else {
+    document.getElementById('scanResultSummary').textContent = 'Siap memindai LJK berikutnya. Jepret kamera atau pilih foto LJK.';
+  }
+}
+
+/**
+ * Deteksi sub-pixel centroid 4 kotak jangkar hitam menggunakan Integral Image lokal adaptif
+ * dan analisis komponen terhubung (Connected Components) berbentuk persegi.
+ */
 function detectFiducialCorners(imgData, w, h) {
   const d = imgData.data;
-  const isDark = (x, y) => {
-    const i = (y * w + x) * 4;
-    const lum = 0.299 * d[i] + 0.587 * d[i+1] + 0.114 * d[i+2];
-    return lum < 95;
+  const n = w * h;
+  const gray = new Uint8Array(n);
+  for (let i = 0; i < n; i++) {
+    const p = i * 4;
+    gray[i] = (77 * d[p] + 150 * d[p + 1] + 29 * d[p + 2]) >> 8;
+  }
+
+  // Bangun Integral Image untuk threshold lokal adaptif O(1)
+  const stride = w + 1;
+  const integ = new Uint32Array((w + 1) * (h + 1));
+  for (let y = 0; y < h; y++) {
+    let rowSum = 0;
+    const gRow = y * w;
+    const iPrev = y * stride;
+    const iCurr = (y + 1) * stride;
+    for (let x = 0; x < w; x++) {
+      rowSum += gray[gRow + x];
+      integ[iCurr + x + 1] = integ[iPrev + x + 1] + rowSum;
+    }
+  }
+
+  const winR = Math.max(12, Math.round(Math.min(w, h) * 0.04));
+  const isAdaptiveDark = (x, y) => {
+    const x0 = Math.max(0, x - winR), y0 = Math.max(0, y - winR);
+    const x1 = Math.min(w - 1, x + winR), y1 = Math.min(h - 1, y + winR);
+    const area = (x1 - x0 + 1) * (y1 - y0 + 1);
+    const sum = integ[(y1 + 1) * stride + (x1 + 1)]
+              - integ[y0 * stride + (x1 + 1)]
+              - integ[(y1 + 1) * stride + x0]
+              + integ[y0 * stride + x0];
+    const localMean = sum / area;
+    const g = gray[y * w + x];
+    return g < localMean * 0.72 && g < 165;
   };
-  const scanQuad = (x0, x1, y0, y1, scoreFn) => {
-    let bestScore = -Infinity, bx = (x0 + x1) / 2, by = (y0 + y1) / 2;
-    for (let y = y0; y < y1; y += 3) {
-      for (let x = x0; x < x1; x += 3) {
-        if (isDark(x, y)) {
-          // Cek blok 5x5 sekitar titik agar tidak tertipu noise
-          let darkCnt = 0;
-          for (let dy = -4; dy <= 4; dy += 2) {
-            for (let dx = -4; dx <= 4; dx += 2) {
-              const nx = Math.min(w-1, Math.max(0, x+dx));
-              const ny = Math.min(h-1, Math.max(0, y+dy));
-              if (isDark(nx, ny)) darkCnt++;
+
+  const visited = new Uint8Array(n);
+  const queueX = new Int32Array(25000);
+  const queueY = new Int32Array(25000);
+
+  const findCornerSquare = (rx0, rx1, ry0, ry1, targetX, targetY) => {
+    let bestCandidate = null;
+    let bestScore = -Infinity;
+    const minSide = Math.max(8, Math.round(w * 0.012));
+    const maxSide = Math.round(w * 0.09);
+
+    for (let y = ry0; y < ry1; y += 2) {
+      for (let x = rx0; x < rx1; x += 2) {
+        const idx = y * w + x;
+        if (visited[idx] || !isAdaptiveDark(x, y)) continue;
+
+        let head = 0, tail = 0;
+        queueX[tail] = x; queueY[tail] = y; tail++;
+        visited[idx] = 1;
+
+        let sumX = 0, sumY = 0, count = 0;
+        let minX = x, maxX = x, minY = y, maxY = y;
+
+        while (head < tail && tail < 24990) {
+          const cx = queueX[head], cy = queueY[head];
+          head++;
+          sumX += cx; sumY += cy; count++;
+          if (cx < minX) minX = cx;
+          if (cx > maxX) maxX = cx;
+          if (cy < minY) minY = cy;
+          if (cy > maxY) maxY = cy;
+
+          const neighbors = [[cx - 1, cy], [cx + 1, cy], [cx, cy - 1], [cx, cy + 1]];
+          for (let k = 0; k < 4; k++) {
+            const nx = neighbors[k][0], ny = neighbors[k][1];
+            if (nx >= rx0 && nx < rx1 && ny >= ry0 && ny < ry1) {
+              const nIdx = ny * w + nx;
+              if (!visited[nIdx] && isAdaptiveDark(nx, ny)) {
+                visited[nIdx] = 1;
+                queueX[tail] = nx; queueY[tail] = ny; tail++;
+              }
             }
           }
-          if (darkCnt >= 16) {
-            const sc = scoreFn(x, y);
-            if (sc > bestScore) { bestScore = sc; bx = x; by = y; }
-          }
+        }
+
+        const bw = maxX - minX + 1;
+        const bh = maxY - minY + 1;
+        if (bw < minSide || bh < minSide || bw > maxSide || bh > maxSide) continue;
+        const aspect = bw / bh;
+        if (aspect < 0.62 || aspect > 1.62) continue;
+
+        const fillRatio = count / (bw * bh);
+        if (fillRatio < 0.64) continue; // Kotak jangkar pekat memiliki fillRatio tinggi (>0.75)
+
+        const centX = sumX / count;
+        const centY = sumY / count;
+        const distCorner = Math.hypot(centX - targetX, centY - targetY);
+        const squareness = 1 - Math.abs(1 - aspect);
+        const score = (fillRatio * 120) + (squareness * 60) - (distCorner * 0.25);
+
+        if (score > bestScore) {
+          bestScore = score;
+          bestCandidate = { x: centX, y: centY };
         }
       }
     }
-    return bestScore > -Infinity ? { x: bx, y: by } : null;
+    return bestCandidate;
   };
 
-  const qw = Math.floor(w * 0.28), qh = Math.floor(h * 0.25);
-  const tl = scanQuad(5, qw, 5, qh, (x, y) => -(x + y));
-  const tr = scanQuad(w - qw, w - 5, 5, qh, (x, y) => (x - y));
-  const bl = scanQuad(5, qw, h - qh, h - 5, (x, y) => (-x + y));
-  const br = scanQuad(w - qw, w - 5, h - qh, h - 5, (x, y) => (x + y));
+  const qw = Math.floor(w * 0.34);
+  const qh = Math.floor(h * 0.28);
+  const tl = findCornerSquare(2, qw, 2, qh, 0, 0);
+  const tr = findCornerSquare(w - qw, w - 2, 2, qh, w, 0);
+  const bl = findCornerSquare(2, qw, h - qh, h - 2, 0, h);
+  const br = findCornerSquare(w - qw, w - 2, h - qh, h - 2, w, h);
 
-  if (tl && tr && bl && br) return { tl, tr, bl, br, found: true };
-  // Koordinat tidak ditebak bila marker tidak ditemukan.
-  return {
-    tl: { x: w * 0.06, y: h * 0.045 },
-    tr: { x: w * 0.94, y: h * 0.045 },
-    bl: { x: w * 0.06, y: h * 0.955 },
-    br: { x: w * 0.94, y: h * 0.955 },
-    found: false
+  if (tl && tr && bl && br) {
+    const topW = Math.hypot(tr.x - tl.x, tr.y - tl.y);
+    const botW = Math.hypot(br.x - bl.x, br.y - bl.y);
+    const leftH = Math.hypot(bl.x - tl.x, bl.y - tl.y);
+    const rightH = Math.hypot(br.x - tr.x, br.y - tr.y);
+    if (topW > w * 0.42 && botW > w * 0.42 && leftH > h * 0.42 && rightH > h * 0.42) {
+      return { tl, tr, bl, br, found: true };
+    }
+  }
+  return { found: false };
+}
+
+/**
+ * Menghitung matriks Homografi 3x3 dari persegi satuan [0,1]^2 ke quadrilateral foto (tl, tr, br, bl)
+ */
+function buildHomographyMapper(tl, tr, br, bl) {
+  const dx1 = tr.x - br.x, dy1 = tr.y - br.y;
+  const dx2 = bl.x - br.x, dy2 = bl.y - br.y;
+  const sx = tl.x - tr.x + br.x - bl.x;
+  const sy = tl.y - tr.y + br.y - bl.y;
+  const det = dx1 * dy2 - dx2 * dy1;
+
+  if (Math.abs(det) < 1e-6) {
+    return (nx, ny) => {
+      const topX = tl.x + (tr.x - tl.x) * nx;
+      const topY = tl.y + (tr.y - tl.y) * nx;
+      const botX = bl.x + (br.x - bl.x) * nx;
+      const botY = bl.y + (br.y - bl.y) * nx;
+      return { x: topX + (botX - topX) * ny, y: topY + (botY - topY) * ny };
+    };
+  }
+
+  const g = (sx * dy2 - sy * dx2) / det;
+  const h = (dx1 * sy - dy1 * sx) / det;
+  const a = tr.x - tl.x + g * tr.x;
+  const b = bl.x - tl.x + h * bl.x;
+  const c = tl.x;
+  const d = tr.y - tl.y + g * tr.y;
+  const e = bl.y - tl.y + h * bl.y;
+  const f = tl.y;
+
+  return (nx, ny) => {
+    const w = g * nx + h * ny + 1;
+    return {
+      x: (a * nx + b * ny + c) / w,
+      y: (d * nx + e * ny + f) / w
+    };
   };
 }
 
@@ -1002,14 +1832,35 @@ function reprocessOMR() {
   if (!loadedScanImage) return;
   const canvas = document.getElementById('omrCanvas');
   const ctx = canvas.getContext('2d');
-  const W = canvas.width, H = canvas.height;
+
+  // Pertahankan rasio asli foto saat analisis (maks sisi 1350px) agar lingkaran tidak gepeng
+  const srcW = loadedScanImage.width;
+  const srcH = loadedScanImage.height;
+  const maxDim = 1350;
+  const scale = Math.min(1, maxDim / Math.max(srcW, srcH));
+  const W = Math.round(srcW * scale);
+  const H = Math.round(srcH * scale);
+  canvas.width = W;
+  canvas.height = H;
   ctx.drawImage(loadedScanImage, 0, 0, W, H);
 
   const imgData = ctx.getImageData(0, 0, W, H);
-  const corners=detectFiducialCorners(imgData,W,H);if(!corners.found){ctx.drawImage(loadedScanImage,0,0,W,H);document.getElementById('scanResultSummary').textContent='Empat penanda sudut tidak terdeteksi. Foto ulang seluruh LJK; scan dibatalkan agar tidak salah membaca.';currentScannedPG=[];currentScannedBS=[];document.getElementById('scanAnswersEditor').innerHTML='';document.getElementById('scanUraianInputs').innerHTML='';return;}
-  // Gambar garis bingkai kalibrasi 4 sudut
-  ctx.strokeStyle = corners.found ? '#10b981' : '#f59e0b';
-  ctx.lineWidth = 3;
+  const corners = detectFiducialCorners(imgData, W, H);
+
+  if (!corners.found) {
+    document.getElementById('scanResultSummary').innerHTML =
+      `<span style="color:#dc2626;font-weight:700;">⚠️ Empat kotak jangkar hitam di sudut LJK belum terdeteksi utuh.</span><br>` +
+      `<small>Pastikan seluruh lembar LJK (keempat kotak hitam sudut) terlihat jelas di dalam bingkai foto dan pencahayaan cukup merata.</small>`;
+    currentScannedPG = [];
+    currentScannedBS = [];
+    document.getElementById('scanAnswersEditor').innerHTML = '';
+    document.getElementById('scanUraianInputs').innerHTML = '';
+    return;
+  }
+
+  // Gambar garis bingkai kalibrasi 4 sudut + titik pusat marker
+  ctx.strokeStyle = '#10b981';
+  ctx.lineWidth = Math.max(2, Math.round(W * 0.003));
   ctx.beginPath();
   ctx.moveTo(corners.tl.x, corners.tl.y);
   ctx.lineTo(corners.tr.x, corners.tr.y);
@@ -1018,67 +1869,143 @@ function reprocessOMR() {
   ctx.closePath();
   ctx.stroke();
 
-  // Interpolasi Bilinear titik (nx, ny) ke koordinat gambar
-  const mapPoint = (nx, ny) => {
-    const topX = corners.tl.x + (corners.tr.x - corners.tl.x) * nx;
-    const topY = corners.tl.y + (corners.tr.y - corners.tl.y) * nx;
-    const botX = corners.bl.x + (corners.br.x - corners.bl.x) * nx;
-    const botY = corners.bl.y + (corners.br.y - corners.bl.y) * nx;
-    return {
-      x: topX + (botX - topX) * ny,
-      y: topY + (botY - topY) * ny
-    };
-  };
+  [corners.tl, corners.tr, corners.br, corners.bl].forEach(pt => {
+    ctx.fillStyle = '#10b981';
+    ctx.beginPath();
+    ctx.arc(pt.x, pt.y, Math.max(4, W * 0.006), 0, Math.PI * 2);
+    ctx.fill();
+  });
 
-  const threshPct = parseInt(document.getElementById('omrThreshold').value) || 58;
-  const darkCutoff = 255 * (1 - threshPct / 100);
+  const mapPoint = buildHomographyMapper(corners.tl, corners.tr, corners.br, corners.bl);
+  const layout = getOMRLayout();
+
+  // Hitung radius bulatan dinamis berdasarkan lebar & tinggi frame terdeteksi
+  const frameW = (Math.hypot(corners.tr.x - corners.tl.x, corners.tr.y - corners.tl.y) +
+                  Math.hypot(corners.br.x - corners.bl.x, corners.br.y - corners.bl.y)) / 2;
+  const rPx = Math.max(4, frameW * layout.bubbleR_norm);
   const d = imgData.data;
 
-  const measureFill = (cx, cy, rad) => {
-    let dark = 0, total = 0;
-    for (let dy = -rad; dy <= rad; dy++) {
-      for (let dx = -rad; dx <= rad; dx++) {
-        if (dx*dx + dy*dy <= rad*rad) {
-          const px = Math.min(W-1, Math.max(0, Math.round(cx + dx)));
-          const py = Math.min(H-1, Math.max(0, Math.round(cy + dy)));
-          const idx = (py * W + px) * 4;
-          const lum = 0.299 * d[idx] + 0.587 * d[idx+1] + 0.114 * d[idx+2];
-          if (lum < darkCutoff) dark++;
-          total++;
+  // Pengukuran kontras relatif: membandingkan inti bulatan vs cincin kertas di sekitarnya
+  const measureRelativeFill = (cx, cy, rad) => {
+    const innerR = rad * 0.66;
+    const ringR1 = rad * 1.28;
+    const ringR2 = rad * 1.78;
+    const maxR = Math.ceil(ringR2);
+
+    let coreSum = 0, coreCnt = 0;
+    const ringVals = [];
+
+    for (let dy = -maxR; dy <= maxR; dy++) {
+      const py = Math.round(cy + dy);
+      if (py < 0 || py >= H) continue;
+      for (let dx = -maxR; dx <= maxR; dx++) {
+        const px = Math.round(cx + dx);
+        if (px < 0 || px >= W) continue;
+        const dist = Math.hypot(dx, dy);
+        const idx = (py * W + px) * 4;
+        const lum = 0.299 * d[idx] + 0.587 * d[idx + 1] + 0.114 * d[idx + 2];
+
+        if (dist <= innerR) {
+          coreSum += lum;
+          coreCnt++;
+        } else if (dist >= ringR1 && dist <= ringR2) {
+          ringVals.push(lum);
         }
       }
     }
-    return total > 0 ? dark / total : 0;
+
+    if (coreCnt === 0 || ringVals.length === 0) return 0;
+    const coreLum = coreSum / coreCnt;
+    // Gunakan persentil ke-70 pada cincin luar agar tidak terpengaruh garis tepi bulatan/teks di dekatnya
+    ringVals.sort((a, b) => a - b);
+    const paperLum = ringVals[Math.floor(ringVals.length * 0.7)];
+    return Math.max(0, (paperLum - coreLum) / Math.max(45, paperLum));
   };
 
-  const layout = getOMRLayout();
-  const absenScores = [[], []];
-  const pgChoices=Array.from({length:state.config.jmlPG},()=>[]);
-  const bsChoices=Array.from({length:state.config.jmlBS||0},()=>[]);
+  // Konversi slider sensitivitas (30..85%) ke ambang kontras fill (semakin tinggi sensitivitas, semakin mudah mendeteksi arsiran tipis)
+  const threshPct = parseInt(document.getElementById('omrThreshold').value) || 58;
+  const minFillCutoff = Math.max(0.14, 0.44 - (threshPct - 30) * 0.0048);
+
+  const absenMeasured = [[], []];
+  const pgMeasured = Array.from({ length: state.config.jmlPG }, () => []);
+  const bsMeasured = Array.from({ length: state.config.jmlBS || 0 }, () => []);
 
   layout.bubbles.forEach(b => {
     const pt = mapPoint(b.nx, b.ny);
-    const fill = measureFill(pt.x, pt.y, 7);
-    const filled = fill > 0.42;
+    const fillScore = measureRelativeFill(pt.x, pt.y, rPx);
+    const item = { ...b, pt, fillScore, filled: false };
 
-    ctx.beginPath();
-    ctx.arc(pt.x, pt.y, 6, 0, Math.PI * 2);
-    ctx.strokeStyle = filled ? '#ef4444' : 'rgba(59,130,246,0.55)';
-    ctx.lineWidth = filled ? 2.2 : 1;
-    ctx.stroke();
+    if (b.type === 'absen') absenMeasured[b.digit].push(item);
+    else if (b.type === 'pg') pgMeasured[b.qIndex].push(item);
+    else if (b.type === 'bs') bsMeasured[b.qIndex].push(item);
+  });
 
-    if (b.type === 'absen') {
-      absenScores[b.digit].push({ val: b.val, fill, filled });
-    } else if (b.type === 'pg' && filled) {
-      pgChoices[b.qIndex].push(b.letter);
-    } else if (b.type === 'bs' && filled) {
-      bsChoices[b.qIndex].push(b.letter);
+  // Evaluasi Nomor Absen
+  [0, 1].forEach(digit => {
+    const list = absenMeasured[digit].slice().sort((a, b) => b.fillScore - a.fillScore);
+    if (list[0] && list[0].fillScore >= minFillCutoff) {
+      list[0].filled = true;
     }
   });
 
-  // Deteksi Nomor Absen Siswa
-  const d0 = absenScores[0].filter(x=>x.filled).sort((a,b)=>b.fill-a.fill)[0];
-  const d1 = absenScores[1].filter(x=>x.filled).sort((a,b)=>b.fill-a.fill)[0];
+  // Evaluasi PG per nomor soal (relatif antar opsi dalam 1 nomor)
+  const pgChoices = pgMeasured.map(opts => {
+    const sorted = opts.slice().sort((a, b) => b.fillScore - a.fillScore);
+    const top = sorted[0];
+    if (!top || top.fillScore < minFillCutoff) return [];
+    const chosen = [];
+    opts.forEach(opt => {
+      if (opt.fillScore >= minFillCutoff && opt.fillScore >= top.fillScore * 0.72) {
+        opt.filled = true;
+        chosen.push(opt.letter);
+      }
+    });
+    return chosen;
+  });
+
+  // Evaluasi Benar-Salah per nomor soal
+  const bsChoices = bsMeasured.map(opts => {
+    const sorted = opts.slice().sort((a, b) => b.fillScore - a.fillScore);
+    const top = sorted[0];
+    if (!top || top.fillScore < minFillCutoff) return [];
+    const chosen = [];
+    opts.forEach(opt => {
+      if (opt.fillScore >= minFillCutoff && opt.fillScore >= top.fillScore * 0.72) {
+        opt.filled = true;
+        chosen.push(opt.letter);
+      }
+    });
+    return chosen;
+  });
+
+  // Gambar overlay deteksi pada setiap bulatan
+  const allMeasured = [
+    ...absenMeasured[0], ...absenMeasured[1],
+    ...pgMeasured.flat(), ...bsMeasured.flat()
+  ];
+  const keyPG = (state.config.kunciPG || '').toUpperCase().padEnd(state.config.jmlPG, '!');
+  const keyBS = (state.config.kunciBS || '').toUpperCase().padEnd(state.config.jmlBS || 0, '!');
+
+  allMeasured.forEach(m => {
+    ctx.beginPath();
+    if (m.filled) {
+      let isRight = true;
+      if (m.type === 'pg') isRight = m.letter === keyPG[m.qIndex];
+      else if (m.type === 'bs') isRight = m.letter === keyBS[m.qIndex];
+      ctx.arc(m.pt.x, m.pt.y, rPx * 0.92, 0, Math.PI * 2);
+      ctx.strokeStyle = isRight ? '#22c55e' : '#ef4444';
+      ctx.lineWidth = Math.max(2, rPx * 0.28);
+      ctx.stroke();
+    } else {
+      ctx.arc(m.pt.x, m.pt.y, Math.max(1.5, rPx * 0.22), 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(56, 189, 248, 0.7)';
+      ctx.fill();
+    }
+  });
+
+  // Set otomatis pilihan siswa dari Nomor Absen yang terdeteksi
+  const d0 = absenMeasured[0].find(x => x.filled);
+  const d1 = absenMeasured[1].find(x => x.filled);
   if (d0 || d1) {
     const absenNo = (d0 ? d0.val * 10 : 0) + (d1 ? d1.val : 0);
     if (absenNo >= 1 && absenNo <= state.students.length) {
@@ -1086,7 +2013,6 @@ function reprocessOMR() {
     }
   }
 
-  // Konversi ke format huruf KORANUL (A-E, X=Kosong, V=Ganda)
   currentScannedPG = pgChoices.map(a => !a.length ? 'X' : a.length > 1 ? 'V' : a[0]);
   currentScannedBS = bsChoices.map(a => !a.length ? 'X' : a.length > 1 ? 'V' : a[0]);
   renderScannedEditor();
@@ -1102,23 +2028,33 @@ function renderScannedEditor() {
   ed.innerHTML = '';
 
   const heading = (label) => {
-    const h = document.createElement('div'); h.style.cssText = 'width:100%;font-weight:800;margin:7px 0 2px;color:#1e3a8a'; h.textContent = label; ed.appendChild(h);
+    const h = document.createElement('div');
+    h.style.cssText = 'width:100%;font-weight:800;margin:7px 0 2px;color:#1e3a8a;font-size:0.82rem;';
+    h.textContent = label;
+    ed.appendChild(h);
   };
   const addChip = (label, ans, isOk, title, onCycle) => {
     const chip = document.createElement('button');
-    chip.className = 'btn btn-sm'; chip.style.background = isOk ? '#dcfce7' : (ans === 'X' || ans === 'V' ? '#fef3c7' : '#fee2e2');
-    chip.style.color = isOk ? '#166534' : '#92400e'; chip.style.border = '1px solid #cbd5e1';
-    chip.textContent = `${label}:${ans}`; chip.title = title; chip.onclick = onCycle; ed.appendChild(chip);
+    chip.className = 'btn btn-sm';
+    chip.style.background = isOk ? '#dcfce7' : (ans === 'X' || ans === 'V' ? '#fef3c7' : '#fee2e2');
+    chip.style.color = isOk ? '#166534' : '#92400e';
+    chip.style.border = '1px solid #cbd5e1';
+    chip.textContent = `${label}:${ans}`;
+    chip.title = title;
+    chip.onclick = onCycle;
+    ed.appendChild(chip);
   };
 
   if (kPG > 0) {
     heading('PILIHAN GANDA');
     for (let i = 0; i < kPG; i++) {
-      const ans = currentScannedPG[i] || 'X', isOk = ans === keyPG[i];
+      const ans = currentScannedPG[i] || 'X';
+      const isOk = ans === keyPG[i];
       if (isOk) benarPG++;
       addChip(i + 1, ans, isOk, `Klik untuk ubah jawaban PG No.${i + 1} (Kunci: ${keyPG[i]})`, () => {
-        const opts = ['A','B','C','D','E'].slice(0, state.config.opsiPG).concat(['X','V']);
-        currentScannedPG[i] = opts[(opts.indexOf(ans) + 1) % opts.length]; renderScannedEditor();
+        const opts = ['A', 'B', 'C', 'D', 'E'].slice(0, state.config.opsiPG).concat(['X', 'V']);
+        currentScannedPG[i] = opts[(opts.indexOf(ans) + 1) % opts.length];
+        renderScannedEditor();
       });
     }
   }
@@ -1126,10 +2062,13 @@ function renderScannedEditor() {
   if (kBS > 0) {
     heading('BENAR - SALAH');
     for (let i = 0; i < kBS; i++) {
-      const ans = currentScannedBS[i] || 'X', isOk = ans === keyBS[i];
+      const ans = currentScannedBS[i] || 'X';
+      const isOk = ans === keyBS[i];
       if (isOk) benarBS++;
       addChip(`B-S ${getBSQuestionNo(i)}`, ans, isOk, `Klik untuk ubah jawaban B-S No.${getBSQuestionNo(i)} (Kunci: ${keyBS[i]})`, () => {
-        const opts = ['B','S','X','V']; currentScannedBS[i] = opts[(opts.indexOf(ans) + 1) % opts.length]; renderScannedEditor();
+        const opts = ['B', 'S', 'X', 'V'];
+        currentScannedBS[i] = opts[(opts.indexOf(ans) + 1) % opts.length];
+        renderScannedEditor();
       });
     }
   }
@@ -1137,16 +2076,20 @@ function renderScannedEditor() {
   const nilaiPG = kPG > 0 ? ((benarPG / kPG) * 100).toFixed(1) : '—';
   const nilaiBS = kBS > 0 ? ((benarBS / kBS) * 100).toFixed(1) : '—';
   document.getElementById('scanResultSummary').innerHTML =
-    `<b>PG:</b> ${currentScannedPG.join('')} • Skor ${benarPG}/${kPG} • Nilai ${nilaiPG}` +
-    (kBS ? `<br><b>B-S:</b> ${currentScannedBS.join('')} • Skor ${benarBS}/${kBS} • Nilai ${nilaiBS}` : '') +
-    `<br><small>Klik tombol jawaban untuk koreksi manual. X = kosong, V = terdeteksi ganda.</small>`;
+    `<b>PG:</b> <code>${currentScannedPG.join('')}</code> • Skor <b>${benarPG}/${kPG}</b> • Nilai <b>${nilaiPG}</b>` +
+    (kBS ? `<br><b>B-S:</b> <code>${currentScannedBS.join('')}</code> • Skor <b>${benarBS}/${kBS}</b> • Nilai <b>${nilaiBS}</b>` : '') +
+    `<br><small style="color:#64748b;">Ketuk kotak nomor di bawah jika ingin mengoreksi manual. (X = kosong, V = ganda)</small>`;
 
+  syncScanUraianForStudent();
+}
+
+function syncScanUraianForStudent() {
   const urBox = document.getElementById('scanUraianInputs');
   urBox.innerHTML = '';
   const stIdx = parseInt(document.getElementById('scanStudentSelect').value) || 0;
   const existingUR = (state.students[stIdx] && state.students[stIdx].ur) || [];
   for (let u = 0; u < state.config.jmlUR; u++) {
-    const noU = kPG + kBS + u + 1;
+    const noU = state.config.jmlPG + (state.config.jmlBS || 0) + u + 1;
     const maxS = state.config.maxUR[u] || 4;
     const val = existingUR[u] !== undefined ? existingUR[u] : 0;
     const div = document.createElement('div');
@@ -1154,17 +2097,30 @@ function renderScannedEditor() {
     urBox.appendChild(div);
   }
 }
-function saveScannedResult() {
+
+function saveScannedResult(autoAdvance = true) {
   const stIdx = parseInt(document.getElementById('scanStudentSelect').value);
   if (isNaN(stIdx) || !state.students[stIdx]) return alert('Pilih siswa terlebih dahulu.');
+  if (currentScannedPG.length === 0 && currentScannedBS.length === 0) {
+    return alert('Belum ada hasil scan LJK yang terbaca untuk disimpan.');
+  }
+
   state.students[stIdx].pg = currentScannedPG.join('');
   state.students[stIdx].bs = currentScannedBS.join('');
   const urInputs = document.querySelectorAll('.scan-ur-in');
   if (urInputs.length > 0) {
     state.students[stIdx].ur = Array.from(urInputs).map(inp => parseFloat(inp.value) || 0);
   }
+
+  sessionScanCount++;
+  document.getElementById('scanCounterBadge').textContent = `Terscan Sesi Ini: ${sessionScanCount} LJK`;
   saveState();
-  alert(`Berhasil menyimpan hasil koreksi untuk ${state.students[stIdx].nama}!`);
+
+  if (autoAdvance) {
+    prepareNextScan(true);
+  } else {
+    alert(`Hasil koreksi untuk ${state.students[stIdx].nama} berhasil disimpan!`);
+  }
 }
 
 // ==================== INPUT MANUAL JAWABAN ====================
@@ -1175,19 +2131,27 @@ function renderInputJawabanTable() {
 
   state.students.forEach((st, i) => {
     const p = analytics.pgMatrix[i];
-    const u=analytics.urMatrix[i];const bs=analytics.bsMatrix[i];
+    const u = analytics.urMatrix[i];
+    const bs = analytics.bsMatrix[i];
     const urStr = (st.ur || []).slice(0, state.config.jmlUR).join(',');
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td>${i + 1}</td>
-      <td><b>${st.nama}</b></td>
-      <td><input value="${st.pg || ''}" maxlength="${state.config.jmlPG}" placeholder="Ketik A-E..."
-        onchange="state.students[${i}].pg=this.value.toUpperCase(); saveState();" style="font-family:monospace; letter-spacing:1px;" /></td>
+      <td><b>${escapeAttr(st.nama)}</b></td>
+      <td><input value="${escapeAttr(st.pg || '')}" maxlength="${state.config.jmlPG}" placeholder="Ketik A-E..."
+        oninput="state.students[${i}].pg=this.value.toUpperCase(); persistNow();"
+        onchange="saveState();" style="font-family:monospace; letter-spacing:1px; min-width:130px;" /></td>
       <td>${p.skor} / ${state.config.jmlPG}</td>
-      <td><span class="badge ${p.tuntas==='Tuntas'?'badge-tuntas':'badge-remed'}">${p.nilai.toFixed(1)}</span></td>
-      <td><input value="${st.bs||''}" maxlength="${state.config.jmlBS}" placeholder="BSSB" onchange="state.students[${i}].bs=this.value.toUpperCase().replace(/[^BS]/g,'');saveState();" style="width:90px" /></td><td>${bs.skor}/${state.config.jmlBS||0}</td><td>${bs.nilai.toFixed(1)}</td><td><input value="${urStr}"  placeholder="Misal: 3,2,3,2,4"
-        onchange="state.students[${i}].ur=this.value.split(',').map(x=>parseFloat(x.trim())||0); saveState();" /></td>
-      <td><span class="badge ${u.tuntas==='Tuntas'?'badge-tuntas':'badge-remed'}">${u.nilai.toFixed(1)}</span></td>
+      <td><span class="badge ${p.tuntas === 'Tuntas' ? 'badge-tuntas' : 'badge-remed'}">${p.nilai.toFixed(1)}</span></td>
+      <td><input value="${escapeAttr(st.bs || '')}" maxlength="${state.config.jmlBS}" placeholder="BSSB"
+        oninput="state.students[${i}].bs=this.value.toUpperCase().replace(/[^BSXV]/g,''); persistNow();"
+        onchange="saveState();" style="width:90px; font-family:monospace;" /></td>
+      <td>${bs.skor}/${state.config.jmlBS || 0}</td>
+      <td>${bs.nilai.toFixed(1)}</td>
+      <td><input value="${escapeAttr(urStr)}" placeholder="Misal: 3,2,3,2,4"
+        oninput="state.students[${i}].ur=this.value.split(',').map(x=>parseFloat(x.trim())||0); persistNow();"
+        onchange="saveState();" style="min-width:110px;" /></td>
+      <td><span class="badge ${u.tuntas === 'Tuntas' ? 'badge-tuntas' : 'badge-remed'}">${u.nilai.toFixed(1)}</span></td>
     `;
     tbody.appendChild(tr);
   });
@@ -1230,24 +2194,34 @@ function renderHeaderKop(title) {
 
 function chartBarRows(title, rows, maxValue) {
   if (!rows.length) return `<div class="card"><h3>${title}</h3><p>Belum ada data untuk ditampilkan.</p></div>`;
-  const max = Math.max(1, maxValue || Math.max(0,...rows.map(x=>x.value)));
-  return `<div class="card"><h3>${title}</h3>${rows.map(r=>{
-    const pct=Math.max(0,Math.min(100,(r.value/max)*100));
-    return `<div class="bar-row"><div style="width:115px;white-space:normal;">${r.label}</div><div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${r.color||'#2563eb'}"></div></div><div style="width:58px;text-align:right"><b>${r.display!==undefined?r.display:r.value}</b></div></div>`;
+  const max = Math.max(1, maxValue || Math.max(0, ...rows.map(x => x.value)));
+  return `<div class="card"><h3>${title}</h3>${rows.map(r => {
+    const pct = Math.max(0, Math.min(100, (r.value / max) * 100));
+    return `<div class="bar-row"><div style="width:115px;white-space:normal;">${r.label}</div><div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${r.color || '#2563eb'}"></div></div><div style="width:58px;text-align:right"><b>${r.display !== undefined ? r.display : r.value}</b></div></div>`;
   }).join('')}</div>`;
 }
+
 function chartDonut(title, rows) {
-  const total=rows.reduce((a,r)=>a+Math.max(0,r.value),0);
-  if(!total) return `<div class="card"><h3>${title}</h3><p>Belum ada data untuk ditampilkan.</p></div>`;
-  let angle=0;const stops=rows.map(r=>{const start=angle;angle+=Math.max(0,r.value)/total*360;return `${r.color} ${start}deg ${angle}deg`;}).join(',');
-  return `<div class="card"><h3>${title}</h3><div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap"><div style="width:132px;height:132px;border-radius:50%;background:conic-gradient(${stops});position:relative;flex:none"><div style="position:absolute;inset:27px;border-radius:50%;background:white;display:grid;place-items:center;font-weight:800">${total}</div></div><div style="flex:1;min-width:150px">${rows.map(r=>`<div style="display:flex;justify-content:space-between;gap:10px;font-size:.82rem;margin:6px 0"><span><i style="display:inline-block;width:10px;height:10px;border-radius:2px;background:${r.color};margin-right:6px"></i>${r.label}</span><b>${r.value} (${Math.round(r.value/total*100)}%)</b></div>`).join('')}</div></div></div>`;
+  const total = rows.reduce((a, r) => a + Math.max(0, r.value), 0);
+  if (!total) return `<div class="card"><h3>${title}</h3><p>Belum ada data untuk ditampilkan.</p></div>`;
+  let angle = 0;
+  const stops = rows.map(r => {
+    const start = angle;
+    angle += Math.max(0, r.value) / total * 360;
+    return `${r.color} ${start}deg ${angle}deg`;
+  }).join(',');
+  return `<div class="card"><h3>${title}</h3><div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap"><div style="width:132px;height:132px;border-radius:50%;background:conic-gradient(${stops});position:relative;flex:none"><div style="position:absolute;inset:27px;border-radius:50%;background:white;display:grid;place-items:center;font-weight:800">${total}</div></div><div style="flex:1;min-width:150px">${rows.map(r => `<div style="display:flex;justify-content:space-between;gap:10px;font-size:.82rem;margin:6px 0"><span><i style="display:inline-block;width:10px;height:10px;border-radius:2px;background:${r.color};margin-right:6px"></i>${r.label}</span><b>${r.value} (${Math.round(r.value / total * 100)}%)</b></div>`).join('')}</div></div></div>`;
 }
+
 function chartLine(title, values, labels) {
-  if(!values.length) return `<div class="card"><h3>${title}</h3><p>Belum ada data untuk ditampilkan.</p></div>`;
-  const w=640,h=190,pad=28,max=Math.max(1,...values),min=Math.min(0,...values),range=Math.max(1,max-min);
-  const pts=values.map((v,i)=>`${pad+(values.length===1?0:i*(w-2*pad)/(values.length-1))},${h-pad-((v-min)/range)*(h-2*pad)}`).join(' ');
-  const dots=values.map((v,i)=>{const x=pad+(values.length===1?0:i*(w-2*pad)/(values.length-1)),y=h-pad-((v-min)/range)*(h-2*pad);return `<circle cx="${x}" cy="${y}" r="4" fill="#2563eb"><title>${labels[i]||i+1}: ${Number(v).toFixed(1)}</title></circle>`}).join('');
-  return `<div class="card"><h3>${title}</h3><div style="overflow-x:auto"><svg viewBox="0 0 ${w} ${h}" style="width:100%;min-width:320px;height:auto"><line x1="${pad}" y1="${pad}" x2="${pad}" y2="${h-pad}" stroke="#94a3b8"/><line x1="${pad}" y1="${h-pad}" x2="${w-pad}" y2="${h-pad}" stroke="#94a3b8"/><polyline points="${pts}" fill="none" stroke="#2563eb" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>${dots}</svg></div><small style="color:#64748b">Sumbu X mengikuti urutan ${labels.length===values.length?'siswa/soal':'data'}; arahkan kursor ke titik untuk melihat nilai.</small></div>`;
+  if (!values.length) return `<div class="card"><h3>${title}</h3><p>Belum ada data untuk ditampilkan.</p></div>`;
+  const w = 640, h = 190, pad = 28, max = Math.max(1, ...values), min = Math.min(0, ...values), range = Math.max(1, max - min);
+  const pts = values.map((v, i) => `${pad + (values.length === 1 ? 0 : i * (w - 2 * pad) / (values.length - 1))},${h - pad - ((v - min) / range) * (h - 2 * pad)}`).join(' ');
+  const dots = values.map((v, i) => {
+    const x = pad + (values.length === 1 ? 0 : i * (w - 2 * pad) / (values.length - 1)), y = h - pad - ((v - min) / range) * (h - 2 * pad);
+    return `<circle cx="${x}" cy="${y}" r="4" fill="#2563eb"><title>${labels[i] || i + 1}: ${Number(v).toFixed(1)}</title></circle>`;
+  }).join('');
+  return `<div class="card"><h3>${title}</h3><div style="overflow-x:auto"><svg viewBox="0 0 ${w} ${h}" style="width:100%;min-width:320px;height:auto"><line x1="${pad}" y1="${pad}" x2="${pad}" y2="${h - pad}" stroke="#94a3b8"/><line x1="${pad}" y1="${h - pad}" x2="${w - pad}" y2="${h - pad}" stroke="#94a3b8"/><polyline points="${pts}" fill="none" stroke="#2563eb" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>${dots}</svg></div><small style="color:#64748b">Sumbu X mengikuti urutan ${labels.length === values.length ? 'siswa/soal' : 'data'}; arahkan kursor ke titik untuk melihat nilai.</small></div>`;
 }
 
 function renderReport() {
@@ -1255,12 +2229,12 @@ function renderReport() {
   const a = computeAllAnalytics();
 
   if (currentReportTab === 'nilai_mc') {
-    const tuntasCnt=a.objMatrix.filter(x=>x.tuntas==='Tuntas').length;
+    const tuntasCnt = a.objMatrix.filter(x => x.tuntas === 'Tuntas').length;
     box.innerHTML = renderHeaderKop('DAFTAR NILAI SOAL OBJEKTIF (PG + B-S)') + `
       <div class="grid-3" style="margin-bottom:10px;">
-        <div class="stat-box"><div class="num">${tuntasCnt} / ${a.N}</div><div class="lbl">Siswa Tuntas PG</div></div>
-        <div class="stat-box"><div class="num">${(a.objMatrix.reduce((s,x)=>s+x.nilai,0)/Math.max(1,a.N)).toFixed(1)}</div><div class="lbl">Rata-rata Nilai PG</div></div>
-        <div class="stat-box"><div class="num">${Math.max(0,...a.objMatrix.map(x=>x.nilai)).toFixed(1)}</div><div class="lbl">Nilai Tertinggi</div></div>
+        <div class="stat-box"><div class="num">${tuntasCnt} / ${a.N}</div><div class="lbl">Siswa Tuntas Objektif</div></div>
+        <div class="stat-box"><div class="num">${(a.objMatrix.reduce((s, x) => s + x.nilai, 0) / Math.max(1, a.N)).toFixed(1)}</div><div class="lbl">Rata-rata Nilai</div></div>
+        <div class="stat-box"><div class="num">${Math.max(0, ...a.objMatrix.map(x => x.nilai)).toFixed(1)}</div><div class="lbl">Nilai Tertinggi</div></div>
       </div>
       <div class="table-wrap">
         <table>
@@ -1268,10 +2242,10 @@ function renderReport() {
           <tbody>
             ${state.students.map((st, i) => `
               <tr>
-                <td>${i+1}</td><td>${st.nama}</td>
+                <td>${i + 1}</td><td>${st.nama}</td>
                 <td>${a.pgMatrix[i].skor}</td><td>${a.bsMatrix[i].skor}</td><td>${a.objMatrix[i].skor}/${a.objMatrix[i].total}</td>
                 <td><b>${a.objMatrix[i].nilai.toFixed(1)}</b></td>
-                <td><span class="badge ${a.objMatrix[i].tuntas==='Tuntas'?'badge-tuntas':'badge-remed'}">${a.objMatrix[i].tuntas}</span></td>
+                <td><span class="badge ${a.objMatrix[i].tuntas === 'Tuntas' ? 'badge-tuntas' : 'badge-remed'}">${a.objMatrix[i].tuntas}</span></td>
               </tr>`).join('')}
           </tbody>
         </table>
@@ -1302,8 +2276,8 @@ function renderReport() {
                 <td>${it.tk.toFixed(3)}</td><td>${it.katTK}</td>
                 <td>${it.dp.toFixed(3)}</td><td>${it.katDP}</td>
                 <td>${it.rxy.toFixed(3)}</td>
-                <td><span class="badge ${it.valid==='Valid'?'badge-tuntas':'badge-remed'}">${it.valid}</span></td>
-                <td><span class="badge ${it.bankSoal==='Diterima'?'badge-tuntas':(it.bankSoal==='Dipertimbangkan'?'badge-warn':'badge-remed')}">${it.bankSoal}</span></td>
+                <td><span class="badge ${it.valid === 'Valid' ? 'badge-tuntas' : 'badge-remed'}">${it.valid}</span></td>
+                <td><span class="badge ${it.bankSoal === 'Diterima' ? 'badge-tuntas' : (it.bankSoal === 'Dipertimbangkan' ? 'badge-warn' : 'badge-remed')}">${it.bankSoal}</span></td>
               </tr>`).join('')}
           </tbody>
         </table>
@@ -1312,12 +2286,12 @@ function renderReport() {
 
   else if (currentReportTab === 'grafik_mc') {
     const k = Math.max(1, a.kPG);
-    const mudah = a.itemsPG.filter(x=>x.katTK==='Mudah').length;
-    const sedang = a.itemsPG.filter(x=>x.katTK==='Sedang').length;
-    const sukar = a.itemsPG.filter(x=>x.katTK==='Sukar').length;
-    const valid = a.itemsPG.filter(x=>x.valid==='Valid').length;
+    const mudah = a.itemsPG.filter(x => x.katTK === 'Mudah').length;
+    const sedang = a.itemsPG.filter(x => x.katTK === 'Sedang').length;
+    const sukar = a.itemsPG.filter(x => x.katTK === 'Sukar').length;
+    const valid = a.itemsPG.filter(x => x.valid === 'Valid').length;
     const tdkValid = k - valid;
-    const tuntas = a.pgMatrix.filter(x=>x.tuntas==='Tuntas').length;
+    const tuntas = a.pgMatrix.filter(x => x.tuntas === 'Tuntas').length;
     const pctTuntas = (tuntas / Math.max(1, a.N)) * 100;
     const pctSedang = (sedang / k) * 100;
     const pctValid = (valid / k) * 100;
@@ -1334,11 +2308,23 @@ function renderReport() {
       return `<div class="bar-row"><div style="width:110px;">${lbl} (${cnt})</div><div class="bar-track"><div class="bar-fill" style="width:${pct}%; background:${color};"></div></div><div style="width:42px; text-align:right;"><b>${pct}%</b></div></div>`;
     };
 
-    const pgResponses = a.pgMatrix.reduce((o,m)=>{for(const ch of m.ans){if(ch==='X')o.kosong++;else if(ch==='V')o.ganda++;else if(a.itemsPG.length && ch===undefined){} }return o;},{kosong:0,ganda:0});
-    const pgCorrect=a.pgMatrix.reduce((sum,m)=>sum+m.skor,0);
-    const pgTotal=a.N*a.kPG;
-    const pgWrong=Math.max(0,pgTotal-pgCorrect-pgResponses.kosong-pgResponses.ganda);
-    const pgPerItem=a.itemsPG.map(it=>({label:`No.${it.no}`,value:Math.round(it.tk*100),display:`${Math.round(it.tk*100)}%`,color:it.katTK==='Mudah'?'#10b981':it.katTK==='Sedang'?'#3b82f6':'#ef4444'}));
+    const pgResponses = a.pgMatrix.reduce((o, m) => {
+      for (const ch of m.ans) {
+        if (ch === 'X') o.kosong++;
+        else if (ch === 'V') o.ganda++;
+      }
+      return o;
+    }, { kosong: 0, ganda: 0 });
+    const pgCorrect = a.pgMatrix.reduce((sum, m) => sum + m.skor, 0);
+    const pgTotal = a.N * a.kPG;
+    const pgWrong = Math.max(0, pgTotal - pgCorrect - pgResponses.kosong - pgResponses.ganda);
+    const pgPerItem = a.itemsPG.map(it => ({
+      label: `No.${it.no}`,
+      value: Math.round(it.tk * 100),
+      display: `${Math.round(it.tk * 100)}%`,
+      color: it.katTK === 'Mudah' ? '#10b981' : it.katTK === 'Sedang' ? '#3b82f6' : '#ef4444'
+    }));
+
     box.innerHTML = renderHeaderKop('GRAFIK ANALISIS PILIHAN GANDA (PG) & SARAN') + `
       <div class="grid-2">
         <div class="card">
@@ -1355,8 +2341,8 @@ function renderReport() {
         </div>
       </div>
       <div class="grid-2">
-        ${chartDonut('Komposisi Jawaban PG Seluruh Siswa',[{label:'Benar',value:pgCorrect,color:'#16a34a'},{label:'Salah',value:pgWrong,color:'#ef4444'},{label:'Kosong',value:pgResponses.kosong,color:'#f59e0b'},{label:'Ganda',value:pgResponses.ganda,color:'#7c3aed'}])}
-        ${chartBarRows('Persentase Jawaban Benar per Butir PG',pgPerItem,100)}
+        ${chartDonut('Komposisi Jawaban PG Seluruh Siswa', [{ label: 'Benar', value: pgCorrect, color: '#16a34a' }, { label: 'Salah', value: pgWrong, color: '#ef4444' }, { label: 'Kosong', value: pgResponses.kosong, color: '#f59e0b' }, { label: 'Ganda', value: pgResponses.ganda, color: '#7c3aed' }])}
+        ${chartBarRows('Persentase Jawaban Benar per Butir PG', pgPerItem, 100)}
       </div>
       <div class="card" style="background:#f8fafc;">
         <h3>Kesimpulan & Saran Otomatis (Sheet: Saran)</h3>
@@ -1366,29 +2352,51 @@ function renderReport() {
   }
 
   else if (currentReportTab === 'grafik_bs') {
-    if (!a.kBS) { box.innerHTML=renderHeaderKop('GRAFIK BENAR-SALAH (B-S)') + '<p>Jumlah soal B-S masih 0. Atur jumlah soal B-S dan isi kunci B/S pada menu Data & Kunci.</p>'; return; }
-    const total=a.N*a.kBS;
-    const benar=a.itemsBS.reduce((s,x)=>s+x.benar,0), salah=a.itemsBS.reduce((s,x)=>s+x.salah,0), kosong=a.itemsBS.reduce((s,x)=>s+x.kosong,0), ganda=a.itemsBS.reduce((s,x)=>s+x.ganda,0), belumDinilai=a.itemsBS.reduce((s,x)=>s+x.belumDinilai,0);
-    const perItem=a.itemsBS.map(x=>({label:`No.${x.no}`,value:Math.round(x.tk*100),display:x.keyReady?`${Math.round(x.tk*100)}%`:'Kunci belum diisi',color:'#0d9488'}));
-    const keyMissing=a.itemsBS.filter(x=>!x.keyReady).length;
-    box.innerHTML=renderHeaderKop('GRAFIK ANALISIS BENAR-SALAH (B-S)')+
-      (keyMissing?`<div class="card" style="background:#fff7ed;color:#9a3412"><b>Perhatian:</b> ${keyMissing} kunci B-S belum diisi. Grafik ketepatan untuk nomor tersebut belum dapat dihitung.</div>`:'')+
-      `<div class="grid-2">${chartDonut('Komposisi Respons B-S',[{label:'Benar',value:benar,color:'#16a34a'},{label:'Salah',value:salah,color:'#ef4444'},{label:'Kosong',value:kosong,color:'#f59e0b'},{label:'Ganda',value:ganda,color:'#7c3aed'},{label:'Belum dinilai',value:belumDinilai,color:'#64748b'}])}${chartBarRows('Ketepatan Jawaban per Butir B-S',perItem,100)}</div>
-      ${keyMissing===0?chartLine('Perbandingan Skor B-S per Siswa',a.bsMatrix.map(x=>x.nilai),state.students.map((x,i)=>`${i+1}. ${x.nama}`)):'<div class="card"><h3>Skor per Siswa</h3><p>Grafik nilai siswa akan aktif setelah seluruh kunci B-S dilengkapi.</p></div>'}
-      <div class="card"><h3>Rincian Respons per Pernyataan B-S</h3><div class="table-wrap"><table><thead><tr><th>No Soal</th><th>Kunci</th><th>Benar</th><th>Salah</th><th>Kosong</th><th>Ganda</th><th>Belum Dinilai</th><th>Ketepatan</th></tr></thead><tbody>${a.itemsBS.map((x,i)=>`<tr><td>${x.no}</td><td>${(state.config.kunciBS||'')[i]||'—'}</td><td>${x.benar}</td><td>${x.salah}</td><td>${x.kosong}</td><td>${x.ganda}</td><td>${x.belumDinilai}</td><td>${x.keyReady?Math.round(x.tk*100)+'%':'Belum tersedia'}</td></tr>`).join('')}</tbody></table></div></div>`;
+    if (!a.kBS) {
+      box.innerHTML = renderHeaderKop('GRAFIK BENAR-SALAH (B-S)') + '<p>Jumlah soal B-S masih 0. Atur jumlah soal B-S dan isi kunci B/S pada menu Data & Kunci.</p>';
+      return;
+    }
+    const benar = a.itemsBS.reduce((s, x) => s + x.benar, 0);
+    const salah = a.itemsBS.reduce((s, x) => s + x.salah, 0);
+    const kosong = a.itemsBS.reduce((s, x) => s + x.kosong, 0);
+    const ganda = a.itemsBS.reduce((s, x) => s + x.ganda, 0);
+    const belumDinilai = a.itemsBS.reduce((s, x) => s + x.belumDinilai, 0);
+    const perItem = a.itemsBS.map(x => ({
+      label: `No.${x.no}`,
+      value: Math.round(x.tk * 100),
+      display: x.keyReady ? `${Math.round(x.tk * 100)}%` : 'Kunci belum diisi',
+      color: '#0d9488'
+    }));
+    const keyMissing = a.itemsBS.filter(x => !x.keyReady).length;
+    box.innerHTML = renderHeaderKop('GRAFIK ANALISIS BENAR-SALAH (B-S)') +
+      (keyMissing ? `<div class="card" style="background:#fff7ed;color:#9a3412"><b>Perhatian:</b> ${keyMissing} kunci B-S belum diisi. Grafik ketepatan untuk nomor tersebut belum dapat dihitung.</div>` : '') +
+      `<div class="grid-2">${chartDonut('Komposisi Respons B-S', [{ label: 'Benar', value: benar, color: '#16a34a' }, { label: 'Salah', value: salah, color: '#ef4444' }, { label: 'Kosong', value: kosong, color: '#f59e0b' }, { label: 'Ganda', value: ganda, color: '#7c3aed' }, { label: 'Belum dinilai', value: belumDinilai, color: '#64748b' }])}${chartBarRows('Ketepatan Jawaban per Butir B-S', perItem, 100)}</div>
+      ${keyMissing === 0 ? chartLine('Perbandingan Skor B-S per Siswa', a.bsMatrix.map(x => x.nilai), state.students.map((x, i) => `${i + 1}. ${x.nama}`)) : '<div class="card"><h3>Skor per Siswa</h3><p>Grafik nilai siswa akan aktif setelah seluruh kunci B-S dilengkapi.</p></div>'}
+      <div class="card"><h3>Rincian Respons per Pernyataan B-S</h3><div class="table-wrap"><table><thead><tr><th>No Soal</th><th>Kunci</th><th>Benar</th><th>Salah</th><th>Kosong</th><th>Ganda</th><th>Belum Dinilai</th><th>Ketepatan</th></tr></thead><tbody>${a.itemsBS.map((x, i) => `<tr><td>${x.no}</td><td>${(state.config.kunciBS || '')[i] || '—'}</td><td>${x.benar}</td><td>${x.salah}</td><td>${x.kosong}</td><td>${x.ganda}</td><td>${x.belumDinilai}</td><td>${x.keyReady ? Math.round(x.tk * 100) + '%' : 'Belum tersedia'}</td></tr>`).join('')}</tbody></table></div></div>`;
   }
 
   else if (currentReportTab === 'grafik_ur') {
-    if (!a.kUR) { box.innerHTML=renderHeaderKop('GRAFIK SOAL URAIAN') + '<p>Jumlah soal Uraian masih 0. Atur jumlah soal Uraian pada menu Data & Kunci.</p>'; return; }
-    const maxTotal=state.config.maxUR.slice(0,a.kUR).reduce((s,v)=>s+(Number(v)||0),0);
-    const mean=a.urMatrix.length?a.urMatrix.reduce((s,x)=>s+x.nilai,0)/a.urMatrix.length:0;
-    const bands=[{label:'Rendah (0–59)',value:a.urMatrix.filter(x=>x.nilai<60).length,color:'#ef4444'},{label:'Sedang (60–79)',value:a.urMatrix.filter(x=>x.nilai>=60&&x.nilai<80).length,color:'#f59e0b'},{label:'Tinggi (80–100)',value:a.urMatrix.filter(x=>x.nilai>=80).length,color:'#16a34a'}];
-    const perItem=a.itemsUR.map((it,j)=>{const avg=a.N?a.urMatrix.reduce((sum,x)=>sum+x.row[j],0)/a.N:0;const max=Number(state.config.maxUR[j])||1;return {label:`No.${it.no}`,value:Math.round(avg/max*100),display:`${Math.round(avg/max*100)}%`,color:'#7c3aed'};});
-    box.innerHTML=renderHeaderKop('GRAFIK ANALISIS SOAL URAIAN')+
-      `<div class="grid-3"><div class="stat-box"><div class="num">${mean.toFixed(1)}</div><div class="lbl">Rata-rata Nilai Uraian</div></div><div class="stat-box"><div class="num">${Math.max(0,...a.urMatrix.map(x=>x.nilai)).toFixed(1)}</div><div class="lbl">Nilai Tertinggi</div></div><div class="stat-box"><div class="num">${maxTotal}</div><div class="lbl">Total Skor Maksimum</div></div></div>
-      <div class="grid-2">${chartBarRows('Rata-rata Capaian per Soal Uraian',perItem,100)}${chartDonut('Distribusi Capaian Siswa',bands)}</div>
-      ${chartLine('Grafik Nilai Uraian per Siswa',a.urMatrix.map(x=>x.nilai),state.students.map((x,i)=>`${i+1}. ${x.nama}`))}
-      <div class="card"><h3>Rata-rata Skor Tiap Soal Uraian</h3><div class="table-wrap"><table><thead><tr><th>No Soal</th><th>Skor Maksimum</th><th>Rata-rata Skor</th><th>Persentase Capaian</th><th>Kategori Kesukaran</th></tr></thead><tbody>${a.itemsUR.map((it,j)=>{const avg=a.N?a.urMatrix.reduce((sum,x)=>sum+x.row[j],0)/a.N:0;return `<tr><td>${it.no}</td><td>${state.config.maxUR[j]}</td><td>${avg.toFixed(2)}</td><td>${Math.round(it.tk*100)}%</td><td>${it.katTK}</td></tr>`}).join('')}</tbody></table></div></div>`;
+    if (!a.kUR) {
+      box.innerHTML = renderHeaderKop('GRAFIK SOAL URAIAN') + '<p>Jumlah soal Uraian masih 0. Atur jumlah soal Uraian pada menu Data & Kunci.</p>';
+      return;
+    }
+    const maxTotal = state.config.maxUR.slice(0, a.kUR).reduce((s, v) => s + (Number(v) || 0), 0);
+    const mean = a.urMatrix.length ? a.urMatrix.reduce((s, x) => s + x.nilai, 0) / a.urMatrix.length : 0;
+    const bands = [
+      { label: 'Rendah (0–59)', value: a.urMatrix.filter(x => x.nilai < 60).length, color: '#ef4444' },
+      { label: 'Sedang (60–79)', value: a.urMatrix.filter(x => x.nilai >= 60 && x.nilai < 80).length, color: '#f59e0b' },
+      { label: 'Tinggi (80–100)', value: a.urMatrix.filter(x => x.nilai >= 80).length, color: '#16a34a' }
+    ];
+    const perItem = a.itemsUR.map((it, j) => {
+      const avg = a.N ? a.urMatrix.reduce((sum, x) => sum + x.row[j], 0) / a.N : 0;
+      const max = Number(state.config.maxUR[j]) || 1;
+      return { label: `No.${it.no}`, value: Math.round(avg / max * 100), display: `${Math.round(avg / max * 100)}%`, color: '#7c3aed' };
+    });
+    box.innerHTML = renderHeaderKop('GRAFIK ANALISIS SOAL URAIAN') +
+      `<div class="grid-3"><div class="stat-box"><div class="num">${mean.toFixed(1)}</div><div class="lbl">Rata-rata Nilai Uraian</div></div><div class="stat-box"><div class="num">${Math.max(0, ...a.urMatrix.map(x => x.nilai)).toFixed(1)}</div><div class="lbl">Nilai Tertinggi</div></div><div class="stat-box"><div class="num">${maxTotal}</div><div class="lbl">Total Skor Maksimum</div></div></div>
+      <div class="grid-2">${chartBarRows('Rata-rata Capaian per Soal Uraian', perItem, 100)}${chartDonut('Distribusi Capaian Siswa', bands)}</div>
+      ${chartLine('Grafik Nilai Uraian per Siswa', a.urMatrix.map(x => x.nilai), state.students.map((x, i) => `${i + 1}. ${x.nama}`))}
+      <div class="card"><h3>Rata-rata Skor Tiap Soal Uraian</h3><div class="table-wrap"><table><thead><tr><th>No Soal</th><th>Skor Maksimum</th><th>Rata-rata Skor</th><th>Persentase Capaian</th><th>Kategori Kesukaran</th></tr></thead><tbody>${a.itemsUR.map((it, j) => { const avg = a.N ? a.urMatrix.reduce((sum, x) => sum + x.row[j], 0) / a.N : 0; return `<tr><td>${it.no}</td><td>${state.config.maxUR[j]}</td><td>${avg.toFixed(2)}</td><td>${Math.round(it.tk * 100)}%</td><td>${it.katTK}</td></tr>`; }).join('')}</tbody></table></div></div>`;
   }
 
   else if (currentReportTab === 'nilai_ur') {
@@ -1399,10 +2407,10 @@ function renderReport() {
           <tbody>
             ${state.students.map((st, i) => `
               <tr>
-                <td>${i+1}</td><td>${st.nama}</td>
+                <td>${i + 1}</td><td>${st.nama}</td>
                 <td>${a.urMatrix[i].skor}</td>
                 <td><b>${a.urMatrix[i].nilai.toFixed(1)}</b></td>
-                <td><span class="badge ${a.urMatrix[i].tuntas==='Tuntas'?'badge-tuntas':'badge-remed'}">${a.urMatrix[i].tuntas}</span></td>
+                <td><span class="badge ${a.urMatrix[i].tuntas === 'Tuntas' ? 'badge-tuntas' : 'badge-remed'}">${a.urMatrix[i].tuntas}</span></td>
               </tr>`).join('')}
           </tbody>
         </table>
@@ -1423,7 +2431,7 @@ function renderReport() {
               <tr>
                 <td><b>${it.no}</b></td><td>${it.tk.toFixed(3)}</td><td>${it.katTK}</td>
                 <td>${it.dp.toFixed(3)}</td><td>${it.katDP}</td><td>${it.rxy.toFixed(3)}</td>
-                <td><span class="badge ${it.valid==='Valid'?'badge-tuntas':'badge-remed'}">${it.valid}</span></td>
+                <td><span class="badge ${it.valid === 'Valid' ? 'badge-tuntas' : 'badge-remed'}">${it.valid}</span></td>
                 <td>${it.bankSoal}</td>
               </tr>`).join('')}
           </tbody>
@@ -1434,22 +2442,22 @@ function renderReport() {
   else if (currentReportTab === 'nil_gab') {
     box.innerHTML = renderHeaderKop('DAFTAR NILAI GABUNGAN (Nil Gab)') + `
       <div class="toolbar" style="align-items:center;">
-        <label style="margin:0;">Bobot PG (%):</label>
-        <input type="number" style="width:70px;" value="${Math.round(state.config.bobotPG*100)}"
+        <label style="margin:0;">Bobot Objektif (PG + B-S) (%):</label>
+        <input type="number" style="width:74px;" value="${Math.round(state.config.bobotPG * 100)}"
           onchange="const p=Math.min(100,Math.max(0,parseFloat(this.value)||70))/100; state.config.bobotPG=p; state.config.bobotUR=1-p; saveState();" />
-        <span style="font-size:0.8rem;">Bobot Uraian: <b>${Math.round(state.config.bobotUR*100)}%</b></span>
+        <span style="font-size:0.8rem;">Bobot Uraian: <b>${Math.round(state.config.bobotUR * 100)}%</b></span>
       </div>
       <div class="table-wrap">
         <table>
-          <thead><tr><th>No</th><th>Nama Siswa</th><th>Nilai PG</th><th>Jawaban B-S</th><th>Skor B-S</th><th>Nilai B-S</th><th>Nilai Uraian</th><th>Nilai Gabungan</th><th>Ketuntasan</th></tr></thead>
+          <thead><tr><th>No</th><th>Nama Siswa</th><th>Nilai Objektif</th><th>Nilai Uraian</th><th>Nilai Gabungan</th><th>Ketuntasan</th></tr></thead>
           <tbody>
             ${state.students.map((st, i) => {
               const g = a.gabungan[i];
               return `<tr>
-                <td>${i+1}</td><td>${st.nama}</td>
+                <td>${i + 1}</td><td>${st.nama}</td>
                 <td>${g.nPG.toFixed(1)}</td><td>${g.nUR.toFixed(1)}</td>
                 <td><b>${g.nGab.toFixed(2)}</b></td>
-                <td><span class="badge ${g.ketGab==='Tuntas'?'badge-tuntas':'badge-remed'}">${g.ketGab}</span></td>
+                <td><span class="badge ${g.ketGab === 'Tuntas' ? 'badge-tuntas' : 'badge-remed'}">${g.ketGab}</span></td>
               </tr>`;
             }).join('')}
           </tbody>
@@ -1459,7 +2467,6 @@ function renderReport() {
 
   else if (currentReportTab === 'remed') {
     const idx = Math.min(selectedRemedStudent, state.students.length - 1);
-    const st = state.students[idx];
     const g = a.gabungan[idx];
     const pRow = a.pgMatrix[idx].row;
     const uRow = a.urMatrix[idx].row;
@@ -1468,11 +2475,11 @@ function renderReport() {
       <div style="margin-bottom:10px;">
         <label>Pilih Nomor Absen / Nama Siswa:</label>
         <select onchange="selectedRemedStudent=parseInt(this.value); renderReport();">
-          ${state.students.map((s, i) => `<option value="${i}" ${i===idx?'selected':''}>${i+1} - ${s.nama} (${a.gabungan[i].ketGab})</option>`).join('')}
+          ${state.students.map((s, i) => `<option value="${i}" ${i === idx ? 'selected' : ''}>${i + 1} - ${s.nama} (${a.gabungan[i].ketGab})</option>`).join('')}
         </select>
       </div>
       <div class="grid-3" style="margin-bottom:10px;">
-        <div class="stat-box"><div class="num">${g.nPG.toFixed(1)}</div><div class="lbl">Nilai Pil Ganda</div></div>
+        <div class="stat-box"><div class="num">${g.nPG.toFixed(1)}</div><div class="lbl">Nilai Objektif</div></div>
         <div class="stat-box"><div class="num">${g.nUR.toFixed(1)}</div><div class="lbl">Nilai Uraian</div></div>
         <div class="stat-box"><div class="num">${g.nGab.toFixed(1)}</div><div class="lbl">Nilai Akhir (${g.ketGab})</div></div>
       </div>
@@ -1488,10 +2495,10 @@ function renderReport() {
               return `<tr>
                 <td>${hasPG ? r + 1 : '-'}</td>
                 <td>${hasPG ? pRow[r] : '-'}</td>
-                <td>${hasPG ? `<span class="badge ${pRow[r]===1?'badge-tuntas':'badge-remed'}">${pRow[r]===1?'Tuntas':'Remedial'}</span>` : '-'}</td>
+                <td>${hasPG ? `<span class="badge ${pRow[r] === 1 ? 'badge-tuntas' : 'badge-remed'}">${pRow[r] === 1 ? 'Tuntas' : 'Remedial'}</span>` : '-'}</td>
                 <td>${hasUR ? a.kPG + a.kBS + r + 1 : '-'}</td>
                 <td>${hasUR ? `${uRow[r]} / ${urMax}` : '-'}</td>
-                <td>${hasUR ? `<span class="badge ${urKet==='Tuntas'?'badge-tuntas':'badge-remed'}">${urKet}</span>` : '-'}</td>
+                <td>${hasUR ? `<span class="badge ${urKet === 'Tuntas' ? 'badge-tuntas' : 'badge-remed'}">${urKet}</span>` : '-'}</td>
               </tr>`;
             }).join('')}
           </tbody>
@@ -1509,12 +2516,13 @@ function renderReport() {
             ${state.students.map((st, i) => {
               const g = a.gabungan[i];
               return `<tr>
-                <td>${i+1}</td><td>${st.nama}</td>
+                <td>${i + 1}</td><td>${st.nama}</td>
                 <td>${g.nGab.toFixed(2)}</td>
                 <td><input type="number" style="width:75px; padding:4px;" value="${st.remedial !== null ? st.remedial : ''}"
-                  onchange="state.students[${i}].remedial=this.value===''?null:parseFloat(this.value); saveState();" /></td>
+                  oninput="state.students[${i}].remedial=this.value===''?null:parseFloat(this.value); persistNow();"
+                  onchange="saveState();" /></td>
                 <td><b>${g.nAkhir.toFixed(2)}</b></td>
-                <td><span class="badge ${g.ketAkhir==='Tuntas'?'badge-tuntas':'badge-remed'}">${g.ketAkhir}</span></td>
+                <td><span class="badge ${g.ketAkhir === 'Tuntas' ? 'badge-tuntas' : 'badge-remed'}">${g.ketAkhir}</span></td>
               </tr>`;
             }).join('')}
           </tbody>
@@ -1543,7 +2551,6 @@ function exportKoranulExcel() {
   const m = state.meta;
   const wb = XLSX.utils.book_new();
 
-  // 1. Sheet: data
   const wsData = XLSX.utils.aoa_to_sheet([
     ['DATA PESERTA UJIAN'],
     ['Nama Sekolah', m.sekolah, 'Materi Pokok', m.materi],
@@ -1559,7 +2566,6 @@ function exportKoranulExcel() {
   ]);
   XLSX.utils.book_append_sheet(wb, wsData, 'data');
 
-  // 2. Sheet: DATA MC
   const blocksKunci = state.config.kunciPG.slice(0, a.kPG).match(/.{1,5}/g) || [];
   const wsDataMC = XLSX.utils.aoa_to_sheet([
     ['DATA JAWABAN SISWA PILIHAN GANDA'],
@@ -1572,24 +2578,33 @@ function exportKoranulExcel() {
   ]);
   XLSX.utils.book_append_sheet(wb, wsDataMC, 'DATA MC');
 
-  if(a.kBS>0){
-    const w=XLSX.utils.aoa_to_sheet([['DATA BENAR-SALAH'],['Kunci',state.config.kunciBS],['No','Nama','Jawaban','Skor','Nilai'],...state.students.map((st,i)=>[i+1,st.nama,st.bs||'',a.bsMatrix[i].skor,Number(a.bsMatrix[i].nilai.toFixed(2))])]);
-    XLSX.utils.book_append_sheet(wb,w,'DATA BS');
-    const wa=XLSX.utils.aoa_to_sheet([['ANALISIS BUTIR BENAR-SALAH'],['Nomor Soal','Kunci','Benar','Salah','Kosong','Ganda','Belum Dinilai','Tingkat Ketepatan'],...a.itemsBS.map((it,i)=>[it.no,(state.config.kunciBS||'')[i]||'',it.benar,it.salah,it.kosong,it.ganda,it.belumDinilai,it.keyReady?Number((it.tk*100).toFixed(2))+'%':'Kunci belum diisi'])]);
-    XLSX.utils.book_append_sheet(wb,wa,'Analisis BS');
+  if (a.kBS > 0) {
+    const w = XLSX.utils.aoa_to_sheet([
+      ['DATA BENAR-SALAH'],
+      ['Kunci', state.config.kunciBS],
+      ['No', 'Nama', 'Jawaban', 'Skor', 'Nilai'],
+      ...state.students.map((st, i) => [i + 1, st.nama, st.bs || '', a.bsMatrix[i].skor, Number(a.bsMatrix[i].nilai.toFixed(2))])
+    ]);
+    XLSX.utils.book_append_sheet(wb, w, 'DATA BS');
+
+    const wa = XLSX.utils.aoa_to_sheet([
+      ['ANALISIS BUTIR BENAR-SALAH'],
+      ['Nomor Soal', 'Kunci', 'Benar', 'Salah', 'Kosong', 'Ganda', 'Belum Dinilai', 'Tingkat Ketepatan'],
+      ...a.itemsBS.map((it, i) => [it.no, (state.config.kunciBS || '')[i] || '', it.benar, it.salah, it.kosong, it.ganda, it.belumDinilai, it.keyReady ? Number((it.tk * 100).toFixed(2)) + '%' : 'Kunci belum diisi'])
+    ]);
+    XLSX.utils.book_append_sheet(wb, wa, 'Analisis BS');
   }
-  // 3. Sheet: NILAI MC
+
   const wsNilaiMC = XLSX.utils.aoa_to_sheet([
     ['DAFTAR NILAI SOAL OBJEKTIF (PG + B-S)'],
     ['Nama Sekolah', m.sekolah, 'Kelas/Semester', m.kelas],
     ['Mata Pelajaran', m.mapel, 'Nilai KKTP', m.kktp],
     [],
     ['NO', 'NAMA', 'SKOR', 'NILAI', 'KETUNTASAN'],
-    ...state.students.map((s,i)=>[i+1,s.nama,a.objMatrix[i].skor,Number(a.objMatrix[i].nilai.toFixed(2)),a.objMatrix[i].tuntas])
+    ...state.students.map((s, i) => [i + 1, s.nama, a.objMatrix[i].skor, Number(a.objMatrix[i].nilai.toFixed(2)), a.objMatrix[i].tuntas])
   ]);
   XLSX.utils.book_append_sheet(wb, wsNilaiMC, 'NILAI MC');
 
-  // 4. Sheet: analisi MC
   const wsAnalisisMC = XLSX.utils.aoa_to_sheet([
     ['HASIL ANALISIS SOAL PILIHAN GANDA'],
     [`r-tabel (5%, N=${a.N})`, Number(a.rTabel.toFixed(3)), 'Reliabilitas (KR-20)', `${a.kr20.toFixed(3)} (${a.relStatusPG})`],
@@ -1599,7 +2614,6 @@ function exportKoranulExcel() {
   ]);
   XLSX.utils.book_append_sheet(wb, wsAnalisisMC, 'analisi MC');
 
-  // 5. Sheet: DATA UR & NILAI UR & Analisis UR
   if (a.kUR > 0) {
     const wsDataUR = XLSX.utils.aoa_to_sheet([
       ['DATA JAWABAN SOAL URAIAN'],
@@ -1625,10 +2639,9 @@ function exportKoranulExcel() {
     XLSX.utils.book_append_sheet(wb, wsAnalisisUR, 'Analisis UR');
   }
 
-  // 6. Sheet: Nil Gab
   const wsNilGab = XLSX.utils.aoa_to_sheet([
     ['DAFTAR NILAI GABUNGAN'],
-    ['No', 'NAMA', `Pilihan Ganda (${Math.round(state.config.bobotPG*100)}%)`, `Uraian (${Math.round(state.config.bobotUR*100)}%)`, 'Nilai Gabungan', 'Ketuntasan'],
+    ['No', 'NAMA', `Objektif (${Math.round(state.config.bobotPG * 100)}%)`, `Uraian (${Math.round(state.config.bobotUR * 100)}%)`, 'Nilai Gabungan', 'Ketuntasan'],
     ...state.students.map((s, i) => {
       const g = a.gabungan[i];
       return [i + 1, s.nama, Number(g.nPG.toFixed(2)), Number(g.nUR.toFixed(2)), Number(g.nGab.toFixed(2)), g.ketGab];
@@ -1636,7 +2649,6 @@ function exportKoranulExcel() {
   ]);
   XLSX.utils.book_append_sheet(wb, wsNilGab, 'Nil Gab');
 
-  // 7. Sheet: Perbaikan
   const wsPerbaikan = XLSX.utils.aoa_to_sheet([
     ['DAFTAR NILAI PERBAIKAN'],
     ['NO', 'Nama', 'Nilai Awal', 'Nilai Remedial', 'Nilai Akhir', 'Ketuntasan'],
@@ -1647,7 +2659,7 @@ function exportKoranulExcel() {
   ]);
   XLSX.utils.book_append_sheet(wb, wsPerbaikan, 'Perbaikan');
 
-  XLSX.writeFile(wb, `KORANUL_${m.mapel}_${m.sekolah.replace(/\s+/g,'_')}.xlsx`);
+  XLSX.writeFile(wb, `KORANUL_${m.mapel}_${m.sekolah.replace(/\s+/g, '_')}.xlsx`);
 }
 
 function switchTab(tabName, btn) {
@@ -1656,6 +2668,7 @@ function switchTab(tabName, btn) {
   document.getElementById('tab-' + tabName).classList.add('active');
   btn.classList.add('active');
   if (tabName === 'ljk') renderLJKPreview();
+  if (tabName === 'scan' && !loadedScanImage) drawScannerIdleCanvas();
   if (tabName === 'laporan') renderReport();
 }
 
