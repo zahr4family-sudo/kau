@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#1d4ed8" />
   <meta name="description" content="KORANUL OMR dan analisis hasil belajar siswa." />
   <link rel="apple-touch-icon" href="./icons/icon-192.png" />
-  <title>KORANUL - Koreksi LJK & Analisis Ulangan</title>
+  <title>KORANUL - Koreksi LJK & Analisis Soal</title>
   <link rel="manifest" href="./manifest.json" />
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <style>
@@ -145,7 +145,7 @@
         <div><label>Kepala Sekolah</label><input id="inKepsek" value="Aep Sudrajat, S.Pd" oninput="saveState()" onchange="saveState()" /></div>
         <div><label>NIP Kepala Sekolah</label><input id="inNipKepsek" value="19000000 000000 0 000" oninput="saveState()" onchange="saveState()" /></div>
         <div><label>Guru Pengajar</label><input id="inGuru" value="Apipudin, S.Pd.I" oninput="saveState()" onchange="saveState()" /></div>
-        <div><label>NIP Guru</label><input id="inNipGuru" value="19000000 000000 0 002" oninput="saveState()" onchange="saveState()" /></div>
+        <div><label>NIP Guru</label><input id="inNipGuru" value="19000000 000000 0 021" oninput="saveState()" onchange="saveState()" /></div>
         <div><label>Jenis Tes</label><input id="inJenisTes" value="PENILAIAN SUMATIF AKHIR SEMESTER" oninput="saveState()" onchange="saveState()" /></div>
         <div><label>Materi Pokok</label><input id="inMateri" value="BAB I - BAB V" oninput="saveState()" onchange="saveState()" /></div>
         <div><label>Kelas / Semester</label><input id="inKelas" value="I (Satu)/ Ganjil" oninput="saveState()" onchange="saveState()" /></div>
@@ -158,8 +158,19 @@
     </div>
 
     <div class="card">
-      <h2>2. Konfigurasi Soal & Kunci Jawaban</h2>
+      <h2>2. Konfigurasi Soal, Kunci & Gelembung Identitas LJK</h2>
       <div class="grid-3">
+        <div>
+          <label>Jenis Gelembung Identitas LJK</label>
+          <select id="inIdFieldType" onchange="onIdFieldTypeChange(this.value)">
+            <option value="nomor_peserta" selected>NOMOR PESERTA</option>
+            <option value="nisn">NISN</option>
+          </select>
+        </div>
+        <div>
+          <label>Banyak Digit Gelembung (2–12)</label>
+          <input type="number" id="inIdDigits" min="2" max="12" value="3" oninput="onIdDigitsChange(this.value)" onchange="onIdDigitsChange(this.value)" />
+        </div>
         <div>
           <label>Jumlah Soal Pilihan Ganda (1–50)</label>
           <input type="number" id="inJmlPG" min="1" max="50" value="20" oninput="updateQuestionConfig()" onchange="updateQuestionConfig()" />
@@ -198,7 +209,7 @@
     </div>
 
     <div class="card">
-      <h2>3. Daftar Peserta Ujian (Maks. 200 Siswa)</h2>
+      <h2>3. Daftar Peserta Ujian (Maks. 500 Siswa • <span id="lblTotalPesertaBadge">10 Peserta</span>)</h2>
       <div class="toolbar">
         <button class="btn btn-primary btn-sm" onclick="addStudent()">+ Tambah Siswa</button>
         <label class="btn btn-outline btn-sm" style="margin:0;cursor:pointer;">⬆️ Import CSV<input type="file" accept=".csv,text/csv" style="display:none" onchange="importStudentsCSV(event)"></label>
@@ -210,7 +221,7 @@
           <thead>
             <tr>
               <th style="width:50px;">No</th>
-              <th style="width:120px;">NIS / NISN</th>
+              <th style="width:150px;" id="thIdPeserta">NOMOR PESERTA</th>
               <th>Nama Siswa</th>
               <th style="width:60px;">Aksi</th>
             </tr>
@@ -239,9 +250,20 @@
     <div class="card">
       <h2>Pembuat Lembar Jawaban Komputer (LJK) Siap Cetak</h2>
       <p style="font-size:0.82rem; color:var(--muted); margin-top:0;">
-        LJK dilengkapi <b>4 kotak jangkar hitam (fiducial marker)</b> di keempat sudut agar kamera HP mengenali posisi bulatan secara presisi. Jika total soal ringkas (misal &le; 50 nomor), LJK dan ruang jawaban Uraian otomatis ditata rapi dalam <b>1 halaman</b>.
+        LJK dilengkapi <b>4 kotak jangkar hitam (fiducial marker)</b> di keempat sudut agar kamera HP mengenali posisi bulatan secara presisi. Anda dapat menyesuaikan kolom identitas (<b>Nomor Peserta</b> atau <b>NISN</b>) beserta jumlah digit gelembungnya.
       </p>
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:12px 0;padding:12px;border:1px solid #cbd5e1;border-radius:10px;background:#f8fafc;">
+        <div>
+          <label for="ljkIdFieldType">Gelembung Identitas</label>
+          <select id="ljkIdFieldType" onchange="onIdFieldTypeChange(this.value)">
+            <option value="nomor_peserta" selected>NOMOR PESERTA</option>
+            <option value="nisn">NISN</option>
+          </select>
+        </div>
+        <div>
+          <label for="ljkIdDigits">Digit Identitas (2–12)</label>
+          <input type="number" id="ljkIdDigits" min="2" max="12" value="3" onchange="onIdDigitsChange(this.value)">
+        </div>
         <div><label for="ljkPGCols">Kolom PG (Otomatis/1–5)</label><input type="number" id="ljkPGCols" min="0" max="5" value="0" onchange="updateLJKLayoutConfig()" title="0 = Otomatis efisien sesuai jumlah soal"></div>
         <div><label for="ljkPGRows">Maks Baris/Kolom PG (5–15)</label><input type="number" id="ljkPGRows" min="5" max="15" value="10" onchange="updateLJKLayoutConfig()"></div>
         <div><label for="ljkBSCols">Kolom B-S (Otomatis/1–5)</label><input type="number" id="ljkBSCols" min="0" max="5" value="0" onchange="updateLJKLayoutConfig()" title="0 = Otomatis efisien sesuai jumlah soal"></div>
@@ -294,16 +316,25 @@
         <div class="scanner-guide"></div>
       </div>
 
-      <div class="grid-2" style="margin-bottom:10px;">
+      <div class="grid-3" style="margin-bottom:10px;">
         <div>
-          <label>Nomor Absen Siswa Terdeteksi (Bisa Diubah Manual)</label>
-          <select id="scanStudentSelect" onchange="syncScanUraianForStudent()"></select>
+          <label>Mode Penentuan Peserta LJK</label>
+          <select id="scanAssignMode" onchange="onScanAssignModeChange()">
+            <option value="auto" selected>🤖 Otomatis (Baca Gelembung LJK)</option>
+            <option value="manual">👆 Manual (Pilih dari Daftar)</option>
+          </select>
+        </div>
+        <div>
+          <label id="lblScanStudentSelect">Peserta Terpilih (Otomatis / Manual)</label>
+          <select id="scanStudentSelect" onchange="onManualStudentSelectChange()"></select>
         </div>
         <div>
           <label>Sensitivitas Kehitaman Bulatan: <span id="lblThresh">58</span>%</label>
           <input type="range" id="omrThreshold" min="30" max="85" value="58" oninput="document.getElementById('lblThresh').textContent=this.value; reprocessOMR();" />
         </div>
       </div>
+
+      <div id="scanIdMatchBanner" style="display:none; font-size:0.8rem; padding:8px 10px; border-radius:8px; margin-bottom:10px; background:#eff6ff; color:#1e3a8a;"></div>
 
       <div style="text-align:center; background:#0f172a; padding:8px; border-radius:10px; margin-bottom:10px;">
         <canvas id="omrCanvas" width="794" height="1123" style="max-width:460px; border-radius:6px; margin:0 auto;"></canvas>
@@ -337,6 +368,7 @@
           <thead>
             <tr>
               <th>No</th>
+              <th id="thInputIdPeserta">Nomor Peserta</th>
               <th>Nama Siswa</th>
               <th>Jawaban PG (1–<span class="lblJmlPG">20</span>)</th>
               <th>Skor PG</th>
@@ -398,7 +430,8 @@ const R_TABLE_005 = {
   21:0.433, 22:0.423, 23:0.413, 24:0.404, 25:0.396, 26:0.388, 27:0.381, 28:0.374, 29:0.367, 30:0.361,
   31:0.355, 32:0.349, 33:0.344, 34:0.339, 35:0.334, 36:0.329, 37:0.325, 38:0.320, 39:0.316, 40:0.312,
   41:0.308, 42:0.304, 43:0.301, 44:0.297, 45:0.294, 46:0.291, 47:0.288, 48:0.284, 49:0.281, 50:0.279,
-  55:0.266, 60:0.254, 65:0.244, 70:0.235, 75:0.227, 80:0.220, 85:0.213, 90:0.207, 95:0.202, 100:0.195
+  55:0.266, 60:0.254, 65:0.244, 70:0.235, 75:0.227, 80:0.220, 85:0.213, 90:0.207, 95:0.202, 100:0.195,
+  125:0.176, 150:0.159, 175:0.148, 200:0.138, 250:0.124, 300:0.113, 350:0.105, 400:0.098, 450:0.092, 500:0.088
 };
 function getRTable(n) {
   if (n <= 3) return 0.997;
@@ -407,7 +440,13 @@ function getRTable(n) {
   for (let i = keys.length - 1; i >= 0; i--) {
     if (n >= keys[i]) return R_TABLE_005[keys[i]];
   }
-  return 0.195;
+  return 0.088;
+}
+
+const MAX_STUDENTS = 500;
+
+function getIdFieldLabel() {
+  return state.config.idFieldType === 'nisn' ? 'NISN' : 'NOMOR PESERTA';
 }
 
 // ==================== PENGATURAN AWAL (DEFAULT FACTORY STATE) ====================
@@ -415,12 +454,14 @@ function getDefaultState() {
   return {
     meta: {
       sekolah: 'SDN Nagreg', kepsek: 'Aep Sudrajat, S.Pd', nipKepsek: '19000000 000000 0 000',
-      guru: 'Apipudin, S.Pd.I', nipGuru: '19000000 000000 0 002', mapel: 'PAI',
+      guru: 'Apipudin, S.Pd.I', nipGuru: '19000000 000000 0 021', mapel: 'PAI',
       jenisTes: 'PENILAIAN SUMATIF AKHIR SEMESTER', materi: 'BAB I - BAB V',
       kelas: 'I (Satu)/ Ganjil', tapel: '2025 - 2026', tglTes: '29 September 2025',
       tglPeriksa: '30 September 2025', kktp: 70, tempat: 'Bandung'
     },
     config: {
+      idFieldType: 'nomor_peserta',
+      idDigits: 3,
       jmlPG: 20, opsiPG: 4, jmlBS: 0, kunciBS: '', jmlUR: 5,
       pgCols: 0, pgRows: 10, bsCols: 0, bsRows: 8, uraianMode: 'auto',
       kunciPG: 'BBACABCCBCCBABBCCAAC',
@@ -428,15 +469,15 @@ function getDefaultState() {
       bobotPG: 0.7, bobotUR: 0.3
     },
     students: [
-      { nis: '001', nama: 'ADEVA AZZAHRA', pg: 'XXAAAAAAAAAABBAXBXXX', bs: '', ur: [1,1,1,1,1], remedial: 94 },
-      { nis: '002', nama: 'ADZKIA ZAHRA', pg: 'BVBVCBCCCCCVCVCCAVVA', bs: '', ur: [2,2,3,2,2], remedial: 94 },
-      { nis: '003', nama: 'PIRMAN PAUZI', pg: 'BBCCABAACCAACBBCBACC', bs: '', ur: [1,1,1,1,1], remedial: 94 },
-      { nis: '004', nama: 'FAUJI RESMANA', pg: 'BBBCBCCACCCCBCBBCABA', bs: '', ur: [3,3,1,3,4], remedial: 94 },
-      { nis: '005', nama: 'FAKHRY ATHAHAFIS', pg: 'BBAAACABCCCCABBCAACC', bs: '', ur: [3,2,3,2,3], remedial: null },
+      { nis: '001', nama: 'GUMILANG', pg: 'XXAAAAAAAAAABBAXBXXX', bs: '', ur: [1,1,1,1,1], remedial: 94 },
+      { nis: '002', nama: 'ZAHRA', pg: 'BVBVCBCCCCCVCVCCAVVA', bs: '', ur: [2,2,3,2,2], remedial: 94 },
+      { nis: '003', nama: 'PAUZI', pg: 'BBCCABAACCAACBBCBACC', bs: '', ur: [1,1,1,1,1], remedial: 94 },
+      { nis: '004', nama: 'RESMANA', pg: 'BBBCBCCACCCCBCBBCABA', bs: '', ur: [3,3,1,3,4], remedial: 94 },
+      { nis: '005', nama: 'ATHAHAFIS', pg: 'BBAAACABCCCCABBCAACC', bs: '', ur: [3,2,3,2,3], remedial: null },
       { nis: '006', nama: 'ARDIANSYAH', pg: 'BBCBACAABCBCABBCCACC', bs: '', ur: [3,2,3,3,2], remedial: null },
       { nis: '007', nama: 'JASMINE', pg: 'BBCBACAACCCABBCCCACC', bs: '', ur: [1,1,3,2,1], remedial: 94 },
       { nis: '008', nama: 'ZAINAL ABIDIN', pg: 'BBAAAABBCCBBABBAAAAC', bs: '', ur: [1,1,1,1,1], remedial: null },
-      { nis: '009', nama: 'MUHAMMAD NUGRAHA', pg: 'BBACABCCBCCBABBCCAAC', bs: '', ur: [3,2,3,3,3], remedial: null },
+      { nis: '009', nama: 'NUGRAHA', pg: 'BBACABCCBCCBABBCCAAC', bs: '', ur: [3,2,3,3,3], remedial: null },
       { nis: '010', nama: 'SALSABILA', pg: 'ABACBAABBVAAACAVBBCC', bs: '', ur: [3,3,3,1,4], remedial: 94 }
     ]
   };
@@ -447,6 +488,7 @@ let currentReportTab = 'nilai_mc';
 let selectedRemedStudent = 0;
 let currentScannedPG = [];
 let currentScannedBS = [];
+let lastDetectedIdDigits = '';
 let loadedScanImage = null;
 let cameraStream = null;
 let sessionScanCount = 0;
@@ -516,8 +558,10 @@ function normalizeLoadedState(raw) {
   const merged = {
     meta: { ...def.meta, ...(raw.meta || {}) },
     config: { ...def.config, ...(raw.config || {}) },
-    students: Array.isArray(raw.students) ? raw.students : def.students
+    students: Array.isArray(raw.students) ? raw.students.slice(0, MAX_STUDENTS) : def.students
   };
+  merged.config.idFieldType = merged.config.idFieldType === 'nisn' ? 'nisn' : 'nomor_peserta';
+  merged.config.idDigits = Math.min(12, Math.max(2, Number(merged.config.idDigits) || 3));
   merged.config.jmlPG = Math.min(50, Math.max(1, Number(merged.config.jmlPG) || 20));
   merged.config.opsiPG = Math.min(5, Math.max(3, Number(merged.config.opsiPG) || 4));
   merged.config.jmlBS = Math.min(50, Math.max(0, Number(merged.config.jmlBS) || 0));
@@ -530,7 +574,7 @@ function normalizeLoadedState(raw) {
   merged.config.bsRows = Number(merged.config.bsRows || 8);
   merged.config.uraianMode = merged.config.uraianMode || 'auto';
   merged.students = merged.students.map(st => ({
-    nis: st.nis || '',
+    nis: String(st.nis || '').trim(),
     nama: (st.nama || '').toUpperCase(),
     pg: (st.pg || '').toUpperCase(),
     bs: (st.bs || '').toUpperCase(),
@@ -572,6 +616,42 @@ async function initApp() {
   }
 }
 
+function updateIdLabelsUI() {
+  const lbl = getIdFieldLabel();
+  const th1 = document.getElementById('thIdPeserta');
+  const th2 = document.getElementById('thInputIdPeserta');
+  if (th1) th1.textContent = `${lbl} (${state.config.idDigits} Digit)`;
+  if (th2) th2.textContent = lbl;
+  const cntBadge = document.getElementById('lblTotalPesertaBadge');
+  if (cntBadge) cntBadge.textContent = `${state.students.length} / ${MAX_STUDENTS} Peserta`;
+}
+
+function onIdFieldTypeChange(val) {
+  const type = val === 'nisn' ? 'nisn' : 'nomor_peserta';
+  state.config.idFieldType = type;
+  if (type === 'nisn' && state.config.idDigits === 3) {
+    state.config.idDigits = 10;
+  } else if (type === 'nomor_peserta' && state.config.idDigits === 10) {
+    state.config.idDigits = 3;
+  }
+  syncInputsFromState();
+  persistNow();
+  renderStudentsTable();
+  renderInputJawabanTable();
+  renderLJKPreview();
+  if (loadedScanImage) reprocessOMR();
+}
+
+function onIdDigitsChange(val) {
+  const parsed = parseInt(val, 10);
+  if (isNaN(parsed)) return;
+  state.config.idDigits = Math.min(12, Math.max(2, parsed));
+  syncInputsFromState();
+  persistNow();
+  renderLJKPreview();
+  if (loadedScanImage) reprocessOMR();
+}
+
 function syncInputsFromState() {
   const m = state.meta;
   document.getElementById('inSekolah').value = m.sekolah;
@@ -588,6 +668,11 @@ function syncInputsFromState() {
   document.getElementById('inTglPeriksa').value = m.tglPeriksa;
   document.getElementById('inKktp').value = m.kktp;
   document.getElementById('inTempat').value = m.tempat;
+
+  document.getElementById('inIdFieldType').value = state.config.idFieldType;
+  document.getElementById('inIdDigits').value = state.config.idDigits;
+  document.getElementById('ljkIdFieldType').value = state.config.idFieldType;
+  document.getElementById('ljkIdDigits').value = state.config.idDigits;
 
   document.getElementById('inJmlPG').value = state.config.jmlPG;
   document.getElementById('inOpsiPG').value = state.config.opsiPG;
@@ -610,6 +695,7 @@ function syncInputsFromState() {
   document.getElementById('inKunciPG').value = state.config.kunciPG;
   document.getElementById('inMaxUR').value = state.config.maxUR.join(',');
   updateKunciPreview();
+  updateIdLabelsUI();
   document.querySelectorAll('.lblJmlPG').forEach(el => el.textContent = state.config.jmlPG);
   document.getElementById('hdrSubtitle').textContent = `${m.sekolah} • ${m.mapel} (${m.kelas})`;
 }
@@ -631,6 +717,8 @@ function saveState(skipTableRerender = false) {
     kktp: parseFloat(document.getElementById('inKktp').value) || 70,
     tempat: document.getElementById('inTempat').value
   };
+  state.config.idFieldType = document.getElementById('inIdFieldType').value === 'nisn' ? 'nisn' : 'nomor_peserta';
+  state.config.idDigits = Math.min(12, Math.max(2, parseInt(document.getElementById('inIdDigits').value, 10) || 3));
   state.config.jmlPG = Math.min(50, Math.max(1, parseInt(document.getElementById('inJmlPG').value) || 20));
   state.config.opsiPG = parseInt(document.getElementById('inOpsiPG').value) || 4;
   state.config.jmlBS = Math.min(50, Math.max(0, parseInt(document.getElementById('inJmlBS').value) || 0));
@@ -643,6 +731,7 @@ function saveState(skipTableRerender = false) {
   state.config.maxUR = maxArr.slice(0, state.config.jmlUR);
 
   updateKunciPreview();
+  updateIdLabelsUI();
   document.querySelectorAll('.lblJmlPG').forEach(el => el.textContent = state.config.jmlPG);
   document.getElementById('hdrSubtitle').textContent = `${state.meta.sekolah} • ${state.meta.mapel} (${state.meta.kelas})`;
   persistNow();
@@ -704,7 +793,8 @@ function importBackupJSON(ev) {
 
 function startFreshExam() {
   if (!confirm('Kosongkan daftar siswa & semua jawaban untuk memulai ujian baru? (Identitas sekolah tetap dipertahankan)')) return;
-  state.students = [{ nis: '001', nama: 'SISWA 1', pg: '', bs: '', ur: [], remedial: null }];
+  const padLen = state.config.idFieldType === 'nomor_peserta' ? state.config.idDigits : 3;
+  state.students = [{ nis: '1'.padStart(padLen, '0'), nama: 'SISWA 1', pg: '', bs: '', ur: [], remedial: null }];
   sessionScanCount = 0;
   document.getElementById('scanCounterBadge').textContent = 'Terscan Sesi Ini: 0 LJK';
   persistNow();
@@ -732,19 +822,21 @@ async function resetToDefaultSettings() {
   alert('Aplikasi berhasil dikembalikan ke pengaturan awal.');
 }
 
-// ==================== MANAJEMEN SISWA ====================
+// ==================== MANAJEMEN SISWA (MAKS. 500 PESERTA) ====================
 function renderStudentsTable() {
   const tbody = document.getElementById('tbodySiswa');
   const sel = document.getElementById('scanStudentSelect');
   const prevSelVal = sel.value;
   tbody.innerHTML = '';
   sel.innerHTML = '';
+  updateIdLabelsUI();
 
   state.students.forEach((s, idx) => {
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td>${idx + 1}</td>
-      <td><input value="${escapeAttr(s.nis || '')}" oninput="state.students[${idx}].nis=this.value; persistNow();" onchange="saveState();" style="padding:4px 6px;" /></td>
+      <td><input value="${escapeAttr(s.nis || '')}" maxlength="16" placeholder="${state.config.idFieldType === 'nisn' ? '0012345678' : '001'}"
+        oninput="state.students[${idx}].nis=this.value.trim(); persistNow();" onchange="saveState();" style="padding:4px 6px; font-family:monospace;" /></td>
       <td><input value="${escapeAttr(s.nama)}" oninput="state.students[${idx}].nama=this.value.toUpperCase(); persistNow();" onchange="saveState();" style="padding:4px 6px;" /></td>
       <td><button class="btn btn-danger btn-sm" onclick="deleteStudent(${idx})">Hapus</button></td>
     `;
@@ -753,7 +845,8 @@ function renderStudentsTable() {
     const hasScanned = (s.pg && s.pg.length > 0) || (s.bs && s.bs.length > 0);
     const opt = document.createElement('option');
     opt.value = idx;
-    opt.textContent = `${String(idx + 1).padStart(2, '0')} - ${s.nama}${hasScanned ? ' ✓' : ''}`;
+    const codeLabel = s.nis ? `[${s.nis}] ` : '';
+    opt.textContent = `${String(idx + 1).padStart(3, '0')} - ${codeLabel}${s.nama}${hasScanned ? ' ✓' : ''}`;
     sel.appendChild(opt);
   });
 
@@ -767,9 +860,10 @@ function escapeAttr(v) {
 }
 
 function addStudent() {
-  if (state.students.length >= 200) return alert('Maksimum 200 siswa.');
+  if (state.students.length >= MAX_STUDENTS) return alert(`Maksimum ${MAX_STUDENTS} siswa.`);
+  const padLen = state.config.idFieldType === 'nomor_peserta' ? state.config.idDigits : 3;
   state.students.push({
-    nis: String(state.students.length + 1).padStart(3, '0'),
+    nis: String(state.students.length + 1).padStart(padLen, '0'),
     nama: `SISWA BARU ${state.students.length + 1}`,
     pg: '', bs: '', ur: [], remedial: null
   });
@@ -783,12 +877,13 @@ function deleteStudent(idx) {
 }
 
 function bulkImportStudents() {
-  const raw = prompt('Tempel daftar nama siswa (1 nama per baris):');
+  const raw = prompt(`Tempel daftar nama siswa (1 nama per baris, maks. ${MAX_STUDENTS} siswa):`);
   if (!raw) return;
   const lines = raw.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
   if (lines.length === 0) return;
-  state.students = lines.slice(0, 200).map((nama, i) => ({
-    nis: String(i + 1).padStart(3, '0'),
+  const padLen = state.config.idFieldType === 'nomor_peserta' ? state.config.idDigits : 3;
+  state.students = lines.slice(0, MAX_STUDENTS).map((nama, i) => ({
+    nis: String(i + 1).padStart(padLen, '0'),
     nama: nama.toUpperCase(),
     pg: '', bs: '',
     ur: [],
@@ -825,19 +920,20 @@ function importStudentsCSV(e) {
       const rows = parseCSV(String(rd.result || '').replace(/^\uFEFF/, ''));
       if (rows.length < 2) throw Error('CSV harus berisi header dan data');
       const h = rows[0].map(x => x.toLowerCase()), ix = (...a) => h.findIndex(x => a.includes(x));
-      const ni = ix('nis', 'nisn'), nn = ix('nama', 'nama_siswa'), ip = ix('pg', 'jawaban_pg'), ib = ix('bs', 'jawaban_bs'), iu = ix('ur', 'uraian'), ir = ix('remedial');
+      const ni = ix('nis', 'nisn', 'nomor_peserta', 'no_peserta'), nn = ix('nama', 'nama_siswa'), ip = ix('pg', 'jawaban_pg'), ib = ix('bs', 'jawaban_bs'), iu = ix('ur', 'uraian'), ir = ix('remedial');
       if (nn < 0) throw Error('Kolom nama wajib');
+      const padLen = state.config.idFieldType === 'nomor_peserta' ? state.config.idDigits : 3;
       const d = rows.slice(1).map((r, i) => ({
-        nis: ni >= 0 ? r[ni] || '' : String(i + 1).padStart(3, '0'),
+        nis: ni >= 0 ? (r[ni] || '').trim() : String(i + 1).padStart(padLen, '0'),
         nama: (r[nn] || '').toUpperCase(),
         pg: ip >= 0 ? (r[ip] || '').toUpperCase() : '',
         bs: ib >= 0 ? (r[ib] || '').toUpperCase().replace(/[^BSXV]/g, '') : '',
         ur: iu >= 0 ? (r[iu] || '').split(/[|;]/).filter(Boolean).map(Number) : [],
         remedial: ir >= 0 && r[ir] !== '' ? Number(r[ir]) : null
       })).filter(x => x.nama);
-      if (!d.length || d.length > 200) throw Error('Jumlah siswa harus 1–200');
-      const replace = confirm(`${d.length} siswa ditemukan. OK = ganti daftar; Cancel = tambahkan.`);
-      state.students = replace ? d : state.students.concat(d).slice(0, 200);
+      if (!d.length || d.length > MAX_STUDENTS) throw Error(`Jumlah siswa harus 1–${MAX_STUDENTS}`);
+      const replace = confirm(`${d.length} siswa ditemukan. OK = ganti daftar; Cancel = tambahkan (maks. ${MAX_STUDENTS}).`);
+      state.students = replace ? d : state.students.concat(d).slice(0, MAX_STUDENTS);
       saveState();
       alert('Impor CSV berhasil dan tersimpan permanen.');
     } catch (x) {
@@ -849,7 +945,9 @@ function importStudentsCSV(e) {
 }
 
 function downloadCSVTemplate() {
-  const b = new Blob(['\uFEFFnis,nama,pg,bs,ur,remedial\n001,CONTOH SISWA,ABCD,BSSB,3|2|4,\n'], { type: 'text/csv;charset=utf-8' });
+  const colName = state.config.idFieldType === 'nisn' ? 'nisn' : 'nomor_peserta';
+  const sampleId = state.config.idFieldType === 'nisn' ? '0123456789' : '001';
+  const b = new Blob([`\uFEFF${colName},nama,pg,bs,ur,remedial\n${sampleId},CONTOH SISWA,ABCD,BSSB,3|2|4,\n`], { type: 'text/csv;charset=utf-8' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(b);
   a.download = 'template_import_koranul.csv';
@@ -1063,6 +1161,9 @@ function getOMRLayout() {
   const jmlUR = Math.max(0, Number(state.config.jmlUR) || 0);
   const uraianMode = state.config.uraianMode || 'auto';
 
+  const idDigits = Math.min(12, Math.max(2, Number(state.config.idDigits) || 3));
+  const idFieldType = state.config.idFieldType === 'nisn' ? 'nisn' : 'nomor_peserta';
+
   const userPGCols = Number(state.config.pgCols) || 0;
   const maxPGRows = Math.min(15, Math.max(5, Number(state.config.pgRows) || 10));
   const autoPGCols = jmlPG <= 10 ? 2 : (jmlPG <= 20 ? 2 : (jmlPG <= 30 ? 3 : (jmlPG <= 40 ? 4 : 5)));
@@ -1077,16 +1178,38 @@ function getOMRLayout() {
   const bsCols = jmlBS > 0 ? Math.min(5, Math.max(userBSCols > 0 ? userBSCols : autoBSCols, minBSColsNeeded)) : 0;
   const bsRows = jmlBS > 0 ? Math.max(1, Math.ceil(jmlBS / bsCols)) : 0;
 
+  // Dimensi dasar LJK (794 x 1123, margin=24, mkSize=26 -> fx=37, fy=37, fw=720, fh=1049)
+  const W = 794, H = 1123, margin = 24, mkSize = 26;
+  const fx = margin + mkSize / 2;
+  const fy = margin + mkSize / 2;
+  const fw = W - 2 * fx;
+  const fh = H - 2 * fy;
+
+  const colStepPx = idDigits <= 4 ? 26 : (idDigits <= 6 ? 22 : (idDigits <= 8 ? 19.5 : (idDigits <= 10 ? 18 : 16.5)));
+  const idGridBoxW = Math.max(134, idDigits * colStepPx + 20);
+  const rightEdge = fx + fw - 28;
+  const idGridBoxX = rightEdge - idGridBoxW;
+  const leftBoxX = fx + 28;
+  const leftBoxW = idGridBoxX - leftBoxX - 8;
+
+  const firstColX = idGridBoxX + (idGridBoxW - (idDigits - 1) * colStepPx) / 2;
+  const idBubbleR_px = Math.min(0.0102 * fw, colStepPx * 0.41);
+  const idBubbleR_norm = idBubbleR_px / fw;
+
   const bubbles = [];
 
-  for (let d = 0; d < 2; d++) {
+  for (let d = 0; d < idDigits; d++) {
+    const cx = firstColX + d * colStepPx;
+    const nx = (cx - fx) / fw;
     for (let num = 0; num <= 9; num++) {
+      const cy = (fy + 14) + 47 + num * 18.2;
       bubbles.push({
-        type: 'absen',
+        type: 'id_code',
         digit: d,
         val: num,
-        nx: 0.818 + d * 0.068,
-        ny: 0.056 + num * 0.0185
+        nx,
+        ny: (cy - fy) / fh,
+        rNorm: idBubbleR_norm
       });
     }
   }
@@ -1110,7 +1233,8 @@ function getOMRLayout() {
         qIndex: q,
         letter: letters[o],
         nx: baseX + numOffset + o * gap,
-        ny: pgStartY + rowIdx * pgRowStep
+        ny: pgStartY + rowIdx * pgRowStep,
+        rNorm: bubbleR_norm
       });
     }
   }
@@ -1134,14 +1258,16 @@ function getOMRLayout() {
         qIndex: q,
         letter: 'B',
         nx: baseX + numOffset,
-        ny: bsStartY + rowIdx * bsRowStep
+        ny: bsStartY + rowIdx * bsRowStep,
+        rNorm: bubbleR_norm
       });
       bubbles.push({
         type: 'bs',
         qIndex: q,
         letter: 'S',
         nx: baseX + numOffset + gap,
-        ny: bsStartY + rowIdx * bsRowStep
+        ny: bsStartY + rowIdx * bsRowStep,
+        rNorm: bubbleR_norm
       });
     }
     curY = bsStartY + (bsRows - 1) * bsRowStep + 0.024;
@@ -1164,6 +1290,7 @@ function getOMRLayout() {
 
   return {
     bubbles, letters, bubbleR_norm,
+    idFieldType, idDigits, colStepPx, idGridBoxX, idGridBoxW, leftBoxX, leftBoxW, firstColX, idBubbleR_px,
     pgCols, pgRows, pgHeaderY, pgStartY, pgRowStep, pgColWidth,
     bsCols, bsRows, bsHeaderY, bsStartY, bsRowStep, bsColWidth,
     uraianStartY: curY, availUraianH, urOnPage1, urOnPage2
@@ -1210,12 +1337,14 @@ function renderLJKPreview() {
   const fw = W - 2 * fx;
   const fh = H - 2 * fy;
 
+  const layout = getOMRLayout();
+
   ctx.strokeStyle = '#0f172a';
   ctx.lineWidth = 1.4;
   ctx.strokeRect(fx + 20, fy + 8, fw - 40, fh - 16);
 
-  const leftBoxX = fx + 28;
-  const leftBoxW = fw * 0.70;
+  const leftBoxX = layout.leftBoxX;
+  const leftBoxW = layout.leftBoxW;
   ctx.strokeStyle = '#334155';
   ctx.lineWidth = 1;
   ctx.strokeRect(leftBoxX, fy + 14, leftBoxW, 86);
@@ -1223,11 +1352,11 @@ function renderLJKPreview() {
   ctx.fillStyle = '#0f172a';
   ctx.textAlign = 'left';
   ctx.textBaseline = 'alphabetic';
-  ctx.font = 'bold 14.5px sans-serif';
+  ctx.font = 'bold 14px sans-serif';
   ctx.fillText('LEMBAR JAWABAN KOMPUTER (LJK)', leftBoxX + 10, fy + 33);
-  ctx.font = 'bold 11.5px sans-serif';
+  ctx.font = 'bold 11px sans-serif';
   ctx.fillText(state.meta.sekolah.toUpperCase(), leftBoxX + 10, fy + 50);
-  ctx.font = '10px sans-serif';
+  ctx.font = '9.5px sans-serif';
   ctx.fillStyle = '#334155';
   ctx.fillText(`${state.meta.jenisTes} • Mapel: ${state.meta.mapel}`, leftBoxX + 10, fy + 66);
   ctx.fillText(`Kelas: ${state.meta.kelas} • Tahun: ${state.meta.tapel} • Tgl: ${state.meta.tglTes}`, leftBoxX + 10, fy + 81);
@@ -1237,9 +1366,11 @@ function renderLJKPreview() {
   ctx.strokeStyle = '#334155';
   ctx.strokeRect(leftBoxX, idBoxY, leftBoxW, 132);
   ctx.fillStyle = '#0f172a';
-  ctx.font = 'bold 10.5px sans-serif';
-  ctx.fillText('NAMA SISWA  : _______________________________________________', leftBoxX + 10, idBoxY + 24);
-  ctx.fillText('NIS / KELAS   : ______________________   PARAF: _______________', leftBoxX + 10, idBoxY + 50);
+  ctx.font = 'bold 10px sans-serif';
+  const lineDots = '_'.repeat(Math.max(24, Math.floor((leftBoxW - 110) / 5.6)));
+  const halfDots = '_'.repeat(Math.max(10, Math.floor((leftBoxW - 190) / 11.2)));
+  ctx.fillText(`NAMA SISWA  : ${lineDots}`, leftBoxX + 10, idBoxY + 24);
+  ctx.fillText(`KELAS / RUANG : ${halfDots}   PARAF: ${halfDots}`, leftBoxX + 10, idBoxY + 50);
 
   ctx.strokeStyle = '#cbd5e1';
   ctx.beginPath();
@@ -1247,21 +1378,22 @@ function renderLJKPreview() {
   ctx.lineTo(leftBoxX + leftBoxW - 8, idBoxY + 64);
   ctx.stroke();
 
+  const idTitle = getIdFieldLabel();
   ctx.fillStyle = '#1e293b';
   ctx.font = 'bold 9.5px sans-serif';
   ctx.fillText('PETUNJUK PENGISIAN:', leftBoxX + 10, idBoxY + 80);
-  ctx.font = '9px sans-serif';
+  ctx.font = '8.8px sans-serif';
   ctx.fillStyle = '#334155';
   ctx.fillText('1. Hitamkan penuh bulatan jawaban menggunakan pensil 2B atau spidol hitam.', leftBoxX + 10, idBoxY + 95);
-  ctx.fillText('2. Hitamkan juga 2 digit Nomor Absen Anda pada kotak di sebelah kanan.', leftBoxX + 10, idBoxY + 109);
+  ctx.fillText(`2. Tulis & hitamkan ${layout.idDigits} digit ${idTitle} Anda pada kotak di sebelah kanan.`, leftBoxX + 10, idBoxY + 109);
 
   ctx.fillText('Contoh Benar:', leftBoxX + 10, idBoxY + 124);
-  ctx.beginPath(); ctx.arc(leftBoxX + 82, idBoxY + 121, 5.5, 0, Math.PI * 2); ctx.fillStyle = '#0f172a'; ctx.fill();
+  ctx.beginPath(); ctx.arc(leftBoxX + 80, idBoxY + 121, 5.2, 0, Math.PI * 2); ctx.fillStyle = '#0f172a'; ctx.fill();
   ctx.fillStyle = '#334155';
-  ctx.fillText('Contoh Salah:', leftBoxX + 115, idBoxY + 124);
-  [185, 205, 225].forEach((dx, idx) => {
+  ctx.fillText('Contoh Salah:', leftBoxX + 110, idBoxY + 124);
+  [178, 196, 214].forEach((dx, idx) => {
     const cx = leftBoxX + dx, cy = idBoxY + 121;
-    ctx.beginPath(); ctx.arc(cx, cy, 5.5, 0, Math.PI * 2); ctx.strokeStyle = '#0f172a'; ctx.stroke();
+    ctx.beginPath(); ctx.arc(cx, cy, 5.2, 0, Math.PI * 2); ctx.strokeStyle = '#0f172a'; ctx.stroke();
     ctx.beginPath();
     if (idx === 0) { ctx.moveTo(cx - 4, cy - 4); ctx.lineTo(cx + 4, cy + 4); ctx.moveTo(cx + 4, cy - 4); ctx.lineTo(cx - 4, cy + 4); }
     else if (idx === 1) { ctx.moveTo(cx - 3, cy); ctx.lineTo(cx, cy + 3); ctx.lineTo(cx + 5, cy - 4); }
@@ -1269,39 +1401,50 @@ function renderLJKPreview() {
     ctx.stroke();
   });
 
-  const layout = getOMRLayout();
-
-  const absX = fx + 0.765 * fw;
+  // Kotak Gelembung Identitas (NOMOR PESERTA atau NISN dengan D digit kustom)
+  const absX = layout.idGridBoxX;
   const absY = fy + 14;
-  const absW = 0.195 * fw;
+  const absW = layout.idGridBoxW;
   const absH = 224;
   ctx.strokeStyle = '#0f172a';
   ctx.lineWidth = 1.2;
   ctx.strokeRect(absX, absY, absW, absH);
   ctx.fillStyle = '#e2e8f0';
-  ctx.fillRect(absX, absY, absW, 20);
+  ctx.fillRect(absX, absY, absW, 19);
   ctx.fillStyle = '#0f172a';
-  ctx.font = 'bold 9.5px sans-serif';
+  ctx.font = 'bold 9px sans-serif';
   ctx.textAlign = 'center';
-  ctx.fillText('NOMOR ABSEN', absX + absW / 2, absY + 13.5);
-  ctx.font = '8.5px sans-serif';
-  ctx.fillText('Puluhan   Satuan', absX + absW / 2, absY + 31);
+  ctx.fillText(idTitle, absX + absW / 2, absY + 13);
 
-  const rBubble = layout.bubbleR_norm * fw;
+  // Kotak tulis digit per kolom di atas deretan 0-9
+  const digitBoxW = Math.min(18, layout.colStepPx - 2);
+  for (let d = 0; d < layout.idDigits; d++) {
+    const cx = layout.firstColX + d * layout.colStepPx;
+    ctx.strokeStyle = '#64748b';
+    ctx.lineWidth = 0.9;
+    ctx.strokeRect(cx - digitBoxW / 2, absY + 21, digitBoxW, 15);
+  }
+  ctx.beginPath();
+  ctx.moveTo(absX, absY + 38);
+  ctx.lineTo(absX + absW, absY + 38);
+  ctx.strokeStyle = '#94a3b8';
+  ctx.stroke();
+
   layout.bubbles.forEach(b => {
     const cx = fx + b.nx * fw;
     const cy = fy + b.ny * fh;
+    const rBubble = (b.rNorm || layout.bubbleR_norm) * fw;
     ctx.beginPath();
     ctx.arc(cx, cy, rBubble, 0, Math.PI * 2);
     ctx.strokeStyle = '#1e293b';
-    ctx.lineWidth = 1.15;
+    ctx.lineWidth = 1.1;
     ctx.stroke();
 
     ctx.fillStyle = '#475569';
-    ctx.font = 'bold 8px sans-serif';
+    ctx.font = `bold ${rBubble < 7 ? 7 : 8}px sans-serif`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText(b.type === 'absen' ? String(b.val) : b.letter, cx, cy + 0.3);
+    ctx.fillText(b.type === 'id_code' ? String(b.val) : b.letter, cx, cy + 0.3);
   });
 
   ctx.textAlign = 'left';
@@ -1421,14 +1564,15 @@ function renderLJKPreview() {
   const totalSoal = (Number(state.config.jmlPG) || 0) + (Number(state.config.jmlBS) || 0) + (Number(state.config.jmlUR) || 0);
   const infoEl = document.getElementById('ljkLayoutInfo');
   if (infoEl) {
+    const idSummary = `Identitas: <b>${idTitle} (${layout.idDigits} digit)</b>`;
     if (layout.urOnPage2 === 0) {
       infoEl.style.background = '#dcfce7';
       infoEl.style.color = '#166534';
-      infoEl.innerHTML = `✅ <b>Efisien 1 Halaman:</b> Total <b>${totalSoal} nomor</b> (${state.config.jmlPG} PG${state.config.jmlBS ? ' + ' + state.config.jmlBS + ' B-S' : ''}${state.config.jmlUR ? ' + ' + state.config.jmlUR + ' Uraian' : ''}) termuat rapi dalam <b>1 lembar halaman</b>.`;
+      infoEl.innerHTML = `✅ <b>Efisien 1 Halaman:</b> ${idSummary} • Total <b>${totalSoal} nomor</b> (${state.config.jmlPG} PG${state.config.jmlBS ? ' + ' + state.config.jmlBS + ' B-S' : ''}${state.config.jmlUR ? ' + ' + state.config.jmlUR + ' Uraian' : ''}) termuat rapi dalam <b>1 lembar halaman</b>.`;
     } else {
       infoEl.style.background = '#eff6ff';
       infoEl.style.color = '#1e3a8a';
-      infoEl.innerHTML = `📄 <b>2 Halaman:</b> Halaman 1 memuat seluruh PG${state.config.jmlBS ? ', B-S' : ''}${layout.urOnPage1 > 0 ? ` + ${layout.urOnPage1} soal Uraian pertama` : ''}; Halaman 2 memuat ${layout.urOnPage2} soal Uraian sisanya.`;
+      infoEl.innerHTML = `📄 <b>2 Halaman:</b> ${idSummary} • Halaman 1 memuat seluruh PG${state.config.jmlBS ? ', B-S' : ''}${layout.urOnPage1 > 0 ? ` + ${layout.urOnPage1} soal Uraian pertama` : ''}; Halaman 2 memuat ${layout.urOnPage2} soal Uraian sisanya.`;
     }
   }
 }
@@ -1449,7 +1593,7 @@ function renderUraianContinuationCanvas(canvas, startIdx, totalUR) {
   ctx.fillText('LEMBAR JAWABAN URAIAN (LANJUTAN)', pad + 14, pad + 26);
   ctx.font = '10.5px sans-serif';
   ctx.fillText(`${state.meta.sekolah} • Mapel: ${state.meta.mapel} • Kelas: ${state.meta.kelas}`, pad + 14, pad + 44);
-  ctx.fillText('Nama Siswa: _______________________________   No. Absen: ________', pad + 14, pad + 64);
+  ctx.fillText(`Nama Siswa: _____________________________   ${getIdFieldLabel()}: ________________`, pad + 14, pad + 64);
 
   ctx.beginPath();
   ctx.moveTo(pad, pad + 74);
@@ -1601,12 +1745,125 @@ function loadImageFile(ev) {
   img.src = objUrl;
 }
 
+function onScanAssignModeChange() {
+  const mode = document.getElementById('scanAssignMode').value;
+  const lbl = document.getElementById('lblScanStudentSelect');
+  if (lbl) {
+    lbl.textContent = mode === 'auto'
+      ? 'Peserta Terdeteksi Otomatis (Bisa Diubah Manual)'
+      : 'Pilih Peserta Secara Manual';
+  }
+  if (loadedScanImage && lastDetectedIdDigits) {
+    resolveScannedStudent(lastDetectedIdDigits);
+  } else {
+    const banner = document.getElementById('scanIdMatchBanner');
+    if (banner) {
+      if (mode === 'manual') {
+        const sel = document.getElementById('scanStudentSelect');
+        const idx = parseInt(sel.value, 10) || 0;
+        const st = state.students[idx];
+        banner.style.display = 'block';
+        banner.style.background = '#fef3c7';
+        banner.style.color = '#92400e';
+        banner.innerHTML = `👆 <b>Mode Manual Aktif:</b> Hasil scan LJK akan disimpan ke peserta terpilih: <b>${idx + 1}. ${st ? st.nama : '-'}</b>.`;
+      } else {
+        banner.style.display = 'none';
+      }
+    }
+  }
+}
+
+function onManualStudentSelectChange() {
+  syncScanUraianForStudent();
+  const sel = document.getElementById('scanStudentSelect');
+  const idx = parseInt(sel.value, 10) || 0;
+  const st = state.students[idx];
+  const banner = document.getElementById('scanIdMatchBanner');
+  if (banner && st && loadedScanImage) {
+    banner.style.display = 'block';
+    banner.style.background = '#eff6ff';
+    banner.style.color = '#1e3a8a';
+    banner.innerHTML = `✏️ <b>Pilihan Peserta Manual:</b> Data akan disimpan ke <b>${idx + 1}. [${st.nis || '-'}] ${st.nama}</b>` +
+      (lastDetectedIdDigits ? ` (Gelembung ${getIdFieldLabel()} terbaca: <code>${lastDetectedIdDigits}</code>)` : '') + '.';
+  }
+}
+
+function resolveScannedStudent(detectedDigits) {
+  const mode = document.getElementById('scanAssignMode').value;
+  const sel = document.getElementById('scanStudentSelect');
+  const banner = document.getElementById('scanIdMatchBanner');
+  const idLabel = getIdFieldLabel();
+
+  if (mode === 'manual') {
+    const idx = parseInt(sel.value, 10) || 0;
+    const st = state.students[idx];
+    if (banner) {
+      banner.style.display = 'block';
+      banner.style.background = '#fef3c7';
+      banner.style.color = '#92400e';
+      banner.innerHTML = `👆 <b>Mode Manual:</b> Peserta dikunci pada <b>${idx + 1}. [${st ? st.nis : '-'}] ${st ? st.nama : '-'}</b> (Gelembung ${idLabel} terbaca: <code>${detectedDigits}</code>).`;
+    }
+    return;
+  }
+
+  const cleanDigits = detectedDigits.replace(/\?/g, '');
+  const hasCompleteDigits = !detectedDigits.includes('?') && cleanDigits.length > 0;
+  let matchedIdx = -1;
+  let matchMethod = '';
+
+  if (cleanDigits.length > 0) {
+    // 1. Cocokkan eksak dengan kolom NISN / Nomor Peserta
+    matchedIdx = state.students.findIndex(st => (st.nis || '').trim() === detectedDigits);
+    if (matchedIdx >= 0) matchMethod = 'Cocok Eksak';
+
+    // 2. Cocokkan nilai numerik (misal "005" cocok dengan "5" atau "0005")
+    if (matchedIdx < 0 && hasCompleteDigits && /^\d+$/.test(detectedDigits)) {
+      const targetNum = parseInt(detectedDigits, 10);
+      matchedIdx = state.students.findIndex(st => {
+        const sCode = (st.nis || '').trim();
+        return /^\d+$/.test(sCode) && parseInt(sCode, 10) === targetNum;
+      });
+      if (matchedIdx >= 0) matchMethod = 'Cocok Numerik';
+    }
+
+    // 3. Fallback ke nomor urut peserta jika mode Nomor Peserta dan angka berada dalam 1..N
+    if (matchedIdx < 0 && state.config.idFieldType === 'nomor_peserta' && hasCompleteDigits && /^\d+$/.test(detectedDigits)) {
+      const seqNo = parseInt(detectedDigits, 10);
+      if (seqNo >= 1 && seqNo <= state.students.length) {
+        matchedIdx = seqNo - 1;
+        matchMethod = 'Nomor Urut Peserta';
+      }
+    }
+  }
+
+  if (matchedIdx >= 0) {
+    sel.value = matchedIdx;
+    const st = state.students[matchedIdx];
+    if (banner) {
+      banner.style.display = 'block';
+      banner.style.background = '#dcfce7';
+      banner.style.color = '#166534';
+      banner.innerHTML = `🤖 <b>Otomatis Cocok (${matchMethod}):</b> Gelembung ${idLabel} <code>${detectedDigits}</code> &rarr; <b>${matchedIdx + 1}. [${st.nis || '-'}] ${st.nama}</b> (ubah dropdown di atas jika ingin koreksi manual).`;
+    }
+  } else {
+    if (banner) {
+      banner.style.display = 'block';
+      banner.style.background = '#fee2e2';
+      banner.style.color = '#991b1b';
+      banner.innerHTML = `⚠️ <b>Gelembung ${idLabel} terbaca <code>${detectedDigits}</code></b> tidak ditemukan di daftar peserta. Silakan pilih peserta secara manual pada dropdown di atas.`;
+    }
+  }
+}
+
 function prepareNextScan(advanceStudent = true) {
   loadedScanImage = null;
   currentScannedPG = [];
   currentScannedBS = [];
+  lastDetectedIdDigits = '';
   const fileInput = document.getElementById('omrFileInput');
   if (fileInput) fileInput.value = '';
+  const banner = document.getElementById('scanIdMatchBanner');
+  if (banner) banner.style.display = 'none';
 
   document.getElementById('scanAnswersEditor').innerHTML = '';
   document.getElementById('scanUraianInputs').innerHTML = '';
@@ -1626,7 +1883,7 @@ function prepareNextScan(advanceStudent = true) {
     }
     sel.value = nextIdx;
     document.getElementById('scanResultSummary').innerHTML =
-      `<span style="color:#059669;font-weight:700;">✅ Data tersimpan!</span> Siap memindai LJK berikutnya (Target berikutnya: <b>${nextIdx + 1}. ${state.students[nextIdx].nama}</b>).`;
+      `<span style="color:#059669;font-weight:700;">✅ Data tersimpan!</span> Siap memindai LJK berikutnya (Target berikutnya: <b>${nextIdx + 1}. [${state.students[nextIdx].nis || '-'}] ${state.students[nextIdx].nama}</b>).`;
   } else {
     document.getElementById('scanResultSummary').textContent = 'Siap memindai LJK berikutnya. Jepret kamera atau pilih file foto LJK.';
   }
@@ -1814,6 +2071,7 @@ function reprocessOMR() {
       `<small>Pastikan seluruh lembar LJK (keempat kotak hitam sudut) terlihat jelas di dalam bingkai foto dan pencahayaan cukup merata.</small>`;
     currentScannedPG = [];
     currentScannedBS = [];
+    lastDetectedIdDigits = '';
     document.getElementById('scanAnswersEditor').innerHTML = '';
     document.getElementById('scanUraianInputs').innerHTML = '';
     return;
@@ -1841,13 +2099,13 @@ function reprocessOMR() {
 
   const frameW = (Math.hypot(corners.tr.x - corners.tl.x, corners.tr.y - corners.tl.y) +
                   Math.hypot(corners.br.x - corners.bl.x, corners.br.y - corners.bl.y)) / 2;
-  const rPx = Math.max(4, frameW * layout.bubbleR_norm);
+  const defaultRPx = Math.max(4, frameW * layout.bubbleR_norm);
   const d = imgData.data;
 
   const measureRelativeFill = (cx, cy, rad) => {
     const innerR = rad * 0.66;
-    const ringR1 = rad * 1.28;
-    const ringR2 = rad * 1.78;
+    const ringR1 = rad * 1.24;
+    const ringR2 = rad * 1.68;
     const maxR = Math.ceil(ringR2);
 
     let coreSum = 0, coreCnt = 0;
@@ -1882,26 +2140,32 @@ function reprocessOMR() {
   const threshPct = parseInt(document.getElementById('omrThreshold').value) || 58;
   const minFillCutoff = Math.max(0.14, 0.44 - (threshPct - 30) * 0.0048);
 
-  const absenMeasured = [[], []];
+  const idMeasured = Array.from({ length: layout.idDigits }, () => []);
   const pgMeasured = Array.from({ length: state.config.jmlPG }, () => []);
   const bsMeasured = Array.from({ length: state.config.jmlBS || 0 }, () => []);
 
   layout.bubbles.forEach(b => {
     const pt = mapPoint(b.nx, b.ny);
-    const fillScore = measureRelativeFill(pt.x, pt.y, rPx);
-    const item = { ...b, pt, fillScore, filled: false };
+    const radPx = b.rNorm ? Math.max(3.2, frameW * b.rNorm) : defaultRPx;
+    const fillScore = measureRelativeFill(pt.x, pt.y, radPx);
+    const item = { ...b, pt, radPx, fillScore, filled: false };
 
-    if (b.type === 'absen') absenMeasured[b.digit].push(item);
+    if (b.type === 'id_code') idMeasured[b.digit].push(item);
     else if (b.type === 'pg') pgMeasured[b.qIndex].push(item);
     else if (b.type === 'bs') bsMeasured[b.qIndex].push(item);
   });
 
-  [0, 1].forEach(digit => {
-    const list = absenMeasured[digit].slice().sort((a, b) => b.fillScore - a.fillScore);
+  let detectedCode = '';
+  for (let digit = 0; digit < layout.idDigits; digit++) {
+    const list = idMeasured[digit].slice().sort((a, b) => b.fillScore - a.fillScore);
     if (list[0] && list[0].fillScore >= minFillCutoff) {
       list[0].filled = true;
+      detectedCode += String(list[0].val);
+    } else {
+      detectedCode += '?';
     }
-  });
+  }
+  lastDetectedIdDigits = detectedCode;
 
   const pgChoices = pgMeasured.map(opts => {
     const sorted = opts.slice().sort((a, b) => b.fillScore - a.fillScore);
@@ -1932,8 +2196,9 @@ function reprocessOMR() {
   });
 
   const allMeasured = [
-    ...absenMeasured[0], ...absenMeasured[1],
-    ...pgMeasured.flat(), ...bsMeasured.flat()
+    ...idMeasured.flat(),
+    ...pgMeasured.flat(),
+    ...bsMeasured.flat()
   ];
   const keyPG = (state.config.kunciPG || '').toUpperCase().padEnd(state.config.jmlPG, '!');
   const keyBS = (state.config.kunciBS || '').toUpperCase().padEnd(state.config.jmlBS || 0, '!');
@@ -1944,25 +2209,18 @@ function reprocessOMR() {
       let isRight = true;
       if (m.type === 'pg') isRight = m.letter === keyPG[m.qIndex];
       else if (m.type === 'bs') isRight = m.letter === keyBS[m.qIndex];
-      ctx.arc(m.pt.x, m.pt.y, rPx * 0.92, 0, Math.PI * 2);
+      ctx.arc(m.pt.x, m.pt.y, m.radPx * 0.92, 0, Math.PI * 2);
       ctx.strokeStyle = isRight ? '#22c55e' : '#ef4444';
-      ctx.lineWidth = Math.max(2, rPx * 0.28);
+      ctx.lineWidth = Math.max(1.8, m.radPx * 0.28);
       ctx.stroke();
     } else {
-      ctx.arc(m.pt.x, m.pt.y, Math.max(1.5, rPx * 0.22), 0, Math.PI * 2);
+      ctx.arc(m.pt.x, m.pt.y, Math.max(1.3, m.radPx * 0.22), 0, Math.PI * 2);
       ctx.fillStyle = 'rgba(56, 189, 248, 0.7)';
       ctx.fill();
     }
   });
 
-  const d0 = absenMeasured[0].find(x => x.filled);
-  const d1 = absenMeasured[1].find(x => x.filled);
-  if (d0 || d1) {
-    const absenNo = (d0 ? d0.val * 10 : 0) + (d1 ? d1.val : 0);
-    if (absenNo >= 1 && absenNo <= state.students.length) {
-      document.getElementById('scanStudentSelect').value = absenNo - 1;
-    }
-  }
+  resolveScannedStudent(detectedCode);
 
   currentScannedPG = pgChoices.map(a => !a.length ? 'X' : a.length > 1 ? 'V' : a[0]);
   currentScannedBS = bsChoices.map(a => !a.length ? 'X' : a.length > 1 ? 'V' : a[0]);
@@ -2027,6 +2285,7 @@ function renderScannedEditor() {
   const nilaiPG = kPG > 0 ? ((benarPG / kPG) * 100).toFixed(1) : '—';
   const nilaiBS = kBS > 0 ? ((benarBS / kBS) * 100).toFixed(1) : '—';
   document.getElementById('scanResultSummary').innerHTML =
+    (lastDetectedIdDigits ? `<b>${getIdFieldLabel()} Terbaca:</b> <code>${lastDetectedIdDigits}</code><br>` : '') +
     `<b>PG:</b> <code>${currentScannedPG.join('')}</code> • Skor <b>${benarPG}/${kPG}</b> • Nilai <b>${nilaiPG}</b>` +
     (kBS ? `<br><b>B-S:</b> <code>${currentScannedBS.join('')}</code> • Skor <b>${benarBS}/${kBS}</b> • Nilai <b>${nilaiBS}</b>` : '') +
     `<br><small style="color:#64748b;">Ketuk kotak nomor di bawah jika ingin mengoreksi manual. (X = kosong, V = ganda)</small>`;
@@ -2088,6 +2347,7 @@ function renderInputJawabanTable() {
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td>${i + 1}</td>
+      <td style="font-family:monospace;">${escapeAttr(st.nis || '-')}</td>
       <td><b>${escapeAttr(st.nama)}</b></td>
       <td><input value="${escapeAttr(st.pg || '')}" maxlength="${state.config.jmlPG}" placeholder="Ketik A-E..."
         oninput="state.students[${i}].pg=this.value.toUpperCase(); persistNow();"
@@ -2189,11 +2449,11 @@ function renderReport() {
       </div>
       <div class="table-wrap">
         <table>
-          <thead><tr><th>No</th><th>Nama Siswa</th><th>Skor PG</th><th>Skor B-S</th><th>Total</th><th>Nilai Objektif</th><th>Ketuntasan</th></tr></thead>
+          <thead><tr><th>No</th><th>${getIdFieldLabel()}</th><th>Nama Siswa</th><th>Skor PG</th><th>Skor B-S</th><th>Total</th><th>Nilai Objektif</th><th>Ketuntasan</th></tr></thead>
           <tbody>
             ${state.students.map((st, i) => `
               <tr>
-                <td>${i + 1}</td><td>${st.nama}</td>
+                <td>${i + 1}</td><td style="font-family:monospace;">${escapeAttr(st.nis || '-')}</td><td>${st.nama}</td>
                 <td>${a.pgMatrix[i].skor}</td><td>${a.bsMatrix[i].skor}</td><td>${a.objMatrix[i].skor}/${a.objMatrix[i].total}</td>
                 <td><b>${a.objMatrix[i].nilai.toFixed(1)}</b></td>
                 <td><span class="badge ${a.objMatrix[i].tuntas === 'Tuntas' ? 'badge-tuntas' : 'badge-remed'}">${a.objMatrix[i].tuntas}</span></td>
@@ -2354,11 +2614,11 @@ function renderReport() {
     box.innerHTML = renderHeaderKop('DAFTAR NILAI SOAL URAIAN (NILAI UR)') + `
       <div class="table-wrap">
         <table>
-          <thead><tr><th>No</th><th>Nama Siswa</th><th>Skor Uraian</th><th>Nilai Uraian</th><th>Ketuntasan</th></tr></thead>
+          <thead><tr><th>No</th><th>${getIdFieldLabel()}</th><th>Nama Siswa</th><th>Skor Uraian</th><th>Nilai Uraian</th><th>Ketuntasan</th></tr></thead>
           <tbody>
             ${state.students.map((st, i) => `
               <tr>
-                <td>${i + 1}</td><td>${st.nama}</td>
+                <td>${i + 1}</td><td style="font-family:monospace;">${escapeAttr(st.nis || '-')}</td><td>${st.nama}</td>
                 <td>${a.urMatrix[i].skor}</td>
                 <td><b>${a.urMatrix[i].nilai.toFixed(1)}</b></td>
                 <td><span class="badge ${a.urMatrix[i].tuntas === 'Tuntas' ? 'badge-tuntas' : 'badge-remed'}">${a.urMatrix[i].tuntas}</span></td>
@@ -2400,12 +2660,12 @@ function renderReport() {
       </div>
       <div class="table-wrap">
         <table>
-          <thead><tr><th>No</th><th>Nama Siswa</th><th>Nilai Objektif</th><th>Nilai Uraian</th><th>Nilai Gabungan</th><th>Ketuntasan</th></tr></thead>
+          <thead><tr><th>No</th><th>${getIdFieldLabel()}</th><th>Nama Siswa</th><th>Nilai Objektif</th><th>Nilai Uraian</th><th>Nilai Gabungan</th><th>Ketuntasan</th></tr></thead>
           <tbody>
             ${state.students.map((st, i) => {
               const g = a.gabungan[i];
               return `<tr>
-                <td>${i + 1}</td><td>${st.nama}</td>
+                <td>${i + 1}</td><td style="font-family:monospace;">${escapeAttr(st.nis || '-')}</td><td>${st.nama}</td>
                 <td>${g.nPG.toFixed(1)}</td><td>${g.nUR.toFixed(1)}</td>
                 <td><b>${g.nGab.toFixed(2)}</b></td>
                 <td><span class="badge ${g.ketGab === 'Tuntas' ? 'badge-tuntas' : 'badge-remed'}">${g.ketGab}</span></td>
@@ -2424,9 +2684,9 @@ function renderReport() {
 
     box.innerHTML = renderHeaderKop('RINCIAN REMEDIAL TEACHING SETIAP SISWA (Remed)') + `
       <div style="margin-bottom:10px;">
-        <label>Pilih Nomor Absen / Nama Siswa:</label>
+        <label>Pilih Peserta / Nama Siswa:</label>
         <select onchange="selectedRemedStudent=parseInt(this.value); renderReport();">
-          ${state.students.map((s, i) => `<option value="${i}" ${i === idx ? 'selected' : ''}>${i + 1} - ${s.nama} (${a.gabungan[i].ketGab})</option>`).join('')}
+          ${state.students.map((s, i) => `<option value="${i}" ${i === idx ? 'selected' : ''}>${i + 1} - [${s.nis || '-'}] ${s.nama} (${a.gabungan[i].ketGab})</option>`).join('')}
         </select>
       </div>
       <div class="grid-3" style="margin-bottom:10px;">
@@ -2462,12 +2722,12 @@ function renderReport() {
       <p style="font-size:0.78rem; color:var(--muted);">Isikan Nilai Remedial pada kolom di bawah untuk menghitung Nilai Akhir otomatis sesuai rumus pembobotan KORANUL.</p>
       <div class="table-wrap">
         <table>
-          <thead><tr><th>No</th><th>Nama Siswa</th><th>Nilai Awal</th><th>Nilai Remedial</th><th>Nilai Akhir</th><th>Ketuntasan</th></tr></thead>
+          <thead><tr><th>No</th><th>${getIdFieldLabel()}</th><th>Nama Siswa</th><th>Nilai Awal</th><th>Nilai Remedial</th><th>Nilai Akhir</th><th>Ketuntasan</th></tr></thead>
           <tbody>
             ${state.students.map((st, i) => {
               const g = a.gabungan[i];
               return `<tr>
-                <td>${i + 1}</td><td>${st.nama}</td>
+                <td>${i + 1}</td><td style="font-family:monospace;">${escapeAttr(st.nis || '-')}</td><td>${st.nama}</td>
                 <td>${g.nGab.toFixed(2)}</td>
                 <td><input type="number" style="width:75px; padding:4px;" value="${st.remedial !== null ? st.remedial : ''}"
                   oninput="state.students[${i}].remedial=this.value===''?null:parseFloat(this.value); persistNow();"
@@ -2512,7 +2772,7 @@ function exportKoranulExcel() {
     ['Mata Pelajaran', m.mapel, 'Nilai KKTP', m.kktp],
     ['Jenis Tes', m.jenisTes, 'Tempat TTD', m.tempat],
     [],
-    ['No', 'NIS', 'NAMA'],
+    ['No', getIdFieldLabel(), 'NAMA'],
     ...state.students.map((s, i) => [i + 1, s.nis, s.nama])
   ]);
   XLSX.utils.book_append_sheet(wb, wsData, 'data');
@@ -2551,8 +2811,8 @@ function exportKoranulExcel() {
     ['Nama Sekolah', m.sekolah, 'Kelas/Semester', m.kelas],
     ['Mata Pelajaran', m.mapel, 'Nilai KKTP', m.kktp],
     [],
-    ['NO', 'NAMA', 'SKOR', 'NILAI', 'KETUNTASAN'],
-    ...state.students.map((s, i) => [i + 1, s.nama, a.objMatrix[i].skor, Number(a.objMatrix[i].nilai.toFixed(2)), a.objMatrix[i].tuntas])
+    ['NO', getIdFieldLabel(), 'NAMA', 'SKOR', 'NILAI', 'KETUNTASAN'],
+    ...state.students.map((s, i) => [i + 1, s.nis, s.nama, a.objMatrix[i].skor, Number(a.objMatrix[i].nilai.toFixed(2)), a.objMatrix[i].tuntas])
   ]);
   XLSX.utils.book_append_sheet(wb, wsNilaiMC, 'NILAI MC');
 
@@ -2576,8 +2836,8 @@ function exportKoranulExcel() {
 
     const wsNilaiUR = XLSX.utils.aoa_to_sheet([
       ['DAFTAR NILAI SOAL URAIAN'],
-      ['NO', 'NAMA', 'SKOR', 'NILAI', 'KETUNTASAN'],
-      ...state.students.map((s, i) => [i + 1, s.nama, a.urMatrix[i].skor, Number(a.urMatrix[i].nilai.toFixed(2)), a.urMatrix[i].tuntas])
+      ['NO', getIdFieldLabel(), 'NAMA', 'SKOR', 'NILAI', 'KETUNTASAN'],
+      ...state.students.map((s, i) => [i + 1, s.nis, s.nama, a.urMatrix[i].skor, Number(a.urMatrix[i].nilai.toFixed(2)), a.urMatrix[i].tuntas])
     ]);
     XLSX.utils.book_append_sheet(wb, wsNilaiUR, 'NILAI UR');
 
@@ -2592,20 +2852,20 @@ function exportKoranulExcel() {
 
   const wsNilGab = XLSX.utils.aoa_to_sheet([
     ['DAFTAR NILAI GABUNGAN'],
-    ['No', 'NAMA', `Objektif (${Math.round(state.config.bobotPG * 100)}%)`, `Uraian (${Math.round(state.config.bobotUR * 100)}%)`, 'Nilai Gabungan', 'Ketuntasan'],
+    ['No', getIdFieldLabel(), 'NAMA', `Objektif (${Math.round(state.config.bobotPG * 100)}%)`, `Uraian (${Math.round(state.config.bobotUR * 100)}%)`, 'Nilai Gabungan', 'Ketuntasan'],
     ...state.students.map((s, i) => {
       const g = a.gabungan[i];
-      return [i + 1, s.nama, Number(g.nPG.toFixed(2)), Number(g.nUR.toFixed(2)), Number(g.nGab.toFixed(2)), g.ketGab];
+      return [i + 1, s.nis, s.nama, Number(g.nPG.toFixed(2)), Number(g.nUR.toFixed(2)), Number(g.nGab.toFixed(2)), g.ketGab];
     })
   ]);
   XLSX.utils.book_append_sheet(wb, wsNilGab, 'Nil Gab');
 
   const wsPerbaikan = XLSX.utils.aoa_to_sheet([
     ['DAFTAR NILAI PERBAIKAN'],
-    ['NO', 'Nama', 'Nilai Awal', 'Nilai Remedial', 'Nilai Akhir', 'Ketuntasan'],
+    ['NO', getIdFieldLabel(), 'Nama', 'Nilai Awal', 'Nilai Remedial', 'Nilai Akhir', 'Ketuntasan'],
     ...state.students.map((s, i) => {
       const g = a.gabungan[i];
-      return [i + 1, s.nama, Number(g.nGab.toFixed(2)), g.nRem !== null ? g.nRem : '', Number(g.nAkhir.toFixed(2)), g.ketAkhir];
+      return [i + 1, s.nis, s.nama, Number(g.nGab.toFixed(2)), g.nRem !== null ? g.nRem : '', Number(g.nAkhir.toFixed(2)), g.ketAkhir];
     })
   ]);
   XLSX.utils.book_append_sheet(wb, wsPerbaikan, 'Perbaikan');
