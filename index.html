@@ -145,7 +145,7 @@
         <div><label>Kepala Sekolah</label><input id="inKepsek" value="Aep Sudrajat, S.Pd" oninput="saveState()" onchange="saveState()" /></div>
         <div><label>NIP Kepala Sekolah</label><input id="inNipKepsek" value="19000000 000000 0 000" oninput="saveState()" onchange="saveState()" /></div>
         <div><label>Guru Pengajar</label><input id="inGuru" value="Apipudin, S.Pd.I" oninput="saveState()" onchange="saveState()" /></div>
-        <div><label>NIP Guru</label><input id="inNipGuru" value="19000000 000000 0 000" oninput="saveState()" onchange="saveState()" /></div>
+        <div><label>NIP Guru</label><input id="inNipGuru" value="19000000 000000 0 002" oninput="saveState()" onchange="saveState()" /></div>
         <div><label>Jenis Tes</label><input id="inJenisTes" value="PENILAIAN SUMATIF AKHIR SEMESTER" oninput="saveState()" onchange="saveState()" /></div>
         <div><label>Materi Pokok</label><input id="inMateri" value="BAB I - BAB V" oninput="saveState()" onchange="saveState()" /></div>
         <div><label>Kelas / Semester</label><input id="inKelas" value="I (Satu)/ Ganjil" oninput="saveState()" onchange="saveState()" /></div>
@@ -239,7 +239,7 @@
     <div class="card">
       <h2>Pembuat Lembar Jawaban Komputer (LJK) Siap Cetak</h2>
       <p style="font-size:0.82rem; color:var(--muted); margin-top:0;">
-        LJK dilengkapi <b>4 kotak jangkar hitam (fiducial marker)</b> di keempat sudut agar kamera HP mengenali posisi bulatan secara presisi. Jika total soal ringkas (misal $\le 50$ nomor), LJK dan ruang jawaban Uraian otomatis ditata rapi dalam <b>1 halaman</b>.
+        LJK dilengkapi <b>4 kotak jangkar hitam (fiducial marker)</b> di keempat sudut agar kamera HP mengenali posisi bulatan secara presisi. Jika total soal ringkas (misal &le; 50 nomor), LJK dan ruang jawaban Uraian otomatis ditata rapi dalam <b>1 halaman</b>.
       </p>
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:12px 0;padding:12px;border:1px solid #cbd5e1;border-radius:10px;background:#f8fafc;">
         <div><label for="ljkPGCols">Kolom PG (Otomatis/1–5)</label><input type="number" id="ljkPGCols" min="0" max="5" value="0" onchange="updateLJKLayoutConfig()" title="0 = Otomatis efisien sesuai jumlah soal"></div>
@@ -274,7 +274,7 @@
   <section id="tab-scan" class="tab-page">
     <div class="card">
       <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px; border-bottom:1px solid #e2e8f0; padding-bottom:6px; margin-bottom:10px;">
-        <h2 style="border:none; margin:0; padding:0;">Pemindai LJK via Kamera / Foto (OMR)</h2>
+        <h2 style="border:none; margin:0; padding:0;">Pemindai LJK via Kamera / File Foto (OMR)</h2>
         <span class="badge badge-tuntas" id="scanCounterBadge">Terscan Sesi Ini: 0 LJK</span>
       </div>
 
@@ -282,8 +282,8 @@
         <button class="btn btn-primary" onclick="startCamera()">📷 Buka Kamera</button>
         <button class="btn btn-success" onclick="captureFromVideo()">⚡ Jepret & Koreksi</button>
         <label class="btn btn-outline" style="margin:0; cursor:pointer;">
-          📁 Pilih / Foto LJK
-          <input id="omrFileInput" type="file" accept="image/*" capture="environment" style="display:none;" onchange="loadImageFile(event)" />
+          📁 Pilih File LJK
+          <input id="omrFileInput" type="file" accept="image/*" style="display:none;" onchange="loadImageFile(event)" />
         </label>
         <button class="btn btn-warning btn-sm" onclick="prepareNextScan(false)">🔄 Scan Ulang / Bersihkan</button>
         <button class="btn btn-danger btn-sm" id="btnStopCam" style="display:none;" onclick="stopCamera()">⏹️ Tutup Kamera</button>
@@ -314,7 +314,7 @@
 
       <div class="card" style="background:#f8fafc; margin-bottom:0;">
         <h3 style="margin:0 0 8px 0; font-size:0.9rem;">Hasil Pembacaan LJK & Koreksi Cepat</h3>
-        <div id="scanResultSummary" style="font-size:0.84rem; margin-bottom:8px;">Belum ada LJK dipindai. Buka kamera atau pilih foto LJK untuk mulai memindai.</div>
+        <div id="scanResultSummary" style="font-size:0.84rem; margin-bottom:8px;">Belum ada LJK dipindai. Buka kamera atau pilih file foto LJK untuk mulai memindai.</div>
         <div id="scanAnswersEditor" style="display:flex; flex-wrap:wrap; gap:4px; margin-bottom:10px;"></div>
         <div id="scanUraianInputs" class="grid-3" style="margin-bottom:10px;"></div>
         <div class="grid-2">
@@ -415,7 +415,7 @@ function getDefaultState() {
   return {
     meta: {
       sekolah: 'SDN Nagreg', kepsek: 'Aep Sudrajat, S.Pd', nipKepsek: '19000000 000000 0 000',
-      guru: 'Apipudin, S.Pd.I', nipGuru: '19000000 000000 0 000', mapel: 'PAI dan Budi Pekerti',
+      guru: 'Apipudin, S.Pd.I', nipGuru: '19000000 000000 0 002', mapel: 'PAI',
       jenisTes: 'PENILAIAN SUMATIF AKHIR SEMESTER', materi: 'BAB I - BAB V',
       kelas: 'I (Satu)/ Ganjil', tapel: '2025 - 2026', tglTes: '29 September 2025',
       tglPeriksa: '30 September 2025', kktp: 70, tempat: 'Bandung'
@@ -428,16 +428,16 @@ function getDefaultState() {
       bobotPG: 0.7, bobotUR: 0.3
     },
     students: [
-      { nis: '001', nama: 'ADEVA AZZAHRA GUMILANG', pg: 'XXAAAAAAAAAABBAXBXXX', bs: '', ur: [1,1,1,1,1], remedial: 94 },
-      { nis: '002', nama: 'ADZKIA SHAKILA ZAHRA', pg: 'BVBVCBCCCCCVCVCCAVVA', bs: '', ur: [2,2,3,2,2], remedial: 94 },
-      { nis: '003', nama: 'AGUNG PIRMAN PAUZI', pg: 'BBCCABAACCAACBBCBACC', bs: '', ur: [1,1,1,1,1], remedial: 94 },
-      { nis: '004', nama: 'ALDEN FAUJI RESMANA', pg: 'BBBCBCCACCCCBCBBCABA', bs: '', ur: [3,3,1,3,4], remedial: 94 },
-      { nis: '005', nama: 'FADLY FAKHRY ATHAHAFIS', pg: 'BBAAACABCCCCABBCAACC', bs: '', ur: [3,2,3,2,3], remedial: null },
-      { nis: '006', nama: 'INDRA ARDIANSYAH', pg: 'BBCBACAABCBCABBCCACC', bs: '', ur: [3,2,3,3,2], remedial: null },
-      { nis: '007', nama: 'KEYLA JASMINE', pg: 'BBCBACAACCCABBCCCACC', bs: '', ur: [1,1,3,2,1], remedial: 94 },
-      { nis: '008', nama: 'MUHAMMAD ALI ZAINAL ABIDIN', pg: 'BBAAAABBCCBBABBAAAAC', bs: '', ur: [1,1,1,1,1], remedial: null },
-      { nis: '009', nama: 'MUHAMMAD ZIDAN NUGRAHA', pg: 'BBACABCCBCCBABBCCAAC', bs: '', ur: [3,2,3,3,3], remedial: null },
-      { nis: '010', nama: 'EARLITA ARSYFA SALSABILA', pg: 'ABACBAABBVAAACAVBBCC', bs: '', ur: [3,3,3,1,4], remedial: 94 }
+      { nis: '001', nama: 'ADEVA AZZAHRA', pg: 'XXAAAAAAAAAABBAXBXXX', bs: '', ur: [1,1,1,1,1], remedial: 94 },
+      { nis: '002', nama: 'ADZKIA ZAHRA', pg: 'BVBVCBCCCCCVCVCCAVVA', bs: '', ur: [2,2,3,2,2], remedial: 94 },
+      { nis: '003', nama: 'PIRMAN PAUZI', pg: 'BBCCABAACCAACBBCBACC', bs: '', ur: [1,1,1,1,1], remedial: 94 },
+      { nis: '004', nama: 'FAUJI RESMANA', pg: 'BBBCBCCACCCCBCBBCABA', bs: '', ur: [3,3,1,3,4], remedial: 94 },
+      { nis: '005', nama: 'FAKHRY ATHAHAFIS', pg: 'BBAAACABCCCCABBCAACC', bs: '', ur: [3,2,3,2,3], remedial: null },
+      { nis: '006', nama: 'ARDIANSYAH', pg: 'BBCBACAABCBCABBCCACC', bs: '', ur: [3,2,3,3,2], remedial: null },
+      { nis: '007', nama: 'JASMINE', pg: 'BBCBACAACCCABBCCCACC', bs: '', ur: [1,1,3,2,1], remedial: 94 },
+      { nis: '008', nama: 'ZAINAL ABIDIN', pg: 'BBAAAABBCCBBABBAAAAC', bs: '', ur: [1,1,1,1,1], remedial: null },
+      { nis: '009', nama: 'MUHAMMAD NUGRAHA', pg: 'BBACABCCBCCBABBCCAAC', bs: '', ur: [3,2,3,3,3], remedial: null },
+      { nis: '010', nama: 'SALSABILA', pg: 'ABACBAABBVAAACAVBBCC', bs: '', ur: [3,3,3,1,4], remedial: 94 }
     ]
   };
 }
@@ -1055,10 +1055,6 @@ function getBSQuestionNo(index) {
   return pgCount + Number(index || 0) + 1;
 }
 
-/**
- * Menghitung tata letak terpadu LJK (No. Absen, PG, B-S, dan Uraian dalam 1 halaman jika muat).
- * Koordinat (nx, ny) selalu dinormalisasi 0..1 terhadap pusat 4 fiducial marker.
- */
 function getOMRLayout() {
   const jmlPG = Math.max(0, Number(state.config.jmlPG) || 0);
   const opsi = Math.min(5, Math.max(3, Number(state.config.opsiPG) || 4));
@@ -1067,7 +1063,6 @@ function getOMRLayout() {
   const jmlUR = Math.max(0, Number(state.config.jmlUR) || 0);
   const uraianMode = state.config.uraianMode || 'auto';
 
-  // Penentuan kolom & baris PG otomatis yang efisien (maks 5 kolom)
   const userPGCols = Number(state.config.pgCols) || 0;
   const maxPGRows = Math.min(15, Math.max(5, Number(state.config.pgRows) || 10));
   const autoPGCols = jmlPG <= 10 ? 2 : (jmlPG <= 20 ? 2 : (jmlPG <= 30 ? 3 : (jmlPG <= 40 ? 4 : 5)));
@@ -1075,7 +1070,6 @@ function getOMRLayout() {
   const pgCols = Math.min(5, Math.max(userPGCols > 0 ? userPGCols : autoPGCols, minPGColsNeeded));
   const pgRows = Math.max(1, Math.ceil(jmlPG / pgCols));
 
-  // Penentuan kolom & baris B-S otomatis yang efisien
   const userBSCols = Number(state.config.bsCols) || 0;
   const maxBSRows = Math.min(12, Math.max(4, Number(state.config.bsRows) || 8));
   const autoBSCols = jmlBS <= 6 ? 2 : (jmlBS <= 16 ? 2 : (jmlBS <= 24 ? 3 : (jmlBS <= 32 ? 4 : 5)));
@@ -1085,7 +1079,6 @@ function getOMRLayout() {
 
   const bubbles = [];
 
-  // 1. Grid Nomor Absen (2 digit: Puluhan & Satuan) di kanan atas
   for (let d = 0; d < 2; d++) {
     for (let num = 0; num <= 9; num++) {
       bubbles.push({
@@ -1098,12 +1091,11 @@ function getOMRLayout() {
     }
   }
 
-  // 2. Grid Pilihan Ganda (mulai di bawah kotak identitas)
   const pgHeaderY = 0.258;
   const pgStartY = 0.285;
   const pgRowStep = 0.0218;
   const pgColWidth = 0.904 / pgCols;
-  const bubbleR_norm = 0.0102; // ~7.4px pada lebar frame 720px
+  const bubbleR_norm = 0.0102;
 
   for (let q = 0; q < jmlPG; q++) {
     const colIdx = Math.floor(q / pgRows);
@@ -1125,7 +1117,6 @@ function getOMRLayout() {
 
   let curY = jmlPG > 0 ? (pgStartY + (pgRows - 1) * pgRowStep + 0.024) : pgHeaderY;
 
-  // 3. Grid Benar - Salah (langsung menyambung di bawah PG tanpa ruang terbuang)
   let bsHeaderY = curY;
   let bsStartY = curY + 0.026;
   const bsRowStep = 0.0218;
@@ -1156,10 +1147,8 @@ function getOMRLayout() {
     curY = bsStartY + (bsRows - 1) * bsRowStep + 0.024;
   }
 
-  // 4. Penempatan Lembar Jawaban Uraian (Integrasi 1 Halaman jika muat!)
   const maxPageY = 0.972;
   const availUraianH = Math.max(0, maxPageY - curY - 0.026);
-  // Tinggi minimum nyaman per nomor uraian di halaman 1 (~46px = 0.044 frame height)
   const minPerUraianH = uraianMode === 'single' ? 0.026 : 0.044;
   let urOnPage1 = 0;
 
@@ -1168,7 +1157,6 @@ function getOMRLayout() {
     if (uraianMode === 'single') {
       urOnPage1 = jmlUR;
     } else {
-      // Mode otomatis: muat sebanyak mungkin (seluruhnya jika muat, terutama saat total soal <= 50)
       urOnPage1 = Math.min(jmlUR, Math.max(0, maxFit));
     }
   }
@@ -1207,7 +1195,6 @@ function renderLJKPreview() {
   ctx.fillStyle = '#ffffff';
   ctx.fillRect(0, 0, W, H);
 
-  // 4 Fiducial Anchor Markers (Hitam Pekat di keempat sudut)
   const margin = 24, mkSize = 26;
   const anchors = [
     [margin, margin],
@@ -1218,18 +1205,15 @@ function renderLJKPreview() {
   ctx.fillStyle = '#000000';
   anchors.forEach(([ax, ay]) => ctx.fillRect(ax, ay, mkSize, mkSize));
 
-  // Area frame ternormalisasi antara pusat 4 marker
-  const fx = margin + mkSize / 2; // 37
-  const fy = margin + mkSize / 2; // 37
-  const fw = W - 2 * fx;          // 720
-  const fh = H - 2 * fy;          // 1049
+  const fx = margin + mkSize / 2;
+  const fy = margin + mkSize / 2;
+  const fw = W - 2 * fx;
+  const fh = H - 2 * fy;
 
-  // Bingkai luar bersih di dalam area marker
   ctx.strokeStyle = '#0f172a';
   ctx.lineWidth = 1.4;
   ctx.strokeRect(fx + 20, fy + 8, fw - 40, fh - 16);
 
-  // --- KOP LJK & IDENTITAS SISWA RINGKAS ---
   const leftBoxX = fx + 28;
   const leftBoxW = fw * 0.70;
   ctx.strokeStyle = '#334155';
@@ -1249,7 +1233,6 @@ function renderLJKPreview() {
   ctx.fillText(`Kelas: ${state.meta.kelas} • Tahun: ${state.meta.tapel} • Tgl: ${state.meta.tglTes}`, leftBoxX + 10, fy + 81);
   ctx.fillText(`Materi: ${state.meta.materi}`, leftBoxX + 10, fy + 94);
 
-  // Kotak Identitas Siswa & Cara Menghitamkan
   const idBoxY = fy + 106;
   ctx.strokeStyle = '#334155';
   ctx.strokeRect(leftBoxX, idBoxY, leftBoxW, 132);
@@ -1258,7 +1241,6 @@ function renderLJKPreview() {
   ctx.fillText('NAMA SISWA  : _______________________________________________', leftBoxX + 10, idBoxY + 24);
   ctx.fillText('NIS / KELAS   : ______________________   PARAF: _______________', leftBoxX + 10, idBoxY + 50);
 
-  // Garis pemisah petunjuk di dalam kotak identitas
   ctx.strokeStyle = '#cbd5e1';
   ctx.beginPath();
   ctx.moveTo(leftBoxX + 8, idBoxY + 64);
@@ -1273,7 +1255,6 @@ function renderLJKPreview() {
   ctx.fillText('1. Hitamkan penuh bulatan jawaban menggunakan pensil 2B atau spidol hitam.', leftBoxX + 10, idBoxY + 95);
   ctx.fillText('2. Hitamkan juga 2 digit Nomor Absen Anda pada kotak di sebelah kanan.', leftBoxX + 10, idBoxY + 109);
 
-  // Contoh visual benar vs salah
   ctx.fillText('Contoh Benar:', leftBoxX + 10, idBoxY + 124);
   ctx.beginPath(); ctx.arc(leftBoxX + 82, idBoxY + 121, 5.5, 0, Math.PI * 2); ctx.fillStyle = '#0f172a'; ctx.fill();
   ctx.fillStyle = '#334155';
@@ -1290,7 +1271,6 @@ function renderLJKPreview() {
 
   const layout = getOMRLayout();
 
-  // Kotak Nomor Absen (kanan atas sejajar kop & identitas)
   const absX = fx + 0.765 * fw;
   const absY = fy + 14;
   const absW = 0.195 * fw;
@@ -1307,7 +1287,6 @@ function renderLJKPreview() {
   ctx.font = '8.5px sans-serif';
   ctx.fillText('Puluhan   Satuan', absX + absW / 2, absY + 31);
 
-  // Gambar semua bulatan (Absen, PG, B-S)
   const rBubble = layout.bubbleR_norm * fw;
   layout.bubbles.forEach(b => {
     const cx = fx + b.nx * fw;
@@ -1325,7 +1304,6 @@ function renderLJKPreview() {
     ctx.fillText(b.type === 'absen' ? String(b.val) : b.letter, cx, cy + 0.3);
   });
 
-  // --- SEKSI I: PILIHAN GANDA ---
   ctx.textAlign = 'left';
   ctx.textBaseline = 'alphabetic';
   const secPGY = fy + layout.pgHeaderY * fh;
@@ -1335,7 +1313,6 @@ function renderLJKPreview() {
   ctx.font = 'bold 10px sans-serif';
   ctx.fillText(`I. PILIHAN GANDA (${state.config.jmlPG} SOAL)`, leftBoxX + 6, secPGY);
 
-  // Garis pemisah antar kolom PG agar rapi
   ctx.strokeStyle = '#e2e8f0';
   ctx.lineWidth = 0.9;
   for (let c = 1; c < layout.pgCols; c++) {
@@ -1356,7 +1333,6 @@ function renderLJKPreview() {
     ctx.fillText(`${String(q + 1).padStart(2, '0')}.`, baseX, y + 3);
   }
 
-  // --- SEKSI II: BENAR - SALAH (jika ada) ---
   if (state.config.jmlBS > 0) {
     const secBSY = fy + layout.bsHeaderY * fh;
     ctx.fillStyle = '#e2e8f0';
@@ -1385,7 +1361,6 @@ function renderLJKPreview() {
     }
   }
 
-  // --- SEKSI III: JAWABAN URAIAN PADA HALAMAN 1 (JIKA MUAT) ---
   const romawiUraian = state.config.jmlBS > 0 ? 'III' : 'II';
   if (state.config.jmlUR > 0 && layout.urOnPage1 > 0) {
     const secURY = fy + layout.uraianStartY * fh;
@@ -1416,7 +1391,6 @@ function renderLJKPreview() {
       ctx.font = 'bold 9.5px sans-serif';
       ctx.fillText(`${noSoal}.`, leftBoxX + 6, y0 + 13);
 
-      // Garis tulis tipis di dalam kotak uraian
       ctx.strokeStyle = '#cbd5e1';
       ctx.lineWidth = 0.7;
       const lineSpacing = 15;
@@ -1436,7 +1410,6 @@ function renderLJKPreview() {
     ctx.fillText(`${romawiUraian}. LEMBAR JAWABAN URAIAN (${state.config.jmlUR} SOAL) TERSEDIA PADA HALAMAN 2`, leftBoxX + 8, secURY + 4);
   }
 
-  // Render Halaman 2 (hanya jika ada Uraian lanjutan)
   const canvas2 = document.getElementById('ljkUraianCanvas2');
   if (layout.urOnPage2 > 0) {
     canvas2.style.display = 'block';
@@ -1445,7 +1418,6 @@ function renderLJKPreview() {
     canvas2.style.display = 'none';
   }
 
-  // Info Ringkasan Efisiensi Halaman
   const totalSoal = (Number(state.config.jmlPG) || 0) + (Number(state.config.jmlBS) || 0) + (Number(state.config.jmlUR) || 0);
   const infoEl = document.getElementById('ljkLayoutInfo');
   if (infoEl) {
@@ -1562,7 +1534,7 @@ function drawScannerIdleCanvas() {
   ctx.fillText('SIAP MEMINDAI LJK', canvas.width / 2, canvas.height / 2 - 14);
   ctx.font = '15px sans-serif';
   ctx.fillStyle = '#94a3b8';
-  ctx.fillText('Tekan "Buka Kamera" atau "Pilih / Foto LJK"', canvas.width / 2, canvas.height / 2 + 18);
+  ctx.fillText('Tekan "Buka Kamera" atau "Pilih File LJK"', canvas.width / 2, canvas.height / 2 + 18);
   ctx.textAlign = 'left';
 }
 
@@ -1579,7 +1551,7 @@ async function startCamera() {
     document.getElementById('videoBox').style.display = 'block';
     document.getElementById('btnStopCam').style.display = 'inline-flex';
   } catch (err) {
-    alert('Tidak dapat membuka kamera langsung (' + err.message + '). Gunakan tombol "Pilih / Foto LJK" untuk memotret dengan kamera HP.');
+    alert('Tidak dapat membuka kamera langsung (' + err.message + '). Gunakan tombol "Pilih File LJK" untuk mengambil gambar dari galeri atau file.');
   }
 }
 
@@ -1618,14 +1590,13 @@ function loadImageFile(ev) {
     off.getContext('2d').drawImage(img, 0, 0);
     loadedScanImage = off;
     URL.revokeObjectURL(objUrl);
-    // Reset input value agar dapat langsung memilih/memotret lembar LJK berikutnya tanpa perlu refresh/reset!
     input.value = '';
     reprocessOMR();
   };
   img.onerror = () => {
     URL.revokeObjectURL(objUrl);
     input.value = '';
-    alert('Gagal memuat gambar LJK. Silakan coba lagi.');
+    alert('Gagal memuat file gambar LJK. Silakan coba lagi.');
   };
   img.src = objUrl;
 }
@@ -1644,7 +1615,6 @@ function prepareNextScan(advanceStudent = true) {
   if (advanceStudent && state.students.length > 0) {
     const sel = document.getElementById('scanStudentSelect');
     const curIdx = parseInt(sel.value) || 0;
-    // Cari siswa berikutnya yang belum memiliki jawaban PG/BS, atau lanjut ke nomor berikutnya
     let nextIdx = (curIdx + 1) % state.students.length;
     for (let step = 1; step <= state.students.length; step++) {
       const candidate = (curIdx + step) % state.students.length;
@@ -1658,14 +1628,10 @@ function prepareNextScan(advanceStudent = true) {
     document.getElementById('scanResultSummary').innerHTML =
       `<span style="color:#059669;font-weight:700;">✅ Data tersimpan!</span> Siap memindai LJK berikutnya (Target berikutnya: <b>${nextIdx + 1}. ${state.students[nextIdx].nama}</b>).`;
   } else {
-    document.getElementById('scanResultSummary').textContent = 'Siap memindai LJK berikutnya. Jepret kamera atau pilih foto LJK.';
+    document.getElementById('scanResultSummary').textContent = 'Siap memindai LJK berikutnya. Jepret kamera atau pilih file foto LJK.';
   }
 }
 
-/**
- * Deteksi sub-pixel centroid 4 kotak jangkar hitam menggunakan Integral Image lokal adaptif
- * dan analisis komponen terhubung (Connected Components) berbentuk persegi.
- */
 function detectFiducialCorners(imgData, w, h) {
   const d = imgData.data;
   const n = w * h;
@@ -1675,7 +1641,6 @@ function detectFiducialCorners(imgData, w, h) {
     gray[i] = (77 * d[p] + 150 * d[p + 1] + 29 * d[p + 2]) >> 8;
   }
 
-  // Bangun Integral Image untuk threshold lokal adaptif O(1)
   const stride = w + 1;
   const integ = new Uint32Array((w + 1) * (h + 1));
   for (let y = 0; y < h; y++) {
@@ -1754,7 +1719,7 @@ function detectFiducialCorners(imgData, w, h) {
         if (aspect < 0.62 || aspect > 1.62) continue;
 
         const fillRatio = count / (bw * bh);
-        if (fillRatio < 0.64) continue; // Kotak jangkar pekat memiliki fillRatio tinggi (>0.75)
+        if (fillRatio < 0.64) continue;
 
         const centX = sumX / count;
         const centY = sumY / count;
@@ -1790,9 +1755,6 @@ function detectFiducialCorners(imgData, w, h) {
   return { found: false };
 }
 
-/**
- * Menghitung matriks Homografi 3x3 dari persegi satuan [0,1]^2 ke quadrilateral foto (tl, tr, br, bl)
- */
 function buildHomographyMapper(tl, tr, br, bl) {
   const dx1 = tr.x - br.x, dy1 = tr.y - br.y;
   const dx2 = bl.x - br.x, dy2 = bl.y - br.y;
@@ -1833,7 +1795,6 @@ function reprocessOMR() {
   const canvas = document.getElementById('omrCanvas');
   const ctx = canvas.getContext('2d');
 
-  // Pertahankan rasio asli foto saat analisis (maks sisi 1350px) agar lingkaran tidak gepeng
   const srcW = loadedScanImage.width;
   const srcH = loadedScanImage.height;
   const maxDim = 1350;
@@ -1858,7 +1819,6 @@ function reprocessOMR() {
     return;
   }
 
-  // Gambar garis bingkai kalibrasi 4 sudut + titik pusat marker
   ctx.strokeStyle = '#10b981';
   ctx.lineWidth = Math.max(2, Math.round(W * 0.003));
   ctx.beginPath();
@@ -1879,13 +1839,11 @@ function reprocessOMR() {
   const mapPoint = buildHomographyMapper(corners.tl, corners.tr, corners.br, corners.bl);
   const layout = getOMRLayout();
 
-  // Hitung radius bulatan dinamis berdasarkan lebar & tinggi frame terdeteksi
   const frameW = (Math.hypot(corners.tr.x - corners.tl.x, corners.tr.y - corners.tl.y) +
                   Math.hypot(corners.br.x - corners.bl.x, corners.br.y - corners.bl.y)) / 2;
   const rPx = Math.max(4, frameW * layout.bubbleR_norm);
   const d = imgData.data;
 
-  // Pengukuran kontras relatif: membandingkan inti bulatan vs cincin kertas di sekitarnya
   const measureRelativeFill = (cx, cy, rad) => {
     const innerR = rad * 0.66;
     const ringR1 = rad * 1.28;
@@ -1916,13 +1874,11 @@ function reprocessOMR() {
 
     if (coreCnt === 0 || ringVals.length === 0) return 0;
     const coreLum = coreSum / coreCnt;
-    // Gunakan persentil ke-70 pada cincin luar agar tidak terpengaruh garis tepi bulatan/teks di dekatnya
     ringVals.sort((a, b) => a - b);
     const paperLum = ringVals[Math.floor(ringVals.length * 0.7)];
     return Math.max(0, (paperLum - coreLum) / Math.max(45, paperLum));
   };
 
-  // Konversi slider sensitivitas (30..85%) ke ambang kontras fill (semakin tinggi sensitivitas, semakin mudah mendeteksi arsiran tipis)
   const threshPct = parseInt(document.getElementById('omrThreshold').value) || 58;
   const minFillCutoff = Math.max(0.14, 0.44 - (threshPct - 30) * 0.0048);
 
@@ -1940,7 +1896,6 @@ function reprocessOMR() {
     else if (b.type === 'bs') bsMeasured[b.qIndex].push(item);
   });
 
-  // Evaluasi Nomor Absen
   [0, 1].forEach(digit => {
     const list = absenMeasured[digit].slice().sort((a, b) => b.fillScore - a.fillScore);
     if (list[0] && list[0].fillScore >= minFillCutoff) {
@@ -1948,7 +1903,6 @@ function reprocessOMR() {
     }
   });
 
-  // Evaluasi PG per nomor soal (relatif antar opsi dalam 1 nomor)
   const pgChoices = pgMeasured.map(opts => {
     const sorted = opts.slice().sort((a, b) => b.fillScore - a.fillScore);
     const top = sorted[0];
@@ -1963,7 +1917,6 @@ function reprocessOMR() {
     return chosen;
   });
 
-  // Evaluasi Benar-Salah per nomor soal
   const bsChoices = bsMeasured.map(opts => {
     const sorted = opts.slice().sort((a, b) => b.fillScore - a.fillScore);
     const top = sorted[0];
@@ -1978,7 +1931,6 @@ function reprocessOMR() {
     return chosen;
   });
 
-  // Gambar overlay deteksi pada setiap bulatan
   const allMeasured = [
     ...absenMeasured[0], ...absenMeasured[1],
     ...pgMeasured.flat(), ...bsMeasured.flat()
@@ -2003,7 +1955,6 @@ function reprocessOMR() {
     }
   });
 
-  // Set otomatis pilihan siswa dari Nomor Absen yang terdeteksi
   const d0 = absenMeasured[0].find(x => x.filled);
   const d1 = absenMeasured[1].find(x => x.filled);
   if (d0 || d1) {
