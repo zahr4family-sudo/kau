@@ -116,36 +116,104 @@
     }
     .sub-tab.active { background: var(--primary); color: #fff; border-color: var(--primary); }
 
-    /* CamScanner-style Viewfinder & OMR Canvas */
+    /* Full-Screen CamScanner-style Viewfinder & OMR Canvas */
     .scanner-box {
-      position: relative; width: 100%; max-width: 520px; margin: 0 auto 10px auto;
-      background: #020617; border-radius: 12px; overflow: hidden; box-shadow: 0 6px 18px rgba(0,0,0,0.28);
+      position: fixed;
+      inset: 0;
+      width: 100vw;
+      height: 100vh;
+      height: 100dvh;
+      max-width: none;
+      margin: 0;
+      background: #000000;
+      border-radius: 0;
+      overflow: hidden;
+      z-index: 9999;
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
     }
-    .scanner-box video { width: 100%; display: block; }
+    .scanner-box.is-open {
+      display: flex !important;
+    }
+    .scanner-box video {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
     #liveGuideCanvas {
-      position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none;
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 2;
     }
     .cam-hud-top {
-      position: absolute; top: 8px; left: 8px; right: 8px; display: flex; justify-content: space-between;
-      align-items: center; gap: 6px; pointer-events: none; z-index: 4;
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      padding: max(14px, env(safe-area-inset-top)) 14px 14px 14px;
+      background: linear-gradient(to bottom, rgba(2, 6, 23, 0.85), rgba(2, 6, 23, 0));
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      z-index: 4;
     }
     .cam-status-pill {
-      background: rgba(15, 23, 42, 0.82); color: #f8fafc; padding: 5px 10px; border-radius: 99px;
-      font-size: 0.74rem; font-weight: 700; backdrop-filter: blur(4px); border: 1px solid rgba(255,255,255,0.18);
+      background: rgba(15, 23, 42, 0.86);
+      color: #f8fafc;
+      padding: 7px 13px;
+      border-radius: 99px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      backdrop-filter: blur(6px);
+      border: 1px solid rgba(255, 255, 255, 0.24);
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
     }
     .cam-hud-bottom {
-      position: absolute; bottom: 10px; left: 10px; right: 10px; display: flex; justify-content: space-between;
-      align-items: center; gap: 8px; z-index: 4;
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 18px 18px max(24px, env(safe-area-inset-bottom)) 18px;
+      background: linear-gradient(to top, rgba(2, 6, 23, 0.9), rgba(2, 6, 23, 0));
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      gap: 12px;
+      z-index: 4;
     }
     .cam-shutter-btn {
-      width: 54px; height: 54px; border-radius: 50%; background: #ffffff; border: 4px solid #10b981;
-      box-shadow: 0 2px 12px rgba(0,0,0,0.45); cursor: pointer; display: grid; place-items: center;
-      font-size: 1.25rem; transition: 0.12s;
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      background: #ffffff;
+      border: 5px solid #10b981;
+      box-shadow: 0 4px 18px rgba(0, 0, 0, 0.55);
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+      font-size: 1.65rem;
+      transition: 0.12s;
     }
     .cam-shutter-btn:active { transform: scale(0.92); }
     .cam-mini-btn {
-      background: rgba(15, 23, 42, 0.82); color: #fff; border: 1px solid rgba(255,255,255,0.25);
-      border-radius: 99px; padding: 7px 11px; font-size: 0.74rem; font-weight: 600; cursor: pointer;
+      background: rgba(15, 23, 42, 0.86);
+      color: #fff;
+      border: 1px solid rgba(255, 255, 255, 0.28);
+      border-radius: 99px;
+      padding: 10px 15px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      cursor: pointer;
+      backdrop-filter: blur(6px);
     }
     #omrCanvas { width: 100%; display: block; touch-action: none; }
     .stat-box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 10px; text-align: center; }
@@ -187,9 +255,15 @@
         overflow: visible !important;
         -webkit-print-color-adjust: exact !important;
         print-color-adjust: exact !important;
+        color-adjust: exact !important;
       }
       #appRoot {
         display: none !important;
+      }
+      #printArea, #printArea *, #printArea.is-printing, #printArea.is-printing * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        color-adjust: exact !important;
       }
       #printArea, #printArea.is-printing {
         display: block !important;
@@ -231,10 +305,11 @@
       }
       #printArea .chart-card {
         border: 1px solid #cbd5e1 !important;
+        background: #ffffff !important;
         break-inside: avoid !important;
         page-break-inside: avoid !important;
       }
-      #printArea svg {
+      #printArea .chart-card img, #printArea svg {
         max-width: 100% !important;
         height: auto !important;
         display: block !important;
@@ -521,8 +596,7 @@
         </div>
 
         <div class="toolbar">
-          <button class="btn btn-primary" onclick="startCamera()">📷 Buka Kamera</button>
-          <button class="btn btn-success" onclick="captureFromVideo()">⚡ Jepret & Luruskan</button>
+          <button class="btn btn-primary" onclick="startCamera()">📷 Buka Kamera Full-Screen</button>
           <label class="btn btn-outline" style="margin:0; cursor:pointer;">
             📁 Pilih Foto LJK (Bisa Banyak)
             <input id="omrFileInput" type="file" accept="image/*" multiple style="display:none;" onchange="loadImageFiles(event)" />
@@ -531,13 +605,16 @@
           <button class="btn btn-warning btn-sm" onclick="prepareNextScan(false)">🔄 Scan Ulang / Bersihkan</button>
         </div>
 
-        <!-- Viewfinder Live CamScanner -->
+        <!-- Viewfinder Live CamScanner Full-Screen (100% Layar HP) -->
         <div class="scanner-box" id="videoBox" style="display:none;">
           <video id="cameraVideo" autoplay playsinline muted></video>
           <canvas id="liveGuideCanvas"></canvas>
           <div class="cam-hud-top">
-            <span class="cam-status-pill" id="liveCamStatus">🔍 Arahkan ke 4 sudut hitam LJK...</span>
-            <button class="cam-mini-btn" onclick="stopCamera()">✕ Tutup</button>
+            <span class="cam-status-pill" id="liveCamStatus">🔍 Posisikan 4 sudut LJK...</span>
+            <div style="display:flex; gap:6px; align-items:center;">
+              <button class="cam-mini-btn" id="btnHudAutoCap" onclick="toggleAutoCapture()">🤖 Auto: ON</button>
+              <button class="cam-mini-btn" style="background:rgba(220,38,38,0.88);" onclick="stopCamera()">✕ Tutup</button>
+            </div>
           </div>
           <div class="cam-hud-bottom">
             <button class="cam-mini-btn" id="btnTorchCam" onclick="toggleCameraTorch()">🔦 Senter</button>
@@ -594,6 +671,10 @@
           <div id="scanResultSummary" style="font-size:0.84rem; margin-bottom:8px;">Belum ada LJK dipindai. Buka kamera atau pilih file foto LJK untuk mulai memindai.</div>
           <div id="scanAnswersEditor" style="display:flex; flex-wrap:wrap; gap:4px; margin-bottom:10px;"></div>
           <div id="scanUraianInputs" class="grid-3" style="margin-bottom:10px;"></div>
+          <div style="margin-bottom:8px; display:flex; align-items:center; gap:8px; font-size:0.8rem; color:#334155;">
+            <input type="checkbox" id="chkAutoReopenCam" style="width:auto; margin:0;" />
+            <label for="chkAutoReopenCam" style="margin:0; cursor:pointer; font-weight:600; color:#1e3a8a;">⚡ Otomatis buka kamera full-screen lagi setelah simpan (untuk scan massal cepat)</label>
+          </div>
           <div class="grid-2">
             <button class="btn btn-success" style="width:100%;" onclick="saveScannedResult(true)">💾 Simpan & Lanjut Scan Berikutnya ➡️</button>
             <button class="btn btn-outline" style="width:100%;" onclick="saveScannedResult(false)">💾 Simpan Saja (Tetap di Siswa Ini)</button>
@@ -2069,19 +2150,31 @@ function drawLJKOnCanvas(canvas, studentObj = null) {
   ctx.fillRect(0, 0, W, H);
 
   const margin = 24, mkSize = 26;
-  const anchors = [
-    [margin, margin],
-    [W - margin - mkSize, margin],
-    [margin, H - margin - mkSize],
-    [W - margin - mkSize, H - margin - mkSize]
-  ];
-  ctx.fillStyle = '#000000';
-  anchors.forEach(([ax, ay]) => ctx.fillRect(ax, ay, mkSize, mkSize));
-
   const fx = margin + mkSize / 2;
   const fy = margin + mkSize / 2;
   const fw = W - 2 * fx;
   const fh = H - 2 * fy;
+
+  const anchorCenters = [
+    [fx, fy],
+    [W - fx, fy],
+    [fx, H - fy],
+    [W - fx, H - fy]
+  ];
+  anchorCenters.forEach(([cx, cy]) => {
+    // Zona putih bersih (quiet zone)
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(cx - 20, cy - 20, 40, 40);
+    // Kotak target luar hitam (30x30)
+    ctx.fillStyle = '#000000';
+    ctx.fillRect(cx - 15, cy - 15, 30, 30);
+    // Cincin putih dalam (18x18)
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(cx - 9, cy - 9, 18, 18);
+    // Inti hitam tengah (10x10)
+    ctx.fillStyle = '#000000';
+    ctx.fillRect(cx - 5, cy - 5, 10, 10);
+  });
 
   const layout = getOMRLayout();
   const isSquare = layout.bubbleShape === 'square';
@@ -2572,6 +2665,8 @@ function drawScannerIdleCanvas() {
   ctx.textAlign = 'left';
 }
 
+let lastScanCameFromCamera = false;
+
 function toggleAutoCapture() {
   autoCaptureEnabled = !autoCaptureEnabled;
   stableCornerFrames = 0;
@@ -2579,6 +2674,10 @@ function toggleAutoCapture() {
   if (btn) {
     btn.textContent = autoCaptureEnabled ? '🤖 Auto-Jepret: ON' : '🤖 Auto-Jepret: OFF';
     btn.className = autoCaptureEnabled ? 'btn btn-outline btn-sm' : 'btn btn-sm';
+  }
+  const hudBtn = document.getElementById('btnHudAutoCap');
+  if (hudBtn) {
+    hudBtn.textContent = autoCaptureEnabled ? '🤖 Auto: ON' : '🤖 Auto: OFF';
   }
 }
 
@@ -2596,12 +2695,29 @@ async function startCamera() {
         facingMode: { ideal: cameraFacingMode },
         width: { ideal: 1920 },
         height: { ideal: 2560 }
-      }
+      },
+      audio: false
     });
+
+    // Aktifkan continuous autofocus bila didukung kamera HP
+    const track = cameraStream.getVideoTracks()[0];
+    if (track && track.getCapabilities && track.applyConstraints) {
+      try {
+        const caps = track.getCapabilities();
+        if (caps.focusMode && caps.focusMode.includes('continuous')) {
+          await track.applyConstraints({ advanced: [{ focusMode: 'continuous' }] });
+        }
+      } catch (e) {}
+    }
+
     const video = document.getElementById('cameraVideo');
     video.srcObject = cameraStream;
     await video.play();
-    document.getElementById('videoBox').style.display = 'block';
+
+    const vbox = document.getElementById('videoBox');
+    vbox.style.display = 'flex';
+    vbox.classList.add('is-open');
+    document.body.style.overflow = 'hidden';
     startLiveScannerLoop();
   } catch (err) {
     alert('Tidak dapat membuka kamera langsung (' + err.message + '). Gunakan tombol "Pilih Foto LJK" untuk mengambil gambar dari galeri atau file.');
@@ -2619,7 +2735,12 @@ function stopCamera() {
   }
   const video = document.getElementById('cameraVideo');
   if (video) video.srcObject = null;
-  document.getElementById('videoBox').style.display = 'none';
+  const vbox = document.getElementById('videoBox');
+  if (vbox) {
+    vbox.classList.remove('is-open');
+    vbox.style.display = 'none';
+  }
+  document.body.style.overflow = '';
 }
 
 async function switchCameraFacing() {
@@ -2651,7 +2772,7 @@ function startLiveScannerLoop() {
   const tick = (now) => {
     if (!cameraStream) return;
     liveScanRafId = requestAnimationFrame(tick);
-    if (now - lastRun < 110) return;
+    if (now - lastRun < 100) return;
     lastRun = now;
 
     const video = document.getElementById('cameraVideo');
@@ -2661,12 +2782,27 @@ function startLiveScannerLoop() {
 
     const vw = video.videoWidth;
     const vh = video.videoHeight;
-    if (guideCanvas.width !== vw || guideCanvas.height !== vh) {
-      guideCanvas.width = vw;
-      guideCanvas.height = vh;
+    const cw = guideCanvas.clientWidth || window.innerWidth;
+    const ch = guideCanvas.clientHeight || window.innerHeight;
+    const dpr = Math.min(2, window.devicePixelRatio || 1);
+
+    if (guideCanvas.width !== Math.round(cw * dpr) || guideCanvas.height !== Math.round(ch * dpr)) {
+      guideCanvas.width = Math.round(cw * dpr);
+      guideCanvas.height = Math.round(ch * dpr);
     }
 
-    const scale = 340 / Math.max(vw, vh);
+    // Pemetaan koordinat akurat mengikuti object-fit: cover pada layar HP penuh
+    const coverScale = Math.max(cw / vw, ch / vh);
+    const dispW = vw * coverScale;
+    const dispH = vh * coverScale;
+    const offX = (cw - dispW) / 2;
+    const offY = (ch - dispH) / 2;
+    const mapVideoToScreen = (vx, vy) => ({
+      x: (offX + vx * coverScale) * dpr,
+      y: (offY + vy * coverScale) * dpr
+    });
+
+    const scale = 380 / Math.max(vw, vh);
     const pw = Math.round(vw * scale);
     const ph = Math.round(vh * scale);
     probeCanvas.width = pw;
@@ -2676,11 +2812,24 @@ function startLiveScannerLoop() {
     const res = detectFiducialCorners(imgData, pw, ph);
 
     const gctx = guideCanvas.getContext('2d');
-    gctx.clearRect(0, 0, vw, vh);
+    const sw = guideCanvas.width;
+    const sh = guideCanvas.height;
+    gctx.clearRect(0, 0, sw, sh);
+
+    // Bingkai panduan A4 di tengah layar HP penuh
+    const targetRatio = 720 / 1049;
+    let frameH = sh * 0.76;
+    let frameW = frameH * targetRatio;
+    if (frameW > sw * 0.88) {
+      frameW = sw * 0.88;
+      frameH = frameW / targetRatio;
+    }
+    const fx0 = (sw - frameW) / 2;
+    const fy0 = (sh - frameH) / 2;
 
     if (res.found) {
       const inv = 1 / scale;
-      const pts = {
+      const vPts = {
         tl: { x: res.tl.x * inv, y: res.tl.y * inv },
         tr: { x: res.tr.x * inv, y: res.tr.y * inv },
         br: { x: res.br.x * inv, y: res.br.y * inv },
@@ -2690,60 +2839,81 @@ function startLiveScannerLoop() {
       let maxDelta = 999;
       if (prevLiveCorners) {
         maxDelta = Math.max(
-          Math.hypot(pts.tl.x - prevLiveCorners.tl.x, pts.tl.y - prevLiveCorners.tl.y),
-          Math.hypot(pts.tr.x - prevLiveCorners.tr.x, pts.tr.y - prevLiveCorners.tr.y),
-          Math.hypot(pts.br.x - prevLiveCorners.br.x, pts.br.y - prevLiveCorners.br.y),
-          Math.hypot(pts.bl.x - prevLiveCorners.bl.x, pts.bl.y - prevLiveCorners.bl.y)
+          Math.hypot(vPts.tl.x - prevLiveCorners.tl.x, vPts.tl.y - prevLiveCorners.tl.y),
+          Math.hypot(vPts.tr.x - prevLiveCorners.tr.x, vPts.tr.y - prevLiveCorners.tr.y),
+          Math.hypot(vPts.br.x - prevLiveCorners.br.x, vPts.br.y - prevLiveCorners.br.y),
+          Math.hypot(vPts.bl.x - prevLiveCorners.bl.x, vPts.bl.y - prevLiveCorners.bl.y)
         );
       }
-      prevLiveCorners = pts;
+      prevLiveCorners = vPts;
 
-      if (maxDelta < vw * 0.015) {
+      if (maxDelta < vw * 0.016) {
         stableCornerFrames++;
       } else {
         stableCornerFrames = 1;
       }
 
-      gctx.fillStyle = 'rgba(16, 185, 129, 0.14)';
+      const sPts = {
+        tl: mapVideoToScreen(vPts.tl.x, vPts.tl.y),
+        tr: mapVideoToScreen(vPts.tr.x, vPts.tr.y),
+        br: mapVideoToScreen(vPts.br.x, vPts.br.y),
+        bl: mapVideoToScreen(vPts.bl.x, vPts.bl.y)
+      };
+
+      gctx.fillStyle = 'rgba(16, 185, 129, 0.16)';
       gctx.strokeStyle = '#10b981';
-      gctx.lineWidth = Math.max(4, vw * 0.006);
+      gctx.lineWidth = Math.max(4, 3 * dpr);
       gctx.beginPath();
-      gctx.moveTo(pts.tl.x, pts.tl.y);
-      gctx.lineTo(pts.tr.x, pts.tr.y);
-      gctx.lineTo(pts.br.x, pts.br.y);
-      gctx.lineTo(pts.bl.x, pts.bl.y);
+      gctx.moveTo(sPts.tl.x, sPts.tl.y);
+      gctx.lineTo(sPts.tr.x, sPts.tr.y);
+      gctx.lineTo(sPts.br.x, sPts.br.y);
+      gctx.lineTo(sPts.bl.x, sPts.bl.y);
       gctx.closePath();
       gctx.fill();
       gctx.stroke();
 
-      [pts.tl, pts.tr, pts.br, pts.bl].forEach(p => {
+      [sPts.tl, sPts.tr, sPts.br, sPts.bl].forEach(p => {
         gctx.fillStyle = '#34d399';
         gctx.beginPath();
-        gctx.arc(p.x, p.y, Math.max(8, vw * 0.012), 0, Math.PI * 2);
+        gctx.arc(p.x, p.y, 8 * dpr, 0, Math.PI * 2);
         gctx.fill();
         gctx.strokeStyle = '#ffffff';
-        gctx.lineWidth = 2;
+        gctx.lineWidth = 2.5 * dpr;
         gctx.stroke();
       });
 
-      const targetFrames = 8;
+      const targetFrames = 7;
       if (autoCaptureEnabled) {
         const pct = Math.min(100, Math.round((stableCornerFrames / targetFrames) * 100));
-        if (statusPill) statusPill.textContent = `🟢 LJK Terkunci (${pct}%) — Tahan Sebentar...`;
+        if (statusPill) statusPill.textContent = `🟢 LJK Terkunci (${pct}%) — Tahan...`;
         if (stableCornerFrames >= targetFrames) {
           stableCornerFrames = 0;
           prevLiveCorners = null;
           captureFromVideo();
         }
       } else {
-        if (statusPill) statusPill.textContent = `🟢 4 Sudut Terkunci — Tekan Tombol Jepret!`;
+        if (statusPill) statusPill.textContent = `🟢 4 Sudut Terkunci — Tekan Jepret!`;
       }
     } else {
       stableCornerFrames = 0;
       prevLiveCorners = null;
-      const padX = vw * 0.08, padY = vh * 0.06, arm = Math.min(vw, vh) * 0.07;
-      gctx.strokeStyle = 'rgba(255, 255, 255, 0.72)';
-      gctx.lineWidth = Math.max(3, vw * 0.004);
+
+      // Masking gelap tipis di luar bingkai panduan A4 agar fokus ke lembar jawaban
+      gctx.fillStyle = 'rgba(2, 6, 23, 0.34)';
+      gctx.fillRect(0, 0, sw, fy0);
+      gctx.fillRect(0, fy0 + frameH, sw, sh - (fy0 + frameH));
+      gctx.fillRect(0, fy0, fx0, frameH);
+      gctx.fillRect(fx0 + frameW, fy0, sw - (fx0 + frameW), frameH);
+
+      gctx.strokeStyle = 'rgba(255, 255, 255, 0.45)';
+      gctx.lineWidth = 1.5 * dpr;
+      gctx.setLineDash([8 * dpr, 6 * dpr]);
+      gctx.strokeRect(fx0, fy0, frameW, frameH);
+      gctx.setLineDash([]);
+
+      const arm = Math.min(frameW, frameH) * 0.085;
+      gctx.strokeStyle = '#38bdf8';
+      gctx.lineWidth = 3.5 * dpr;
       const drawBracket = (x, y, sx, sy) => {
         gctx.beginPath();
         gctx.moveTo(x + sx * arm, y);
@@ -2751,11 +2921,12 @@ function startLiveScannerLoop() {
         gctx.lineTo(x, y + sy * arm);
         gctx.stroke();
       };
-      drawBracket(padX, padY, 1, 1);
-      drawBracket(vw - padX, padY, -1, 1);
-      drawBracket(vw - padX, vh - padY, -1, -1);
-      drawBracket(padX, vh - padY, 1, -1);
-      if (statusPill) statusPill.textContent = '🔍 Posisikan 4 kotak sudut LJK ke dalam layar...';
+      drawBracket(fx0, fy0, 1, 1);
+      drawBracket(fx0 + frameW, fy0, -1, 1);
+      drawBracket(fx0 + frameW, fy0 + frameH, -1, -1);
+      drawBracket(fx0, fy0 + frameH, 1, -1);
+
+      if (statusPill) statusPill.textContent = '🔍 Sejajarkan 4 kotak sudut LJK ke dalam bingkai';
     }
   };
   liveScanRafId = requestAnimationFrame(tick);
@@ -2769,6 +2940,14 @@ function captureFromVideo() {
   off.width = video.videoWidth;
   off.height = video.videoHeight;
   off.getContext('2d').drawImage(video, 0, 0);
+
+  lastScanCameFromCamera = true;
+  const chkReopen = document.getElementById('chkAutoReopenCam');
+  if (chkReopen) chkReopen.checked = true;
+
+  // Tutup kamera full-screen otomatis setelah menjepret agar hasil bacaan langsung tampil jelas
+  stopCamera();
+
   loadedScanImage = off;
   manualCornerMode = false;
   currentDetectedCorners = null;
@@ -2791,6 +2970,7 @@ function loadImageFiles(ev) {
   const input = ev.target;
   const files = Array.from(input.files || []);
   if (!files.length) return;
+  lastScanCameFromCamera = false;
   batchFileQueue = files.slice(1);
   updateBatchBadge();
   loadSingleFileObject(files[0], () => {
@@ -3139,11 +3319,17 @@ function prepareNextScan(advanceStudent = true) {
     const nextIdx = parseInt(sel.value) || 0;
     document.getElementById('scanResultSummary').innerHTML =
       `<span style="color:#059669;font-weight:700;">✅ Data tersimpan!</span> Siap memindai LJK berikutnya (Target berikutnya: <b>${nextIdx + 1}. [${state.students[nextIdx].nis || '-'}] ${state.students[nextIdx].nama}</b>).`;
+
+    const chkReopen = document.getElementById('chkAutoReopenCam');
+    if (chkReopen && chkReopen.checked && lastScanCameFromCamera) {
+      setTimeout(() => startCamera(), 250);
+    }
   } else {
-    document.getElementById('scanResultSummary').textContent = 'Siap memindai LJK berikutnya. Buka kamera atau pilih file foto LJK.';
+    document.getElementById('scanResultSummary').textContent = 'Siap memindai LJK berikutnya. Buka kamera full-screen atau pilih file foto LJK.';
   }
 }
 
+// ==================== DETEKSI 4 TARGET JANGKAR KONSENTRIS & SUB-PIXEL ====================
 function detectFiducialCorners(imgData, w, h) {
   const d = imgData.data;
   const n = w * h;
@@ -3166,8 +3352,8 @@ function detectFiducialCorners(imgData, w, h) {
     }
   }
 
-  const winR = Math.max(12, Math.round(Math.min(w, h) * 0.04));
-  const isAdaptiveDark = (x, y) => {
+  const winR = Math.max(14, Math.round(Math.min(w, h) * 0.045));
+  const getLocalMean = (x, y) => {
     const x0 = Math.max(0, x - winR), y0 = Math.max(0, y - winR);
     const x1 = Math.min(w - 1, x + winR), y1 = Math.min(h - 1, y + winR);
     const area = (x1 - x0 + 1) * (y1 - y0 + 1);
@@ -3175,20 +3361,66 @@ function detectFiducialCorners(imgData, w, h) {
               - integ[y0 * stride + (x1 + 1)]
               - integ[(y1 + 1) * stride + x0]
               + integ[y0 * stride + x0];
-    const localMean = sum / area;
+    return sum / area;
+  };
+
+  const isAdaptiveDark = (x, y) => {
+    const localMean = getLocalMean(x, y);
     const g = gray[y * w + x];
-    return g < localMean * 0.72 && g < 165;
+    return g < localMean * 0.74 && g < 175;
   };
 
   const visited = new Uint8Array(n);
-  const queueX = new Int32Array(25000);
-  const queueY = new Int32Array(25000);
+  const queueX = new Int32Array(28000);
+  const queueY = new Int32Array(28000);
 
-  const findCornerSquare = (rx0, rx1, ry0, ry1, targetX, targetY) => {
+  const sampleBoxMean = (cx, cy, rMin, rMax) => {
+    const x0 = Math.max(0, Math.round(cx - rMax));
+    const x1 = Math.min(w - 1, Math.round(cx + rMax));
+    const y0 = Math.max(0, Math.round(cy - rMax));
+    const y1 = Math.min(h - 1, Math.round(cy + rMax));
+    let sum = 0, cnt = 0;
+    for (let py = y0; py <= y1; py++) {
+      const dy = Math.abs(py - cy);
+      for (let px = x0; px <= x1; px++) {
+        const dx = Math.abs(px - cx);
+        const dist = Math.max(dx, dy);
+        if (dist >= rMin && dist <= rMax) {
+          sum += gray[py * w + px];
+          cnt++;
+        }
+      }
+    }
+    return cnt > 0 ? sum / cnt : 128;
+  };
+
+  const refineSubPixelCenter = (cx, cy, halfSide) => {
+    const rad = Math.max(4, Math.ceil(halfSide * 1.15));
+    const x0 = Math.max(0, Math.round(cx - rad));
+    const x1 = Math.min(w - 1, Math.round(cx + rad));
+    const y0 = Math.max(0, Math.round(cy - rad));
+    const y1 = Math.min(h - 1, Math.round(cy + rad));
+    const localThresh = getLocalMean(Math.round(cx), Math.round(cy)) * 0.82;
+
+    let wx = 0, wy = 0, wSum = 0;
+    for (let py = y0; py <= y1; py++) {
+      for (let px = x0; px <= x1; px++) {
+        const wt = Math.max(0, localThresh - gray[py * w + px]);
+        if (wt > 0) {
+          wx += px * wt;
+          wy += py * wt;
+          wSum += wt;
+        }
+      }
+    }
+    return wSum > 0 ? { x: wx / wSum, y: wy / wSum } : { x: cx, y: cy };
+  };
+
+  const findCornerAnchor = (rx0, rx1, ry0, ry1, targetX, targetY) => {
     let bestCandidate = null;
     let bestScore = -Infinity;
-    const minSide = Math.max(7, Math.round(w * 0.011));
-    const maxSide = Math.round(w * 0.095);
+    const minSide = Math.max(8, Math.round(w * 0.013));
+    const maxSide = Math.round(w * 0.115);
 
     for (let y = ry0; y < ry1; y += 2) {
       for (let x = rx0; x < rx1; x += 2) {
@@ -3199,13 +3431,13 @@ function detectFiducialCorners(imgData, w, h) {
         queueX[tail] = x; queueY[tail] = y; tail++;
         visited[idx] = 1;
 
-        let sumX = 0, sumY = 0, count = 0;
+        let count = 0;
         let minX = x, maxX = x, minY = y, maxY = y;
 
-        while (head < tail && tail < 24990) {
+        while (head < tail && tail < 27990) {
           const cx = queueX[head], cy = queueY[head];
           head++;
-          sumX += cx; sumY += cy; count++;
+          count++;
           if (cx < minX) minX = cx;
           if (cx > maxX) maxX = cx;
           if (cy < minY) minY = cy;
@@ -3228,39 +3460,75 @@ function detectFiducialCorners(imgData, w, h) {
         const bh = maxY - minY + 1;
         if (bw < minSide || bh < minSide || bw > maxSide || bh > maxSide) continue;
         const aspect = bw / bh;
-        if (aspect < 0.62 || aspect > 1.62) continue;
+        if (aspect < 0.56 || aspect > 1.78) continue;
 
+        const bboxCentX = (minX + maxX) / 2;
+        const bboxCentY = (minY + maxY) / 2;
+        const halfSide = (bw + bh) * 0.25;
+        const localMean = getLocalMean(Math.round(bboxCentX), Math.round(bboxCentY));
+
+        // 1. Cek Pola Target Konsentris (Kotak Hitam Luar -> Cincin Putih -> Inti Hitam Tengah)
+        const coreLum = sampleBoxMean(bboxCentX, bboxCentY, 0, halfSide * 0.26);
+        const whiteRingLum = sampleBoxMean(bboxCentX, bboxCentY, halfSide * 0.44, halfSide * 0.66);
+        const outerFrameLum = sampleBoxMean(bboxCentX, bboxCentY, halfSide * 0.76, halfSide * 0.96);
+        const quietZoneLum = sampleBoxMean(bboxCentX, bboxCentY, halfSide * 1.12, halfSide * 1.42);
+
+        const isConcentric =
+          coreLum < localMean * 0.78 &&
+          whiteRingLum > localMean * 0.92 &&
+          outerFrameLum < localMean * 0.80 &&
+          (whiteRingLum - coreLum) > 26 &&
+          (whiteRingLum - outerFrameLum) > 24;
+
+        // 2. Kompatibilitas mundur: Cek Kotak Hitam Solid (LJK versi lama) dengan Quiet Zone putih
         const fillRatio = count / (bw * bh);
-        if (fillRatio < 0.64) continue;
+        const isSolidSquare =
+          fillRatio >= 0.68 &&
+          aspect >= 0.70 && aspect <= 1.43 &&
+          quietZoneLum > localMean * 0.94;
 
-        const centX = sumX / count;
-        const centY = sumY / count;
-        const distCorner = Math.hypot(centX - targetX, centY - targetY);
+        if (!isConcentric && !isSolidSquare) continue;
+
+        const distCorner = Math.hypot(bboxCentX - targetX, bboxCentY - targetY);
         const squareness = 1 - Math.abs(1 - aspect);
-        const score = (fillRatio * 120) + (squareness * 60) - (distCorner * 0.25);
+        const quietBonus = quietZoneLum > localMean * 0.94 ? 45 : 0;
+        const typeBonus = isConcentric ? 360 : (fillRatio * 110);
+        const score = typeBonus + (squareness * 65) + quietBonus - (distCorner * 0.42);
 
         if (score > bestScore) {
           bestScore = score;
-          bestCandidate = { x: centX, y: centY };
+          bestCandidate = refineSubPixelCenter(bboxCentX, bboxCentY, halfSide);
         }
       }
     }
     return bestCandidate;
   };
 
-  const qw = Math.floor(w * 0.34);
-  const qh = Math.floor(h * 0.28);
-  const tl = findCornerSquare(2, qw, 2, qh, 0, 0);
-  const tr = findCornerSquare(w - qw, w - 2, 2, qh, w, 0);
-  const bl = findCornerSquare(2, qw, h - qh, h - 2, 0, h);
-  const br = findCornerSquare(w - qw, w - 2, h - qh, h - 2, w, h);
+  const qw = Math.floor(w * 0.36);
+  const qh = Math.floor(h * 0.30);
+  const tl = findCornerAnchor(2, qw, 2, qh, 0, 0);
+  const tr = findCornerAnchor(w - qw, w - 2, 2, qh, w, 0);
+  const bl = findCornerAnchor(2, qw, h - qh, h - 2, 0, h);
+  const br = findCornerAnchor(w - qw, w - 2, h - qh, h - 2, w, h);
 
   if (tl && tr && bl && br) {
     const topW = Math.hypot(tr.x - tl.x, tr.y - tl.y);
     const botW = Math.hypot(br.x - bl.x, br.y - bl.y);
     const leftH = Math.hypot(bl.x - tl.x, bl.y - tl.y);
     const rightH = Math.hypot(br.x - tr.x, br.y - tr.y);
-    if (topW > w * 0.40 && botW > w * 0.40 && leftH > h * 0.40 && rightH > h * 0.40) {
+
+    const wSym = Math.min(topW, botW) / Math.max(1, Math.max(topW, botW));
+    const hSym = Math.min(leftH, rightH) / Math.max(1, Math.max(leftH, rightH));
+    const avgW = (topW + botW) / 2;
+    const avgH = (leftH + rightH) / 2;
+    const pageAspect = avgH / Math.max(1, avgW);
+
+    if (
+      topW > w * 0.38 && botW > w * 0.38 &&
+      leftH > h * 0.38 && rightH > h * 0.38 &&
+      wSym > 0.58 && hSym > 0.58 &&
+      pageAspect > 0.95 && pageAspect < 1.95
+    ) {
       return { tl, tr, bl, br, found: true };
     }
   }
@@ -3324,7 +3592,7 @@ function warpAndEnhanceDocument(srcCanvas, corners, filterMode) {
   const dst = outImg.data;
 
   let minL = 255, maxL = 0;
-  const lumBuf = new Uint8Array(outW * outH);
+  const rawLumBuf = new Uint8Array(outW * outH);
 
   for (let y = 0; y < outH; y++) {
     const ny = (y - fy) / fh;
@@ -3356,7 +3624,7 @@ function warpAndEnhanceDocument(srcCanvas, corners, filterMode) {
       dst[pIdx + 3] = 255;
 
       const lum = (77 * r + 150 * g + 29 * b) >> 8;
-      lumBuf[y * outW + x] = lum;
+      rawLumBuf[y * outW + x] = lum;
       if ((x & 3) === 0 && (y & 3) === 0) {
         if (lum < minL) minL = lum;
         if (lum > maxL) maxL = lum;
@@ -3372,7 +3640,7 @@ function warpAndEnhanceDocument(srcCanvas, corners, filterMode) {
     for (let i = 0; i < outW * outH; i++) {
       const p = i * 4;
       if (filterMode === 'bw') {
-        const norm = Math.max(0, Math.min(255, ((lumBuf[i] - low) * 255) / span));
+        const norm = Math.max(0, Math.min(255, ((rawLumBuf[i] - low) * 255) / span));
         const v = norm > 175 ? 255 : (norm < 95 ? Math.round(norm * 0.45) : Math.round(((norm - 95) / 80) * 210 + 42));
         dst[p] = v;
         dst[p + 1] = v;
@@ -3387,7 +3655,7 @@ function warpAndEnhanceDocument(srcCanvas, corners, filterMode) {
   }
 
   outCtx.putImageData(outImg, 0, 0);
-  return outCanvas;
+  return { canvas: outCanvas, rawLum: rawLumBuf };
 }
 
 function reprocessOMR() {
@@ -3400,7 +3668,7 @@ function reprocessOMR() {
   const probe = document.createElement('canvas');
   const srcW = loadedScanImage.width;
   const srcH = loadedScanImage.height;
-  const maxDim = 1350;
+  const maxDim = 1400;
   const scale = Math.min(1, maxDim / Math.max(srcW, srcH));
   const pW = Math.round(srcW * scale);
   const pH = Math.round(srcH * scale);
@@ -3419,8 +3687,8 @@ function reprocessOMR() {
     canvas.getContext('2d').drawImage(probe, 0, 0);
 
     document.getElementById('scanResultSummary').innerHTML =
-      `<span style="color:#dc2626;font-weight:700;">⚠️ Empat kotak jangkar hitam di sudut LJK belum terdeteksi utuh.</span><br>` +
-      `<small>Pastikan seluruh 4 kotak hitam sudut terlihat jelas atau gunakan tombol <b>"🎯 Atur 4 Sudut Manual"</b> di atas untuk meluruskan dokumen.</small>`;
+      `<span style="color:#dc2626;font-weight:700;">⚠️ Empat kotak target di sudut LJK belum terdeteksi utuh.</span><br>` +
+      `<small>Pastikan seluruh 4 sudut LJK masuk ke layar atau tekan tombol <b>"🎯 Atur 4 Sudut Manual"</b> untuk meluruskan dokumen.</small>`;
     currentScannedPG = [];
     currentScannedBS = [];
     lastDetectedIdDigits = '';
@@ -3441,17 +3709,63 @@ function reprocessOMR() {
 }
 
 function processRectifiedOMRFromSource(fullCorners) {
-  const rectified = warpAndEnhanceDocument(loadedScanImage, fullCorners, scanFilterMode);
+  const { canvas: rectified, rawLum } = warpAndEnhanceDocument(loadedScanImage, fullCorners, scanFilterMode);
   const canvas = document.getElementById('omrCanvas');
   const W = rectified.width;
   const H = rectified.height;
   canvas.width = W;
   canvas.height = H;
-  const ctx = canvas.getContext('2d', { willReadFrequently: true });
+  const ctx = canvas.getContext('2d');
   ctx.drawImage(rectified, 0, 0);
 
-  const imgData = ctx.getImageData(0, 0, W, H);
-  const d = imgData.data;
+  // 1. Normalisasi Pencahayaan & Bayangan Lokal (2D White-Paper Background Estimation)
+  const gridCols = 16, gridRows = 23;
+  const cellW = W / gridCols, cellH = H / gridRows;
+  const bgGrid = new Float32Array(gridCols * gridRows);
+
+  for (let gy = 0; gy < gridRows; gy++) {
+    const y0 = Math.floor(gy * cellH);
+    const y1 = Math.min(H - 1, Math.floor((gy + 1) * cellH));
+    for (let gx = 0; gx < gridCols; gx++) {
+      const x0 = Math.floor(gx * cellW);
+      const x1 = Math.min(W - 1, Math.floor((gx + 1) * cellW));
+      const vals = [];
+      for (let py = y0; py <= y1; py += 2) {
+        const rowOff = py * W;
+        for (let px = x0; px <= x1; px += 2) {
+          vals.push(rawLum[rowOff + px]);
+        }
+      }
+      vals.sort((a, b) => a - b);
+      // Persentil ke-82 selalu mewakili kecerahan kertas putih lokal meski ada gelembung hitam
+      bgGrid[gy * gridCols + gx] = vals.length > 0 ? vals[Math.floor(vals.length * 0.82)] : 220;
+    }
+  }
+
+  const normLum = new Uint8Array(W * H);
+  for (let y = 0; y < H; y++) {
+    const fyGrid = Math.max(0, Math.min(gridRows - 1.001, (y / cellH) - 0.5));
+    const gy0 = fyGrid | 0;
+    const gy1 = Math.min(gridRows - 1, gy0 + 1);
+    const ty = fyGrid - gy0;
+    const rowOff = y * W;
+
+    for (let x = 0; x < W; x++) {
+      const fxGrid = Math.max(0, Math.min(gridCols - 1.001, (x / cellW) - 0.5));
+      const gx0 = fxGrid | 0;
+      const gx1 = Math.min(gridCols - 1, gx0 + 1);
+      const tx = fxGrid - gx0;
+
+      const b00 = bgGrid[gy0 * gridCols + gx0];
+      const b10 = bgGrid[gy0 * gridCols + gx1];
+      const b01 = bgGrid[gy1 * gridCols + gx0];
+      const b11 = bgGrid[gy1 * gridCols + gx1];
+      const localPaper = (b00 * (1 - tx) + b10 * tx) * (1 - ty) + (b01 * (1 - tx) + b11 * tx) * ty;
+
+      const normalized = (rawLum[rowOff + x] / Math.max(45, localPaper)) * 245;
+      normLum[rowOff + x] = normalized > 255 ? 255 : (normalized < 0 ? 0 : normalized);
+    }
+  }
 
   const margin = 24, mkSize = 26;
   const fx = margin + mkSize / 2;
@@ -3467,83 +3781,75 @@ function processRectifiedOMRFromSource(fullCorners) {
   const isSquare = layout.bubbleShape === 'square';
   const defaultRPx = Math.max(4, fw * layout.bubbleR_norm);
 
-  const measureBubbleMarkScore = (cx, cy, rad) => {
-    const innerR = rad * 0.74;
-    const ringR1 = rad * 1.24;
-    const ringR2 = rad * 1.66;
-    const maxR = Math.ceil(ringR2);
+  // 2. Pengukuran Skor Arsiran & Silang (X) dengan Micro-Snap (+/- 2px)
+  const evalAtOffset = (cx, cy, rad) => {
+    const innerR = rad * 0.78;
+    const maxR = Math.ceil(innerR);
+    const cZone = innerR * 0.36;
 
-    const samples = [];
-    const ringVals = [];
+    let sumDark = 0;
+    let totalPx = 0;
+    let darkPx = 0;
+    let centerHits = 0;
+    let qNW = 0, qNE = 0, qSW = 0, qSE = 0;
 
     for (let dy = -maxR; dy <= maxR; dy++) {
       const py = Math.round(cy + dy);
       if (py < 0 || py >= H) continue;
+      const rowOff = py * W;
       for (let dx = -maxR; dx <= maxR; dx++) {
         const px = Math.round(cx + dx);
         if (px < 0 || px >= W) continue;
-        const idx = (py * W + px) * 4;
-        const lum = 0.299 * d[idx] + 0.587 * d[idx + 1] + 0.114 * d[idx + 2];
 
         const inCore = isSquare
           ? (Math.abs(dx) <= innerR && Math.abs(dy) <= innerR)
-          : (Math.hypot(dx, dy) <= innerR);
+          : (dx * dx + dy * dy <= innerR * innerR);
+        if (!inCore) continue;
 
-        if (inCore) {
-          samples.push({ dx, dy, lum });
-        } else {
-          const dist = Math.hypot(dx, dy);
-          if (dist >= ringR1 && dist <= ringR2) {
-            ringVals.push(lum);
-          }
+        totalPx++;
+        const lum = normLum[rowOff + px];
+        if (lum < 238) {
+          sumDark += (238 - lum) / 238;
+        }
+        if (lum < 185) {
+          darkPx++;
+          if (Math.abs(dx) <= cZone && Math.abs(dy) <= cZone) centerHits++;
+          if (dx < 0 && dy < 0) qNW++;
+          else if (dx > 0 && dy < 0) qNE++;
+          else if (dx < 0 && dy > 0) qSW++;
+          else if (dx > 0 && dy > 0) qSE++;
         }
       }
     }
 
-    if (samples.length === 0 || ringVals.length === 0) return 0;
-    ringVals.sort((a, b) => a - b);
-    const paperLum = ringVals[Math.floor(ringVals.length * 0.72)];
-    const inkDeltaThresh = Math.max(22, paperLum * 0.16);
-    const cornerOffset = innerR * 0.30;
-
-    let dropSum = 0;
-    let darkCount = 0;
-    let qNW = 0, qNE = 0, qSW = 0, qSE = 0;
-
-    for (let i = 0; i < samples.length; i++) {
-      const s = samples[i];
-      const drop = Math.max(0, paperLum - s.lum);
-      dropSum += drop;
-      if (drop >= inkDeltaThresh) {
-        darkCount++;
-        if (s.dx <= -cornerOffset && s.dy <= -cornerOffset) qNW++;
-        else if (s.dx >= cornerOffset && s.dy <= -cornerOffset) qNE++;
-        else if (s.dx <= -cornerOffset && s.dy >= cornerOffset) qSW++;
-        else if (s.dx >= cornerOffset && s.dy >= cornerOffset) qSE++;
-      }
-    }
-
-    const coreLum = paperLum - (dropSum / samples.length);
-    const areaFillScore = Math.max(0, (paperLum - coreLum) / Math.max(45, paperLum));
-
-    const strokeRatio = darkCount / samples.length;
-    const netStrokeRatio = Math.max(0, strokeRatio - 0.075);
+    if (totalPx === 0) return 0;
+    const meanFill = sumDark / totalPx;
+    const inkFrac = darkPx / totalPx;
     const quadHits = (qNW > 0 ? 1 : 0) + (qNE > 0 ? 1 : 0) + (qSW > 0 ? 1 : 0) + (qSE > 0 ? 1 : 0);
 
     let crossScore = 0;
-    if (quadHits >= 3 && strokeRatio >= 0.13) {
-      crossScore = Math.min(0.88, 0.25 + netStrokeRatio * 1.65 + (quadHits === 4 ? 0.12 : 0.05));
-    } else if (quadHits >= 2 && strokeRatio >= 0.16) {
-      crossScore = Math.min(0.76, 0.18 + netStrokeRatio * 1.45);
-    } else {
-      crossScore = netStrokeRatio * 1.15;
+    if (centerHits > 0 && quadHits >= 3 && inkFrac >= 0.14) {
+      crossScore = Math.min(0.86, 0.22 + inkFrac * 1.45 + (quadHits === 4 ? 0.10 : 0.04));
     }
+    return Math.max(meanFill * 1.25, inkFrac * 0.92, crossScore);
+  };
 
-    return Math.max(areaFillScore, crossScore);
+  const measureBubbleMarkScore = (cx, cy, rad) => {
+    const offsets = [[0, 0], [-2, 0], [2, 0], [0, -2], [0, 2]];
+    let best = 0;
+    for (let i = 0; i < offsets.length; i++) {
+      const s = evalAtOffset(cx + offsets[i][0], cy + offsets[i][1], rad);
+      if (s > best) best = s;
+    }
+    return best;
   };
 
   const threshPct = parseInt(document.getElementById('omrThreshold').value) || 58;
-  const minFillCutoff = Math.max(0.14, 0.44 - (threshPct - 30) * 0.0048);
+  // Slider: 58% = default seimbang; makin tinggi % makin sensitif terhadap arsiran tipis
+  const sensShift = (58 - threshPct) * 0.0020;
+  const idNetCutoff = Math.max(0.055, 0.115 + sensShift);
+  const optNetCutoff = Math.max(0.050, 0.105 + sensShift);
+  const allFilledAbsCutoff = Math.max(0.28, 0.38 + sensShift);
 
   const idMeasured = Array.from({ length: layout.idDigits }, () => []);
   const pgMeasured = Array.from({ length: state.config.jmlPG }, () => []);
@@ -3551,34 +3857,56 @@ function processRectifiedOMRFromSource(fullCorners) {
 
   layout.bubbles.forEach(b => {
     const pt = { x: fx + b.nx * fw, y: fy + b.ny * fh };
-    const radPx = b.rNorm ? Math.max(3.2, fw * b.rNorm) : defaultRPx;
-    const fillScore = measureBubbleMarkScore(pt.x, pt.y, radPx);
-    const item = { ...b, pt, radPx, fillScore, filled: false };
+    const radPx = b.rNorm ? Math.max(3.5, fw * b.rNorm) : defaultRPx;
+    const rawScore = measureBubbleMarkScore(pt.x, pt.y, radPx);
+    const item = { ...b, pt, radPx, rawScore, netScore: 0, filled: false };
 
     if (b.type === 'id_code') idMeasured[b.digit].push(item);
     else if (b.type === 'pg') pgMeasured[b.qIndex].push(item);
     else if (b.type === 'bs') bsMeasured[b.qIndex].push(item);
   });
 
+  // 3. Kalibrasi Relatif Per Kolom Identitas (0-9) -> Menghilangkan pengaruh bingkai cetak
   let detectedCode = '';
   for (let digit = 0; digit < layout.idDigits; digit++) {
-    const list = idMeasured[digit].slice().sort((a, b) => b.fillScore - a.fillScore);
-    if (list[0] && list[0].fillScore >= minFillCutoff) {
-      list[0].filled = true;
-      detectedCode += String(list[0].val);
+    const col = idMeasured[digit];
+    const asc = col.slice().sort((a, b) => a.rawScore - b.rawScore);
+    const emptyBaseline = asc[Math.min(3, asc.length - 1)] ? asc[Math.min(3, asc.length - 1)].rawScore : 0;
+    col.forEach(item => { item.netScore = item.rawScore - emptyBaseline; });
+
+    const desc = col.slice().sort((a, b) => b.netScore - a.netScore);
+    const top = desc[0];
+    const second = desc[1];
+    if (
+      top &&
+      top.netScore >= idNetCutoff &&
+      top.rawScore >= 0.19 &&
+      (!second || top.netScore >= second.netScore * 1.32)
+    ) {
+      top.filled = true;
+      detectedCode += String(top.val);
     } else {
       detectedCode += '?';
     }
   }
   lastDetectedIdDigits = detectedCode;
 
+  // 4. Kalibrasi Relatif Per Baris Soal PG & B-S
   const pgChoices = pgMeasured.map(opts => {
-    const sorted = opts.slice().sort((a, b) => b.fillScore - a.fillScore);
-    const top = sorted[0];
-    if (!top || top.fillScore < minFillCutoff) return [];
+    if (!opts.length) return [];
+    const asc = opts.slice().sort((a, b) => a.rawScore - b.rawScore);
+    const rowBaseline = Math.min(asc[0].rawScore, 0.24);
+    opts.forEach(opt => { opt.netScore = opt.rawScore - rowBaseline; });
+
+    const desc = opts.slice().sort((a, b) => b.netScore - a.netScore);
+    const top = desc[0];
+    if (!top || (top.netScore < optNetCutoff && top.rawScore < allFilledAbsCutoff)) return [];
+
     const chosen = [];
     opts.forEach(opt => {
-      if (opt.fillScore >= minFillCutoff && opt.fillScore >= top.fillScore * 0.58) {
+      const byRelative = opt.netScore >= optNetCutoff && opt.rawScore >= 0.18 && opt.netScore >= top.netScore * 0.50;
+      const byAbsoluteAll = opt.rawScore >= allFilledAbsCutoff;
+      if (byRelative || byAbsoluteAll) {
         opt.filled = true;
         chosen.push(opt.letter);
       }
@@ -3587,12 +3915,20 @@ function processRectifiedOMRFromSource(fullCorners) {
   });
 
   const bsChoices = bsMeasured.map(opts => {
-    const sorted = opts.slice().sort((a, b) => b.fillScore - a.fillScore);
-    const top = sorted[0];
-    if (!top || top.fillScore < minFillCutoff) return [];
+    if (!opts.length) return [];
+    const asc = opts.slice().sort((a, b) => a.rawScore - b.rawScore);
+    const rowBaseline = Math.min(asc[0].rawScore, 0.24);
+    opts.forEach(opt => { opt.netScore = opt.rawScore - rowBaseline; });
+
+    const desc = opts.slice().sort((a, b) => b.netScore - a.netScore);
+    const top = desc[0];
+    if (!top || (top.netScore < optNetCutoff && top.rawScore < allFilledAbsCutoff)) return [];
+
     const chosen = [];
     opts.forEach(opt => {
-      if (opt.fillScore >= minFillCutoff && opt.fillScore >= top.fillScore * 0.58) {
+      const byRelative = opt.netScore >= optNetCutoff && opt.rawScore >= 0.18 && opt.netScore >= top.netScore * 0.50;
+      const byAbsoluteAll = opt.rawScore >= allFilledAbsCutoff;
+      if (byRelative || byAbsoluteAll) {
         opt.filled = true;
         chosen.push(opt.letter);
       }
@@ -4574,10 +4910,72 @@ function renderReport() {
   }
 }
 
+async function rasterizeChartsForPrint(containerHtml) {
+  const temp = document.createElement('div');
+  temp.innerHTML = containerHtml;
+  const svgs = Array.from(temp.querySelectorAll('svg.chart-svg'));
+  if (!svgs.length) return temp.innerHTML;
+
+  const serializer = new XMLSerializer();
+  let printGradIdx = 0;
+
+  await Promise.all(svgs.map(async (svg) => {
+    try {
+      const vb = (svg.getAttribute('viewBox') || '0 0 600 260').trim().split(/\s+/).map(Number);
+      const vbW = vb[2] || 600;
+      const vbH = vb[3] || 260;
+
+      const clone = svg.cloneNode(true);
+      clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+      clone.setAttribute('width', String(vbW));
+      clone.setAttribute('height', String(vbH));
+
+      // Pastikan semua ID gradasi unik agar tidak bentrok dengan DOM utama saat rasterisasi
+      let svgMarkup = serializer.serializeToString(clone);
+      const idMatches = [...svgMarkup.matchAll(/id="([^"]+)"/g)];
+      idMatches.forEach(m => {
+        const oldId = m[1];
+        printGradIdx++;
+        const newId = `prt_${printGradIdx}_${oldId}`;
+        svgMarkup = svgMarkup.split(`id="${oldId}"`).join(`id="${newId}"`);
+        svgMarkup = svgMarkup.split(`url(#${oldId})`).join(`url(#${newId})`);
+      });
+
+      const svgDataUrl = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svgMarkup);
+      const img = new Image();
+      await new Promise((resolve, reject) => {
+        img.onload = resolve;
+        img.onerror = reject;
+        img.src = svgDataUrl;
+      });
+
+      const scale = 3; // 3x High-DPI agar teks & garis tajam saat cetak
+      const cvs = document.createElement('canvas');
+      cvs.width = Math.round(vbW * scale);
+      cvs.height = Math.round(vbH * scale);
+      const cctx = cvs.getContext('2d');
+      cctx.fillStyle = '#ffffff';
+      cctx.fillRect(0, 0, cvs.width, cvs.height);
+      cctx.drawImage(img, 0, 0, cvs.width, cvs.height);
+
+      const pngImg = document.createElement('img');
+      pngImg.src = cvs.toDataURL('image/png');
+      pngImg.alt = 'Grafik Analisis KAU';
+      pngImg.style.cssText = 'width:100%; height:auto; display:block;';
+      svg.replaceWith(pngImg);
+    } catch (e) {
+      console.warn('Fallback ke SVG langsung saat cetak:', e);
+    }
+  }));
+
+  return temp.innerHTML;
+}
+
 async function printCurrentReport() {
   renderReport();
-  const reportHtml = document.getElementById('reportContainer').innerHTML;
-  await triggerPrintPages(`<section class="print-page report-sheet">${reportHtml}</section>`);
+  const rawHtml = document.getElementById('reportContainer').innerHTML;
+  const printReadyHtml = await rasterizeChartsForPrint(rawHtml);
+  await triggerPrintPages(`<section class="print-page report-sheet">${printReadyHtml}</section>`);
 }
 
 // ==================== EKSPOR MULTI-SHEET EXCEL (.XLSX) SESUAI FORMAT KAU ====================
