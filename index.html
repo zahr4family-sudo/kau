@@ -4,9 +4,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <meta name="theme-color" content="#1d4ed8" />
-  <meta name="description" content="KORANUL OMR dan analisis hasil belajar siswa." />
+  <meta name="description" content="KAU OMR dan analisis hasil belajar siswa." />
   <link rel="apple-touch-icon" href="./icons/icon-192.png" />
-  <title>KORANUL - Koreksi LJK & Analisis Soal</title>
+  <title>KAU - Koreksi LJK & Analisis Soal</title>
   <link rel="manifest" href="./manifest.json" />
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <style>
@@ -124,12 +124,12 @@
 
 <header>
   <div>
-    <h1>KORANUL OMR & ANALISIS</h1>
+    <h1>KAU OMR & ANALISIS</h1>
     <small id="hdrSubtitle">Koreksi LJK & Analisis Butir Soal</small>
   </div>
   <div class="hdr-actions">
     <span id="saveStatusBadge" class="save-pill">💾 Tersimpan</span>
-    <button class="btn-export-top" onclick="exportKoranulExcel()">📥 Excel (.xlsx)</button>
+    <button class="btn-export-top" onclick="exportKAUExcel()">📥 Excel (.xlsx)</button>
   </div>
 </header>
 
@@ -193,7 +193,7 @@
         </div>
       </div>
       <div style="margin-top:10px;">
-        <label>Kunci Jawaban PG (Otomatis dikelompokkan per 5 nomor seperti KORANUL)</label>
+        <label>Kunci Jawaban PG (Otomatis dikelompokkan per 5 nomor seperti KAU)</label>
         <input id="inKunciPG" value="BBACABCCBCCBABBCCAAC" placeholder="Contoh: BBACABCCBC..." oninput="this.value=this.value.toUpperCase().replace(/[^A-E]/g,''); saveState();" />
         <small style="color:var(--muted);" id="kunciPreview">Blok 5-an: BBACA | CCBCC | CBABB | CCAAC</small>
       </div>
@@ -386,7 +386,7 @@
     </div>
   </section>
 
-  <!-- ==================== TAB 5: LAPORAN & ANALISIS KORANUL ==================== -->
+  <!-- ==================== TAB 5: LAPORAN & ANALISIS KAU ==================== -->
   <section id="tab-laporan" class="tab-page">
     <div class="sub-tabs">
       <button class="sub-tab active" onclick="switchReport('nilai_mc', this)">NILAI MC</button>
@@ -402,7 +402,7 @@
     </div>
 
     <div class="toolbar">
-      <button class="btn btn-success btn-sm" onclick="exportKoranulExcel()">📥 Ekspor Semua ke Excel (.xlsx)</button>
+      <button class="btn btn-success btn-sm" onclick="exportKAUExcel()">📥 Ekspor Semua ke Excel (.xlsx)</button>
       <button class="btn btn-primary btn-sm" onclick="printCurrentReport()">🖨️ Cetak Laporan Ini (F4)</button>
     </div>
 
@@ -494,9 +494,9 @@ let cameraStream = null;
 let sessionScanCount = 0;
 
 // ==================== PENYIMPANAN PERMANEN (LOCALSTORAGE + INDEXEDDB + PERSIST) ====================
-const STORAGE_KEY_V2 = 'koranul_pwa_state_v2';
-const STORAGE_KEY_V1 = 'koranul_pwa_state_v1';
-const IDB_NAME = 'koranul_permanent_db';
+const STORAGE_KEY_V2 = 'KAU_pwa_state_v2';
+const STORAGE_KEY_V1 = 'KAU_pwa_state_v1';
+const IDB_NAME = 'KAU_permanent_db';
 const IDB_STORE = 'state_store';
 
 function openIDB() {
@@ -763,7 +763,7 @@ function exportBackupJSON() {
   const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = `Cadangan_KORANUL_${(state.meta.mapel || 'Ujian').replace(/\s+/g, '_')}.json`;
+  a.download = `Cadangan_KAU_${(state.meta.mapel || 'Ujian').replace(/\s+/g, '_')}.json`;
   a.click();
   URL.revokeObjectURL(a.href);
 }
@@ -950,12 +950,12 @@ function downloadCSVTemplate() {
   const b = new Blob([`\uFEFF${colName},nama,pg,bs,ur,remedial\n${sampleId},CONTOH SISWA,ABCD,BSSB,3|2|4,\n`], { type: 'text/csv;charset=utf-8' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(b);
-  a.download = 'template_import_koranul.csv';
+  a.download = 'template_import_KAU.csv';
   a.click();
   URL.revokeObjectURL(a.href);
 }
 
-// ==================== MESIN ANALISIS STATISTIK KORANUL ====================
+// ==================== MESIN ANALISIS STATISTIK KAU ====================
 function computeAllAnalytics() {
   const N = state.students.length;
   const kPG = state.config.jmlPG;
@@ -2368,7 +2368,7 @@ function renderInputJawabanTable() {
   });
 }
 
-// ==================== RENDER LAPORAN & ANALISIS KORANUL ====================
+// ==================== RENDER LAPORAN & ANALISIS KAU ====================
 function switchReport(rep, btn) {
   currentReportTab = rep;
   document.querySelectorAll('.sub-tab').forEach(b => b.classList.remove('active'));
@@ -2719,7 +2719,7 @@ function renderReport() {
 
   else if (currentReportTab === 'perbaikan') {
     box.innerHTML = renderHeaderKop('DAFTAR NILAI PERBAIKAN (Perbaikan)') + `
-      <p style="font-size:0.78rem; color:var(--muted);">Isikan Nilai Remedial pada kolom di bawah untuk menghitung Nilai Akhir otomatis sesuai rumus pembobotan KORANUL.</p>
+      <p style="font-size:0.78rem; color:var(--muted);">Isikan Nilai Remedial pada kolom di bawah untuk menghitung Nilai Akhir otomatis sesuai rumus pembobotan KAU.</p>
       <div class="table-wrap">
         <table>
           <thead><tr><th>No</th><th>${getIdFieldLabel()}</th><th>Nama Siswa</th><th>Nilai Awal</th><th>Nilai Remedial</th><th>Nilai Akhir</th><th>Ketuntasan</th></tr></thead>
@@ -2755,8 +2755,8 @@ function printCurrentReport() {
   pa.style.display = 'none';
 }
 
-// ==================== EKSPOR EXCEL MULTI-SHEET IDENTIK KORANUL ====================
-function exportKoranulExcel() {
+// ==================== EKSPOR EXCEL MULTI-SHEET IDENTIK KAU ====================
+function exportKAUExcel() {
   if (typeof XLSX === 'undefined') return alert('Library Excel sedang dimuat, silakan coba sebentar lagi.');
   const a = computeAllAnalytics();
   const m = state.meta;
@@ -2870,7 +2870,7 @@ function exportKoranulExcel() {
   ]);
   XLSX.utils.book_append_sheet(wb, wsPerbaikan, 'Perbaikan');
 
-  XLSX.writeFile(wb, `KORANUL_${m.mapel}_${m.sekolah.replace(/\s+/g, '_')}.xlsx`);
+  XLSX.writeFile(wb, `KAU_${m.mapel}_${m.sekolah.replace(/\s+/g, '_')}.xlsx`);
 }
 
 function switchTab(tabName, btn) {
