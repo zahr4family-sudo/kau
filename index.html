@@ -4,9 +4,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <meta name="theme-color" content="#1d4ed8" />
-  <meta name="description" content="KORANUL OMR" />
+  <meta name="description" content="KORANUL OMR Multi-Kelas & Multi-Pelajaran" />
   <link rel="apple-touch-icon" href="./icons/icon-192.png" />
-  <title>KORANUL - Koreksi LJK & Analisis Ulangan</title>
+  <title>KORANUL OMR - Multi-Kelas & Multi-Pelajaran</title>
   <link rel="manifest" href="./manifest.json" />
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <style>
@@ -26,11 +26,11 @@
     body { margin: 0; background: var(--bg); color: var(--text); padding-bottom: 78px; }
     header {
       background: linear-gradient(135deg, var(--primary-dark), var(--primary));
-      color: #fff; padding: 12px 16px; position: sticky; top: 0; z-index: 50;
+      color: #fff; padding: 12px 16px; position: sticky; top: 0; z-index: 55;
       box-shadow: 0 2px 8px rgba(0,0,0,0.15); display: flex; justify-content: space-between; align-items: center; gap: 8px;
     }
     header h1 { margin: 0; font-size: 1.02rem; letter-spacing: 0.3px; }
-    header small { display: block; font-size: 0.72rem; opacity: 0.9; }
+    header small { display: block; font-size: 0.72rem; opacity: 0.92; }
     .hdr-actions { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
     .save-pill {
       background: rgba(255,255,255,0.16); color: #fff; padding: 4px 8px; border-radius: 99px;
@@ -40,6 +40,23 @@
       background: #10b981; color: #fff; border: none; padding: 8px 11px; border-radius: 8px;
       font-weight: 700; font-size: 0.76rem; cursor: pointer; white-space: nowrap;
     }
+    .context-bar {
+      background: #ffffff;
+      border-bottom: 1px solid var(--border);
+      padding: 8px 12px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+    .context-inner {
+      max-width: 980px; margin: 0 auto;
+      display: grid; grid-template-columns: 1fr 1fr auto; gap: 8px; align-items: end;
+    }
+    @media (max-width: 680px) {
+      .context-inner { grid-template-columns: 1fr 1fr; }
+      .context-actions { grid-column: 1 / -1; display: flex; justify-content: space-between; align-items: center; }
+    }
+    .context-bar label { font-size: 0.7rem; margin-bottom: 2px; color: var(--primary-dark); font-weight: 700; }
+    .context-bar select { padding: 6px 8px; font-size: 0.82rem; font-weight: 600; border-color: #93c5fd; background: #eff6ff; }
+    .context-actions { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
     .container { max-width: 980px; margin: 0 auto; padding: 12px; }
     .card {
       background: var(--card); border-radius: 12px; padding: 14px; margin-bottom: 12px;
@@ -67,6 +84,7 @@
     .btn-warning { background: var(--warning); color: #fff; }
     .btn-outline { background: #fff; color: var(--primary); border: 1px solid var(--primary); }
     .btn-sm { padding: 6px 10px; font-size: 0.76rem; }
+    .btn-xs { padding: 4px 8px; font-size: 0.72rem; }
     .toolbar { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; align-items: center; }
     .table-wrap { overflow-x: auto; max-height: 460px; border: 1px solid var(--border); border-radius: 8px; }
     table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
@@ -76,6 +94,7 @@
     .badge-tuntas { background: #dcfce7; color: #166534; }
     .badge-remed { background: #fee2e2; color: #991b1b; }
     .badge-warn { background: #fef3c7; color: #92400e; }
+    .badge-info { background: #dbeafe; color: #1e40af; }
     .nav-bottom {
       position: fixed; bottom: 0; left: 0; right: 0; background: #fff; border-top: 1px solid var(--border);
       display: flex; justify-content: space-around; padding: 6px 2px; z-index: 60;
@@ -109,6 +128,12 @@
     .bar-fill { height: 100%; background: var(--primary); transition: width 0.3s; }
     .ljk-preview-stack { display: flex; flex-direction: column; gap: 14px; align-items: center; background: #cbd5e1; padding: 12px; border-radius: 10px; overflow-x: auto; }
     .ljk-preview-stack canvas { max-width: 100%; height: auto; background: #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+    .session-pill-row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+    .session-chip {
+      padding: 5px 10px; border-radius: 8px; border: 1px solid var(--border); background: #f8fafc;
+      font-size: 0.76rem; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;
+    }
+    .session-chip.active { background: #dbeafe; border-color: var(--primary); color: var(--primary-dark); font-weight: 700; }
     @media print {
       body * { visibility: hidden; }
       #printArea, #printArea * { visibility: visible; }
@@ -125,7 +150,7 @@
 <header>
   <div>
     <h1>KORANUL OMR</h1>
-    <small id="hdrSubtitle">Koreksi LJK & Analisis Butir Soal</small>
+    <small id="hdrSubtitle">Koreksi LJK & Analisis Butir Soal • Multi-Kelas & Multi-Pelajaran</small>
   </div>
   <div class="hdr-actions">
     <span id="saveStatusBadge" class="save-pill">💾 Tersimpan</span>
@@ -133,22 +158,80 @@
   </div>
 </header>
 
+<!-- BAR PEMILIH CEPAT MULTI-KELAS & MULTI-PELAJARAN -->
+<div class="context-bar">
+  <div class="context-inner">
+    <div>
+      <label for="quickClassSelect">🏫 Kelas Aktif</label>
+      <select id="quickClassSelect" onchange="onQuickClassChange(this.value)"></select>
+    </div>
+    <div>
+      <label for="quickSubjectSelect">📚 Mata Pelajaran / Sesi</label>
+      <select id="quickSubjectSelect" onchange="onQuickSubjectChange(this.value)"></select>
+    </div>
+    <div class="context-actions">
+      <button class="btn btn-primary btn-sm" onclick="createNewSessionPrompt()" title="Tambah Sesi Kelas / Mata Pelajaran Baru">+ Sesi Baru</button>
+      <button class="btn btn-outline btn-sm" onclick="duplicateActiveSession()" title="Duplikat Konfigurasi & Siswa ke Kelas/Mapel Lain">📋 Duplikat</button>
+      <span class="badge badge-info" id="quickSessionStats">0/0 Terkoreksi</span>
+    </div>
+  </div>
+</div>
+
 <div class="container">
 
   <!-- ==================== TAB 1: IDENTITAS & SISWA ==================== -->
   <section id="tab-data" class="tab-page active">
+
+    <!-- KARTU BARU: MANAJEMEN MULTI-KELAS & MULTI-PELAJARAN -->
+    <div class="card" style="border-color:#93c5fd; background:linear-gradient(to bottom, #eff6ff, #ffffff);">
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px; border-bottom:1px solid #bfdbfe; padding-bottom:6px; margin-bottom:10px;">
+        <h2 style="border:none; margin:0; padding:0;">0. Manajemen Multi-Kelas & Multi-Pelajaran (<span id="lblTotalSessions">1</span> Sesi Tersimpan)</h2>
+        <div style="display:flex; gap:6px; flex-wrap:wrap;">
+          <button class="btn btn-primary btn-xs" onclick="createNewSessionPrompt()">+ Tambah Kelas / Mapel</button>
+          <button class="btn btn-outline btn-xs" onclick="applySchoolIdentityToAll()">🏫 Terapkan Info Sekolah ke Semua Sesi</button>
+        </div>
+      </div>
+      <p style="font-size:0.78rem; color:var(--muted); margin:0 0 8px 0;">
+        Kelola banyak kelas dan mata pelajaran secara terpisah. Daftar siswa pada kelas yang sama akan otomatis disalin saat Anda menambahkan mata pelajaran baru.
+      </p>
+      <div class="table-wrap" style="max-height:220px;">
+        <table>
+          <thead>
+            <tr>
+              <th>Status</th>
+              <th>Kelas</th>
+              <th>Mata Pelajaran</th>
+              <th>Jenis Tes</th>
+              <th>Peserta</th>
+              <th>Rata-rata</th>
+              <th>Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="tbodySessions"></tbody>
+        </table>
+      </div>
+    </div>
+
     <div class="card">
       <h2>1. Data Identitas Ujian (Sheet: data)</h2>
       <div class="grid-2">
         <div><label>Nama Sekolah</label><input id="inSekolah" value="SDN Nagreg" oninput="saveState()" onchange="saveState()" /></div>
-        <div><label>Mata Pelajaran</label><input id="inMapel" value="PAI" oninput="saveState()" onchange="saveState()" /></div>
+        <div>
+          <label>Mata Pelajaran</label>
+          <input id="inMapel" list="listMasterMapel" value="PAI" oninput="saveState()" onchange="onIdentityClassOrSubjectEdited()" />
+          <datalist id="listMasterMapel"></datalist>
+        </div>
         <div><label>Kepala Sekolah</label><input id="inKepsek" value="Aep Sudrajat, S.Pd" oninput="saveState()" onchange="saveState()" /></div>
         <div><label>NIP Kepala Sekolah</label><input id="inNipKepsek" value="19000000 000000 0 000" oninput="saveState()" onchange="saveState()" /></div>
         <div><label>Guru Pengajar</label><input id="inGuru" value="Apipudin, S.Pd.I" oninput="saveState()" onchange="saveState()" /></div>
         <div><label>NIP Guru</label><input id="inNipGuru" value="19000000 000000 0 021" oninput="saveState()" onchange="saveState()" /></div>
         <div><label>Jenis Tes</label><input id="inJenisTes" value="PENILAIAN SUMATIF AKHIR SEMESTER" oninput="saveState()" onchange="saveState()" /></div>
         <div><label>Materi Pokok</label><input id="inMateri" value="BAB I - BAB V" oninput="saveState()" onchange="saveState()" /></div>
-        <div><label>Kelas / Semester</label><input id="inKelas" value="I (Satu)/ Ganjil" oninput="saveState()" onchange="saveState()" /></div>
+        <div>
+          <label>Kelas / Semester</label>
+          <input id="inKelas" list="listMasterKelas" value="I (Satu)/ Ganjil" oninput="saveState()" onchange="onIdentityClassOrSubjectEdited()" />
+          <datalist id="listMasterKelas"></datalist>
+        </div>
         <div><label>Tahun Pelajaran</label><input id="inTapel" value="2025 - 2026" oninput="saveState()" onchange="saveState()" /></div>
         <div><label>Tanggal Tes</label><input id="inTglTes" value="29 September 2025" oninput="saveState()" onchange="saveState()" /></div>
         <div><label>Tanggal Periksa</label><input id="inTglPeriksa" value="30 September 2025" oninput="saveState()" onchange="saveState()" /></div>
@@ -215,6 +298,11 @@
         <label class="btn btn-outline btn-sm" style="margin:0;cursor:pointer;">⬆️ Import CSV<input type="file" accept=".csv,text/csv" style="display:none" onchange="importStudentsCSV(event)"></label>
         <button class="btn btn-outline btn-sm" onclick="downloadCSVTemplate()">Template CSV</button>
         <button class="btn btn-outline btn-sm" onclick="bulkImportStudents()">📋 Paste Daftar Nama</button>
+        <button class="btn btn-outline btn-sm" onclick="copyStudentsFromOtherSession()">👥 Salin dari Kelas/Sesi Lain</button>
+        <button class="btn btn-outline btn-sm" onclick="autoNumberStudents()">🔢 Urutkan Nomor</button>
+      </div>
+      <div style="margin-bottom:8px;">
+        <input id="searchStudentInput" placeholder="🔍 Cari nama atau nomor peserta / NISN..." oninput="renderStudentsTable()" style="padding:6px 10px; font-size:0.82rem;" />
       </div>
       <div class="table-wrap">
         <table>
@@ -234,12 +322,12 @@
     <div class="card" style="border-color:#cbd5e1; background:#f8fafc;">
       <h2>4. Penyimpanan Permanen, Cadangan & Reset Pengaturan</h2>
       <p style="font-size:0.8rem; color:var(--muted); margin-top:0;">
-        Semua perubahan otomatis tersimpan permanen di penyimpanan lokal browser (<b>localStorage + IndexedDB</b>) sehingga tidak akan hilang saat halaman di-refresh atau aplikasi ditutup.
+        Seluruh data semua kelas dan mata pelajaran otomatis tersimpan permanen di penyimpanan lokal browser (<b>localStorage + IndexedDB</b>) sehingga tidak akan hilang saat halaman di-refresh atau aplikasi ditutup.
       </p>
       <div class="toolbar" style="margin-bottom:0;">
-        <button class="btn btn-outline btn-sm" onclick="exportBackupJSON()">💾 Unduh Cadangan (.json)</button>
+        <button class="btn btn-outline btn-sm" onclick="exportBackupJSON()">💾 Unduh Cadangan Semua Kelas (.json)</button>
         <label class="btn btn-outline btn-sm" style="margin:0;cursor:pointer;">📂 Pulihkan Cadangan (.json)<input type="file" accept=".json,application/json" style="display:none" onchange="importBackupJSON(event)"></label>
-        <button class="btn btn-warning btn-sm" onclick="startFreshExam()">🧹 Kosongkan Jawaban & Siswa</button>
+        <button class="btn btn-warning btn-sm" onclick="startFreshExam()">🧹 Kosongkan Jawaban Sesi Ini</button>
         <button class="btn btn-danger btn-sm" onclick="resetToDefaultSettings()">🔄 Reset / Kembali ke Pengaturan Awal</button>
       </div>
     </div>
@@ -250,7 +338,7 @@
     <div class="card">
       <h2>Pembuat Lembar Jawaban Komputer (LJK) Siap Cetak</h2>
       <p style="font-size:0.82rem; color:var(--muted); margin-top:0;">
-        LJK dilengkapi <b>4 kotak jangkar hitam (fiducial marker)</b> di keempat sudut agar kamera HP mengenali posisi bulatan secara presisi. Anda dapat menyesuaikan kolom identitas (<b>Nomor Peserta</b> atau <b>NISN</b>) beserta jumlah digit gelembungnya.
+        LJK dilengkapi <b>4 kotak jangkar hitam (fiducial marker)</b> di keempat sudut agar kamera HP mengenali posisi bulatan secara presisi. Anda dapat mencetak LJK kosong maupun LJK yang sudah terisi otomatis identitas & gelembung <b>Nomor Peserta / NISN</b> siswa.
       </p>
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:12px 0;padding:12px;border:1px solid #cbd5e1;border-radius:10px;background:#f8fafc;">
         <div>
@@ -276,6 +364,12 @@
             <option value="separate">Selalu Halaman Terpisah</option>
           </select>
         </div>
+        <div>
+          <label for="ljkPrefillStudent">Isi Identitas Siswa (Preview)</label>
+          <select id="ljkPrefillStudent" onchange="renderLJKPreview()">
+            <option value="-1">Kosong (Template Umum)</option>
+          </select>
+        </div>
       </div>
       <div id="ljkLayoutInfo" style="font-size:0.8rem; padding:8px 10px; border-radius:8px; background:#eff6ff; color:#1e3a8a; margin-bottom:10px;">
         Menghitung tata letak LJK...
@@ -283,6 +377,7 @@
       <div class="toolbar">
         <button class="btn btn-primary" onclick="renderLJKPreview()">🔄 Perbarui Preview LJK</button>
         <button class="btn btn-success" onclick="printLJK()">🖨️ Cetak / Simpan PDF LJK</button>
+        <button class="btn btn-warning" onclick="printAllStudentsLJK()">🖨️ Cetak Massal LJK Semua Siswa</button>
         <button class="btn btn-outline" onclick="downloadLJKImage()">🖼️ Unduh Gambar LJK (.png)</button>
       </div>
       <div class="ljk-preview-stack" id="ljkPreviewStack">
@@ -298,6 +393,13 @@
       <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px; border-bottom:1px solid #e2e8f0; padding-bottom:6px; margin-bottom:10px;">
         <h2 style="border:none; margin:0; padding:0;">Pemindai LJK via Kamera / File Foto (OMR)</h2>
         <span class="badge badge-tuntas" id="scanCounterBadge">Terscan Sesi Ini: 0 LJK</span>
+      </div>
+
+      <div style="background:#f8fafc; border:1px solid #cbd5e1; border-radius:8px; padding:7px 10px; font-size:0.78rem; margin-bottom:10px; color:#334155;">
+        <b>Aturan Pembacaan Gelembung Objektif (PG &amp; B-S):</b>
+        Gelembung kosong / tidak dijawab salah satu = <b><code>V</code></b> &nbsp;|&nbsp;
+        Memilih semua opsi gelembung / ganda = <b><code>X</code></b> &nbsp;|&nbsp;
+        1 gelembung terisi = <b>Opsi Terpilih</b>.
       </div>
 
       <div class="toolbar">
@@ -361,8 +463,11 @@
     <div class="card">
       <h2>Input / Edit Jawaban PG (`DATA MC`), B-S & Skor Uraian (`DATA UR`)</h2>
       <p style="font-size:0.78rem; color:var(--muted);">
-        Anda dapat mengisi atau mengedit langsung jawaban PG (misal: <code>BBACABCCBC...</code>), Benar-Salah (<code>B/S</code>), maupun skor tiap nomor soal Uraian di tabel ini.
+        Anda dapat mengisi atau mengedit langsung jawaban PG (<code>A–E</code>, <code>V</code> = kosong, <code>X</code> = semua opsi/ganda), Benar-Salah (<code>B/S/V/X</code>), maupun skor tiap nomor soal Uraian di tabel ini.
       </p>
+      <div style="margin-bottom:8px;">
+        <input id="searchInputJawaban" placeholder="🔍 Filter nama siswa atau nomor peserta..." oninput="renderInputJawabanTable()" style="padding:6px 10px; font-size:0.82rem;" />
+      </div>
       <div class="table-wrap">
         <table>
           <thead>
@@ -399,6 +504,8 @@
       <button class="sub-tab" onclick="switchReport('nil_gab', this)">Nil Gab</button>
       <button class="sub-tab" onclick="switchReport('remed', this)">Remedial Siswa</button>
       <button class="sub-tab" onclick="switchReport('perbaikan', this)">Perbaikan</button>
+      <button class="sub-tab" onclick="switchReport('leger_mapel', this)">📚 Leger Mapel (Kelas)</button>
+      <button class="sub-tab" onclick="switchReport('rekap_kelas', this)">🏫 Rekap Antar Kelas</button>
     </div>
 
     <div class="toolbar">
@@ -444,14 +551,37 @@ function getRTable(n) {
 }
 
 const MAX_STUDENTS = 500;
+const DEFAULT_MASTER_CLASSES = [
+  'I (Satu)/ Ganjil',
+  'II (Dua)/ Ganjil',
+  'III (Tiga)/ Ganjil',
+  'IV (Empat)/ Ganjil',
+  'V (Lima)/ Ganjil',
+  'VI (Enam)/ Ganjil'
+];
+const DEFAULT_MASTER_SUBJECTS = [
+  'PAI',
+  'Pendidikan Pancasila',
+  'Bahasa Indonesia',
+  'Matematika',
+  'IPAS',
+  'Seni Budaya',
+  'PJOK',
+  'Bahasa Inggris'
+];
+
+function genSessionId() {
+  return 'ses_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 7);
+}
 
 function getIdFieldLabel() {
   return state.config.idFieldType === 'nisn' ? 'NISN' : 'NOMOR PESERTA';
 }
 
 // ==================== PENGATURAN AWAL (DEFAULT FACTORY STATE) ====================
-function getDefaultState() {
+function getDefaultSession(id = 'ses_default_1') {
   return {
+    id,
     meta: {
       sekolah: 'SDN Nagreg', kepsek: 'Aep Sudrajat, S.Pd', nipKepsek: '19000000 000000 0 000',
       guru: 'Apipudin, S.Pd.I', nipGuru: '19000000 000000 0 021', mapel: 'PAI',
@@ -483,7 +613,19 @@ function getDefaultState() {
   };
 }
 
-let state = getDefaultState();
+function getDefaultWorkspace() {
+  const firstSes = getDefaultSession('ses_default_1');
+  return {
+    version: 3,
+    activeSessionId: firstSes.id,
+    masterClasses: [...DEFAULT_MASTER_CLASSES],
+    masterSubjects: [...DEFAULT_MASTER_SUBJECTS],
+    sessions: [firstSes]
+  };
+}
+
+let workspace = getDefaultWorkspace();
+let state = workspace.sessions[0];
 let currentReportTab = 'nilai_mc';
 let selectedRemedStudent = 0;
 let currentScannedPG = [];
@@ -494,6 +636,7 @@ let cameraStream = null;
 let sessionScanCount = 0;
 
 // ==================== PENYIMPANAN PERMANEN (LOCALSTORAGE + INDEXEDDB + PERSIST) ====================
+const STORAGE_KEY_V3 = 'koranul_pwa_workspace_v3';
 const STORAGE_KEY_V2 = 'koranul_pwa_state_v2';
 const STORAGE_KEY_V1 = 'koranul_pwa_state_v1';
 const IDB_NAME = 'koranul_permanent_db';
@@ -516,7 +659,7 @@ async function saveToIDB(dataObj) {
   try {
     const db = await openIDB();
     const tx = db.transaction(IDB_STORE, 'readwrite');
-    tx.objectStore(IDB_STORE).put(JSON.stringify(dataObj), STORAGE_KEY_V2);
+    tx.objectStore(IDB_STORE).put(JSON.stringify(dataObj), STORAGE_KEY_V3);
   } catch (e) {}
 }
 
@@ -525,8 +668,13 @@ async function loadFromIDB() {
     const db = await openIDB();
     return await new Promise((resolve) => {
       const tx = db.transaction(IDB_STORE, 'readonly');
-      const req = tx.objectStore(IDB_STORE).get(STORAGE_KEY_V2);
-      req.onsuccess = () => resolve(req.result ? JSON.parse(req.result) : null);
+      const req = tx.objectStore(IDB_STORE).get(STORAGE_KEY_V3);
+      req.onsuccess = () => {
+        if (req.result) return resolve(JSON.parse(req.result));
+        const reqOld = tx.objectStore(IDB_STORE).get(STORAGE_KEY_V2);
+        reqOld.onsuccess = () => resolve(reqOld.result ? JSON.parse(reqOld.result) : null);
+        reqOld.onerror = () => resolve(null);
+      };
       req.onerror = () => resolve(null);
     });
   } catch (e) {
@@ -536,10 +684,11 @@ async function loadFromIDB() {
 
 function persistNow() {
   try {
-    const serialized = JSON.stringify(state);
-    localStorage.setItem(STORAGE_KEY_V2, serialized);
-    localStorage.setItem(STORAGE_KEY_V1, serialized);
-    saveToIDB(state);
+    syncMasterListsFromSessions();
+    const serialized = JSON.stringify(workspace);
+    localStorage.setItem(STORAGE_KEY_V3, serialized);
+    localStorage.setItem(STORAGE_KEY_V2, JSON.stringify(state));
+    saveToIDB(workspace);
     const badge = document.getElementById('saveStatusBadge');
     if (badge) {
       const now = new Date();
@@ -552,10 +701,11 @@ function persistNow() {
   }
 }
 
-function normalizeLoadedState(raw) {
-  const def = getDefaultState();
+function normalizeSession(raw, fallbackId) {
+  const def = getDefaultSession(fallbackId || genSessionId());
   if (!raw || typeof raw !== 'object') return def;
   const merged = {
+    id: raw.id || def.id,
     meta: { ...def.meta, ...(raw.meta || {}) },
     config: { ...def.config, ...(raw.config || {}) },
     students: Array.isArray(raw.students) ? raw.students.slice(0, MAX_STUDENTS) : def.students
@@ -584,23 +734,406 @@ function normalizeLoadedState(raw) {
   return merged;
 }
 
+function normalizeLoadedWorkspace(raw) {
+  if (!raw || typeof raw !== 'object') return getDefaultWorkspace();
+
+  // Migrasi otomatis dari format single-session v1/v2 ke workspace v3
+  if (!Array.isArray(raw.sessions)) {
+    const migratedSession = normalizeSession(raw, 'ses_migrated_1');
+    const ws = {
+      version: 3,
+      activeSessionId: migratedSession.id,
+      masterClasses: [...DEFAULT_MASTER_CLASSES],
+      masterSubjects: [...DEFAULT_MASTER_SUBJECTS],
+      sessions: [migratedSession]
+    };
+    if (migratedSession.meta.kelas && !ws.masterClasses.includes(migratedSession.meta.kelas)) {
+      ws.masterClasses.unshift(migratedSession.meta.kelas);
+    }
+    if (migratedSession.meta.mapel && !ws.masterSubjects.includes(migratedSession.meta.mapel)) {
+      ws.masterSubjects.unshift(migratedSession.meta.mapel);
+    }
+    return ws;
+  }
+
+  const sessions = raw.sessions.length > 0
+    ? raw.sessions.map((s, idx) => normalizeSession(s, `ses_${idx + 1}`))
+    : [getDefaultSession('ses_default_1')];
+
+  const activeId = sessions.some(s => s.id === raw.activeSessionId)
+    ? raw.activeSessionId
+    : sessions[0].id;
+
+  const masterClasses = Array.isArray(raw.masterClasses) && raw.masterClasses.length > 0
+    ? [...new Set(raw.masterClasses.map(x => String(x).trim()).filter(Boolean))]
+    : [...DEFAULT_MASTER_CLASSES];
+
+  const masterSubjects = Array.isArray(raw.masterSubjects) && raw.masterSubjects.length > 0
+    ? [...new Set(raw.masterSubjects.map(x => String(x).trim()).filter(Boolean))]
+    : [...DEFAULT_MASTER_SUBJECTS];
+
+  return {
+    version: 3,
+    activeSessionId: activeId,
+    masterClasses,
+    masterSubjects,
+    sessions
+  };
+}
+
+function syncMasterListsFromSessions() {
+  workspace.sessions.forEach(s => {
+    const kls = (s.meta.kelas || '').trim();
+    const mpl = (s.meta.mapel || '').trim();
+    if (kls && !workspace.masterClasses.includes(kls)) workspace.masterClasses.push(kls);
+    if (mpl && !workspace.masterSubjects.includes(mpl)) workspace.masterSubjects.push(mpl);
+  });
+}
+
+// ==================== MANAJEMEN MULTI-KELAS & MULTI-PELAJARAN ====================
+function renderMultiContextUI() {
+  syncMasterListsFromSessions();
+  const curKelas = (state.meta.kelas || '').trim();
+  const curMapel = (state.meta.mapel || '').trim();
+
+  // Populate datalists
+  const dlKelas = document.getElementById('listMasterKelas');
+  const dlMapel = document.getElementById('listMasterMapel');
+  if (dlKelas) dlKelas.innerHTML = workspace.masterClasses.map(k => `<option value="${escapeAttr(k)}">`).join('');
+  if (dlMapel) dlMapel.innerHTML = workspace.masterSubjects.map(m => `<option value="${escapeAttr(m)}">`).join('');
+
+  // Quick Class Select
+  const selClass = document.getElementById('quickClassSelect');
+  if (selClass) {
+    const allClasses = [...new Set([...workspace.masterClasses, curKelas].filter(Boolean))];
+    selClass.innerHTML = allClasses.map(k => {
+      const cntSes = workspace.sessions.filter(s => (s.meta.kelas || '').trim() === k).length;
+      return `<option value="${escapeAttr(k)}" ${k === curKelas ? 'selected' : ''}>${escapeAttr(k)}${cntSes > 0 ? ` (${cntSes} Mapel)` : ''}</option>`;
+    }).join('') + `<option value="__NEW_CLASS__">+ Tambah Kelas Baru...</option>`;
+  }
+
+  // Quick Subject Select (menampilkan sesi pada kelas aktif + opsi tambah mapel dari masterSubjects)
+  const selSubj = document.getElementById('quickSubjectSelect');
+  if (selSubj) {
+    const sessionsInClass = workspace.sessions.filter(s => (s.meta.kelas || '').trim() === curKelas);
+    const existingMapelsInClass = new Set(sessionsInClass.map(s => (s.meta.mapel || '').trim()));
+
+    let html = `<optgroup label="Sesi Aktif di ${escapeAttr(curKelas || 'Kelas Ini')}">`;
+    sessionsInClass.forEach(s => {
+      const doneCnt = s.students.filter(st => (st.pg && st.pg.length > 0) || (st.bs && st.bs.length > 0)).length;
+      html += `<option value="ses:${escapeAttr(s.id)}" ${s.id === state.id ? 'selected' : ''}>${escapeAttr(s.meta.mapel || 'Tanpa Mapel')} (${doneCnt}/${s.students.length} siswa)</option>`;
+    });
+    html += `</optgroup>`;
+
+    const availableMasterMapel = workspace.masterSubjects.filter(m => !existingMapelsInClass.has(m));
+    if (availableMasterMapel.length > 0) {
+      html += `<optgroup label="+ Tambah Mapel ke Kelas Ini">`;
+      availableMasterMapel.forEach(m => {
+        html += `<option value="new_mapel:${escapeAttr(m)}">+ Buat Sesi: ${escapeAttr(m)}</option>`;
+      });
+      html += `</optgroup>`;
+    }
+    html += `<option value="__NEW_MAPEL__">+ Ketik Mata Pelajaran Baru...</option>`;
+    selSubj.innerHTML = html;
+  }
+
+  // Badge progress sesi aktif
+  const doneNow = state.students.filter(st => (st.pg && st.pg.length > 0) || (st.bs && st.bs.length > 0)).length;
+  const statsBadge = document.getElementById('quickSessionStats');
+  if (statsBadge) {
+    statsBadge.textContent = `${doneNow}/${state.students.length} Terkoreksi`;
+  }
+
+  // Tabel daftar seluruh sesi di Tab 1
+  const lblTotSes = document.getElementById('lblTotalSessions');
+  if (lblTotSes) lblTotSes.textContent = workspace.sessions.length;
+
+  const tbodySes = document.getElementById('tbodySessions');
+  if (tbodySes) {
+    tbodySes.innerHTML = workspace.sessions.map(s => {
+      const isActive = s.id === state.id;
+      const doneCnt = s.students.filter(st => (st.pg && st.pg.length > 0) || (st.bs && st.bs.length > 0)).length;
+      const avg = computeSessionQuickAverage(s);
+      return `
+        <tr style="${isActive ? 'background:#eff6ff;' : ''}">
+          <td>${isActive ? '<span class="badge badge-tuntas">Aktif</span>' : '<span class="badge" style="background:#e2e8f0;color:#475569;">Tersimpan</span>'}</td>
+          <td><b>${escapeAttr(s.meta.kelas || '-')}</b></td>
+          <td><b>${escapeAttr(s.meta.mapel || '-')}</b></td>
+          <td>${escapeAttr(s.meta.jenisTes || '-')}</td>
+          <td>${doneCnt}/${s.students.length} siswa</td>
+          <td><b>${avg.toFixed(1)}</b></td>
+          <td>
+            <div style="display:flex; gap:4px;">
+              ${!isActive ? `<button class="btn btn-primary btn-xs" onclick="switchActiveSession('${s.id}')">Buka</button>` : ''}
+              <button class="btn btn-outline btn-xs" onclick="duplicateSessionById('${s.id}')" title="Duplikat sesi ini">Salin</button>
+              ${workspace.sessions.length > 1 ? `<button class="btn btn-danger btn-xs" onclick="deleteSessionById('${s.id}')" title="Hapus sesi ini">Hapus</button>` : ''}
+            </div>
+          </td>
+        </tr>
+      `;
+    }).join('');
+  }
+}
+
+function computeSessionQuickAverage(ses) {
+  if (!ses.students || ses.students.length === 0) return 0;
+  const kPG = ses.config.jmlPG || 0;
+  const kBS = ses.config.jmlBS || 0;
+  const kUR = ses.config.jmlUR || 0;
+  const keyPG = (ses.config.kunciPG || '').toUpperCase().padEnd(kPG, '!');
+  const keyBS = (ses.config.kunciBS || '').toUpperCase().padEnd(kBS, '!');
+  const maxURTot = (ses.config.maxUR || []).slice(0, kUR).reduce((a, b) => a + (Number(b) || 0), 0);
+  const bPG = kUR === 0 ? 1 : (ses.config.bobotPG ?? 0.7);
+  const bUR = kUR === 0 ? 0 : (ses.config.bobotUR ?? 0.3);
+
+  let sum = 0;
+  ses.students.forEach(st => {
+    let sPG = 0;
+    const aPG = (st.pg || '').toUpperCase().padEnd(kPG, 'V');
+    for (let j = 0; j < kPG; j++) if (aPG[j] === keyPG[j]) sPG++;
+
+    let sBS = 0;
+    const aBS = (st.bs || '').toUpperCase().padEnd(kBS, 'V');
+    for (let j = 0; j < kBS; j++) if ((aBS[j] === 'B' || aBS[j] === 'S') && aBS[j] === keyBS[j]) sBS++;
+
+    const totObj = kPG + kBS;
+    const nObj = totObj > 0 ? ((sPG + sBS) / totObj) * 100 : 0;
+
+    let sUR = 0;
+    for (let j = 0; j < kUR; j++) {
+      const mx = (ses.config.maxUR || [])[j] || 4;
+      sUR += Math.min(mx, Math.max(0, parseFloat((st.ur || [])[j]) || 0));
+    }
+    const nUR = maxURTot > 0 ? (sUR / maxURTot) * 100 : 0;
+    sum += (nObj * bPG) + (nUR * bUR);
+  });
+  return sum / ses.students.length;
+}
+
+function switchActiveSession(sessionId) {
+  const target = workspace.sessions.find(s => s.id === sessionId);
+  if (!target) return;
+  persistNow();
+  workspace.activeSessionId = target.id;
+  state = target;
+  selectedRemedStudent = 0;
+  sessionScanCount = 0;
+  document.getElementById('scanCounterBadge').textContent = 'Terscan Sesi Ini: 0 LJK';
+  persistNow();
+  syncInputsFromState();
+  renderMultiContextUI();
+  renderStudentsTable();
+  renderInputJawabanTable();
+  renderLJKPreview();
+  prepareNextScan(false);
+  renderReport();
+}
+
+function cloneRosterClean(studentsList) {
+  return (studentsList || []).map(st => ({
+    nis: st.nis || '',
+    nama: st.nama || '',
+    pg: '',
+    bs: '',
+    ur: [],
+    remedial: null
+  }));
+}
+
+function createSessionForClassAndSubject(kelasName, mapelName, templateSession = null) {
+  const base = templateSession || state;
+  const sameClassSession = workspace.sessions.find(s => (s.meta.kelas || '').trim() === kelasName.trim());
+  const rosterSource = sameClassSession ? sameClassSession.students : base.students;
+
+  const newSes = normalizeSession({
+    id: genSessionId(),
+    meta: {
+      ...base.meta,
+      kelas: kelasName.trim(),
+      mapel: mapelName.trim()
+    },
+    config: JSON.parse(JSON.stringify(base.config)),
+    students: cloneRosterClean(rosterSource)
+  });
+
+  workspace.sessions.push(newSes);
+  switchActiveSession(newSes.id);
+}
+
+function onQuickClassChange(val) {
+  if (val === '__NEW_CLASS__') {
+    const newKls = prompt('Masukkan Nama Kelas Baru (contoh: IV-A / Ganjil):');
+    if (!newKls || !newKls.trim()) {
+      renderMultiContextUI();
+      return;
+    }
+    const cleanKls = newKls.trim();
+    if (!workspace.masterClasses.includes(cleanKls)) workspace.masterClasses.push(cleanKls);
+    const existing = workspace.sessions.find(s => (s.meta.kelas || '').trim() === cleanKls);
+    if (existing) {
+      switchActiveSession(existing.id);
+    } else {
+      createSessionForClassAndSubject(cleanKls, state.meta.mapel || 'PAI', state);
+    }
+    return;
+  }
+
+  const curMapel = (state.meta.mapel || '').trim();
+  const exactMatch = workspace.sessions.find(s => (s.meta.kelas || '').trim() === val && (s.meta.mapel || '').trim() === curMapel);
+  if (exactMatch) {
+    switchActiveSession(exactMatch.id);
+    return;
+  }
+  const anyInClass = workspace.sessions.find(s => (s.meta.kelas || '').trim() === val);
+  if (anyInClass) {
+    switchActiveSession(anyInClass.id);
+  } else {
+    createSessionForClassAndSubject(val, curMapel || 'PAI', state);
+  }
+}
+
+function onQuickSubjectChange(val) {
+  const curKelas = (state.meta.kelas || '').trim();
+  if (val === '__NEW_MAPEL__') {
+    const newMpl = prompt(`Masukkan Nama Mata Pelajaran Baru untuk ${curKelas}:`);
+    if (!newMpl || !newMpl.trim()) {
+      renderMultiContextUI();
+      return;
+    }
+    const cleanMpl = newMpl.trim();
+    if (!workspace.masterSubjects.includes(cleanMpl)) workspace.masterSubjects.push(cleanMpl);
+    const existing = workspace.sessions.find(s => (s.meta.kelas || '').trim() === curKelas && (s.meta.mapel || '').trim() === cleanMpl);
+    if (existing) {
+      switchActiveSession(existing.id);
+    } else {
+      createSessionForClassAndSubject(curKelas, cleanMpl, state);
+    }
+    return;
+  }
+
+  if (val.startsWith('ses:')) {
+    const sesId = val.slice(4);
+    switchActiveSession(sesId);
+  } else if (val.startsWith('new_mapel:')) {
+    const mapelName = val.slice(10);
+    createSessionForClassAndSubject(curKelas, mapelName, state);
+  }
+}
+
+function createNewSessionPrompt() {
+  const kls = prompt('Nama Kelas (contoh: IV-A / Ganjil):', state.meta.kelas || 'IV-A / Ganjil');
+  if (!kls || !kls.trim()) return;
+  const mpl = prompt('Nama Mata Pelajaran (contoh: Matematika):', 'Matematika');
+  if (!mpl || !mpl.trim()) return;
+  const existing = workspace.sessions.find(s => (s.meta.kelas || '').trim() === kls.trim() && (s.meta.mapel || '').trim() === mpl.trim());
+  if (existing) {
+    if (confirm(`Sesi ${kls.trim()} - ${mpl.trim()} sudah ada. Buka sesi tersebut?`)) {
+      switchActiveSession(existing.id);
+    }
+    return;
+  }
+  createSessionForClassAndSubject(kls.trim(), mpl.trim(), state);
+}
+
+function duplicateActiveSession() {
+  duplicateSessionById(state.id);
+}
+
+function duplicateSessionById(sesId) {
+  const src = workspace.sessions.find(s => s.id === sesId);
+  if (!src) return;
+  const kls = prompt('Salin ke Kelas:', src.meta.kelas);
+  if (!kls || !kls.trim()) return;
+  const mpl = prompt('Salin ke Mata Pelajaran:', src.meta.mapel);
+  if (!mpl || !mpl.trim()) return;
+  const includeScores = confirm('Ikut salin jawaban/nilai siswa? (OK = Salin beserta jawaban, Cancel = Hanya daftar siswa & kunci soal)');
+  const copy = normalizeSession({
+    id: genSessionId(),
+    meta: { ...src.meta, kelas: kls.trim(), mapel: mpl.trim() },
+    config: JSON.parse(JSON.stringify(src.config)),
+    students: includeScores ? JSON.parse(JSON.stringify(src.students)) : cloneRosterClean(src.students)
+  });
+  workspace.sessions.push(copy);
+  switchActiveSession(copy.id);
+}
+
+function deleteSessionById(sesId) {
+  if (workspace.sessions.length <= 1) return alert('Minimal harus ada 1 sesi kelas/pelajaran.');
+  const idx = workspace.sessions.findIndex(s => s.id === sesId);
+  if (idx < 0) return;
+  const target = workspace.sessions[idx];
+  if (!confirm(`Hapus sesi "${target.meta.kelas} - ${target.meta.mapel}" beserta seluruh data jawabannya?`)) return;
+  workspace.sessions.splice(idx, 1);
+  if (workspace.activeSessionId === sesId) {
+    switchActiveSession(workspace.sessions[0].id);
+  } else {
+    persistNow();
+    renderMultiContextUI();
+    renderReport();
+  }
+}
+
+function applySchoolIdentityToAll() {
+  if (!confirm('Terapkan Nama Sekolah, Kepala Sekolah, NIP Kepsek, Tahun Pelajaran, dan Tempat TTD dari sesi aktif ke seluruh kelas & mata pelajaran?')) return;
+  const { sekolah, kepsek, nipKepsek, tapel, tempat } = state.meta;
+  workspace.sessions.forEach(s => {
+    s.meta.sekolah = sekolah;
+    s.meta.kepsek = kepsek;
+    s.meta.nipKepsek = nipKepsek;
+    s.meta.tapel = tapel;
+    s.meta.tempat = tempat;
+  });
+  persistNow();
+  renderMultiContextUI();
+  alert(`Identitas sekolah berhasil diterapkan ke ${workspace.sessions.length} sesi kelas & mata pelajaran.`);
+}
+
+function onIdentityClassOrSubjectEdited() {
+  saveState();
+  renderMultiContextUI();
+}
+
+function copyStudentsFromOtherSession() {
+  const others = workspace.sessions.filter(s => s.id !== state.id);
+  if (others.length === 0) return alert('Belum ada sesi kelas/pelajaran lain untuk disalin.');
+  const listTxt = others.map((s, i) => `${i + 1}. ${s.meta.kelas} - ${s.meta.mapel} (${s.students.length} siswa)`).join('\n');
+  const choice = prompt(`Pilih nomor sesi sumber daftar siswa:\n${listTxt}`);
+  if (!choice) return;
+  const idx = parseInt(choice, 10) - 1;
+  if (isNaN(idx) || !others[idx]) return alert('Pilihan tidak valid.');
+  if (!confirm(`Ganti daftar siswa di sesi ini dengan ${others[idx].students.length} siswa dari "${others[idx].meta.kelas} - ${others[idx].meta.mapel}"?`)) return;
+  state.students = cloneRosterClean(others[idx].students);
+  saveState();
+  alert('Daftar siswa berhasil disalin!');
+}
+
+function autoNumberStudents() {
+  const padLen = state.config.idFieldType === 'nomor_peserta' ? state.config.idDigits : 3;
+  state.students.forEach((st, i) => {
+    st.nis = String(i + 1).padStart(padLen, '0');
+  });
+  saveState();
+}
+
 async function initApp() {
   if (navigator.storage && navigator.storage.persist) {
     navigator.storage.persist().catch(() => {});
   }
   let loaded = null;
-  const rawV2 = localStorage.getItem(STORAGE_KEY_V2) || localStorage.getItem(STORAGE_KEY_V1);
-  if (rawV2) {
-    try { loaded = JSON.parse(rawV2); } catch (e) {}
+  const rawV3 = localStorage.getItem(STORAGE_KEY_V3) || localStorage.getItem(STORAGE_KEY_V2) || localStorage.getItem(STORAGE_KEY_V1);
+  if (rawV3) {
+    try { loaded = JSON.parse(rawV3); } catch (e) {}
   }
   if (!loaded) {
     loaded = await loadFromIDB();
   }
   if (loaded) {
-    state = normalizeLoadedState(loaded);
+    workspace = normalizeLoadedWorkspace(loaded);
   }
+  state = workspace.sessions.find(s => s.id === workspace.activeSessionId) || workspace.sessions[0];
   persistNow();
   syncInputsFromState();
+  renderMultiContextUI();
   renderStudentsTable();
   renderInputJawabanTable();
   renderLJKPreview();
@@ -735,6 +1268,7 @@ function saveState(skipTableRerender = false) {
   document.querySelectorAll('.lblJmlPG').forEach(el => el.textContent = state.config.jmlPG);
   document.getElementById('hdrSubtitle').textContent = `${state.meta.sekolah} • ${state.meta.mapel} (${state.meta.kelas})`;
   persistNow();
+  renderMultiContextUI();
 
   if (!skipTableRerender) {
     renderStudentsTable();
@@ -760,10 +1294,10 @@ function updateKunciPreview() {
 // ==================== BACKUP, RESTORE & RESET PENGATURAN AWAL ====================
 function exportBackupJSON() {
   persistNow();
-  const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+  const blob = new Blob([JSON.stringify(workspace, null, 2)], { type: 'application/json' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = `Cadangan_KORANUL_${(state.meta.mapel || 'Ujian').replace(/\s+/g, '_')}.json`;
+  a.download = `Cadangan_KORANUL_MultiKelas_${(state.meta.sekolah || 'Sekolah').replace(/\s+/g, '_')}.json`;
   a.click();
   URL.revokeObjectURL(a.href);
 }
@@ -775,14 +1309,16 @@ function importBackupJSON(ev) {
   rd.onload = () => {
     try {
       const parsed = JSON.parse(String(rd.result || '{}'));
-      state = normalizeLoadedState(parsed);
+      workspace = normalizeLoadedWorkspace(parsed);
+      state = workspace.sessions.find(s => s.id === workspace.activeSessionId) || workspace.sessions[0];
       persistNow();
       syncInputsFromState();
+      renderMultiContextUI();
       renderStudentsTable();
       renderInputJawabanTable();
       renderLJKPreview();
       renderReport();
-      alert('Data cadangan berhasil dipulihkan dan disimpan permanen!');
+      alert(`Data cadangan berhasil dipulihkan (${workspace.sessions.length} sesi kelas/pelajaran) dan disimpan permanen!`);
     } catch (err) {
       alert('File cadangan tidak valid: ' + err.message);
     }
@@ -792,13 +1328,14 @@ function importBackupJSON(ev) {
 }
 
 function startFreshExam() {
-  if (!confirm('Kosongkan daftar siswa & semua jawaban untuk memulai ujian baru? (Identitas sekolah tetap dipertahankan)')) return;
+  if (!confirm(`Kosongkan daftar siswa & semua jawaban pada sesi "${state.meta.kelas} - ${state.meta.mapel}" untuk memulai ujian baru?`)) return;
   const padLen = state.config.idFieldType === 'nomor_peserta' ? state.config.idDigits : 3;
   state.students = [{ nis: '1'.padStart(padLen, '0'), nama: 'SISWA 1', pg: '', bs: '', ur: [], remedial: null }];
   sessionScanCount = 0;
   document.getElementById('scanCounterBadge').textContent = 'Terscan Sesi Ini: 0 LJK';
   persistNow();
   syncInputsFromState();
+  renderMultiContextUI();
   renderStudentsTable();
   renderInputJawabanTable();
   renderReport();
@@ -806,14 +1343,17 @@ function startFreshExam() {
 }
 
 async function resetToDefaultSettings() {
-  if (!confirm('Kembalikan seluruh pengaturan, kunci jawaban, dan data siswa ke pengaturan awal (default)?')) return;
-  state = getDefaultState();
+  if (!confirm('Kembalikan seluruh pengaturan, semua sesi kelas/pelajaran, kunci jawaban, dan data siswa ke pengaturan awal (default)?')) return;
+  workspace = getDefaultWorkspace();
+  state = workspace.sessions[0];
   sessionScanCount = 0;
   document.getElementById('scanCounterBadge').textContent = 'Terscan Sesi Ini: 0 LJK';
+  localStorage.removeItem(STORAGE_KEY_V3);
   localStorage.removeItem(STORAGE_KEY_V2);
   localStorage.removeItem(STORAGE_KEY_V1);
   persistNow();
   syncInputsFromState();
+  renderMultiContextUI();
   renderStudentsTable();
   renderInputJawabanTable();
   renderLJKPreview();
@@ -826,21 +1366,31 @@ async function resetToDefaultSettings() {
 function renderStudentsTable() {
   const tbody = document.getElementById('tbodySiswa');
   const sel = document.getElementById('scanStudentSelect');
+  const prefillSel = document.getElementById('ljkPrefillStudent');
   const prevSelVal = sel.value;
+  const prevPrefillVal = prefillSel ? prefillSel.value : '-1';
+  const filterQ = (document.getElementById('searchStudentInput')?.value || '').trim().toLowerCase();
+
   tbody.innerHTML = '';
   sel.innerHTML = '';
+  if (prefillSel) {
+    prefillSel.innerHTML = '<option value="-1">Kosong (Template Umum)</option>';
+  }
   updateIdLabelsUI();
 
   state.students.forEach((s, idx) => {
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td>${idx + 1}</td>
-      <td><input value="${escapeAttr(s.nis || '')}" maxlength="16" placeholder="${state.config.idFieldType === 'nisn' ? '0012345678' : '001'}"
-        oninput="state.students[${idx}].nis=this.value.trim(); persistNow();" onchange="saveState();" style="padding:4px 6px; font-family:monospace;" /></td>
-      <td><input value="${escapeAttr(s.nama)}" oninput="state.students[${idx}].nama=this.value.toUpperCase(); persistNow();" onchange="saveState();" style="padding:4px 6px;" /></td>
-      <td><button class="btn btn-danger btn-sm" onclick="deleteStudent(${idx})">Hapus</button></td>
-    `;
-    tbody.appendChild(tr);
+    const matchFilter = !filterQ || (s.nama || '').toLowerCase().includes(filterQ) || (s.nis || '').toLowerCase().includes(filterQ);
+    if (matchFilter) {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${idx + 1}</td>
+        <td><input value="${escapeAttr(s.nis || '')}" maxlength="16" placeholder="${state.config.idFieldType === 'nisn' ? '0012345678' : '001'}"
+          oninput="state.students[${idx}].nis=this.value.trim(); persistNow();" onchange="saveState();" style="padding:4px 6px; font-family:monospace;" /></td>
+        <td><input value="${escapeAttr(s.nama)}" oninput="state.students[${idx}].nama=this.value.toUpperCase(); persistNow();" onchange="saveState();" style="padding:4px 6px;" /></td>
+        <td><button class="btn btn-danger btn-sm" onclick="deleteStudent(${idx})">Hapus</button></td>
+      `;
+      tbody.appendChild(tr);
+    }
 
     const hasScanned = (s.pg && s.pg.length > 0) || (s.bs && s.bs.length > 0);
     const opt = document.createElement('option');
@@ -848,10 +1398,20 @@ function renderStudentsTable() {
     const codeLabel = s.nis ? `[${s.nis}] ` : '';
     opt.textContent = `${String(idx + 1).padStart(3, '0')} - ${codeLabel}${s.nama}${hasScanned ? ' ✓' : ''}`;
     sel.appendChild(opt);
+
+    if (prefillSel) {
+      const pOpt = document.createElement('option');
+      pOpt.value = idx;
+      pOpt.textContent = `${String(idx + 1).padStart(3, '0')} - ${codeLabel}${s.nama}`;
+      prefillSel.appendChild(pOpt);
+    }
   });
 
   if (prevSelVal !== '' && Number(prevSelVal) < state.students.length) {
     sel.value = prevSelVal;
+  }
+  if (prefillSel && Number(prevPrefillVal) < state.students.length) {
+    prefillSel.value = prevPrefillVal;
   }
 }
 
@@ -877,7 +1437,7 @@ function deleteStudent(idx) {
 }
 
 function bulkImportStudents() {
-  const raw = prompt(`Tempel daftar nama siswa (1 nama per baris, maks. ${MAX_STUDENTS} siswa):`);
+  const raw = prompt(`Tempel daftar nama siswa untuk ${state.meta.kelas} (1 nama per baris, maks. ${MAX_STUDENTS} siswa):`);
   if (!raw) return;
   const lines = raw.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
   if (lines.length === 0) return;
@@ -926,7 +1486,7 @@ function importStudentsCSV(e) {
       const d = rows.slice(1).map((r, i) => ({
         nis: ni >= 0 ? (r[ni] || '').trim() : String(i + 1).padStart(padLen, '0'),
         nama: (r[nn] || '').toUpperCase(),
-        pg: ip >= 0 ? (r[ip] || '').toUpperCase() : '',
+        pg: ip >= 0 ? (r[ip] || '').toUpperCase().replace(/[^A-EVX]/g, '') : '',
         bs: ib >= 0 ? (r[ib] || '').toUpperCase().replace(/[^BSXV]/g, '') : '',
         ur: iu >= 0 ? (r[iu] || '').split(/[|;]/).filter(Boolean).map(Number) : [],
         remedial: ir >= 0 && r[ir] !== '' ? Number(r[ir]) : null
@@ -956,16 +1516,17 @@ function downloadCSVTemplate() {
 }
 
 // ==================== MESIN ANALISIS STATISTIK KORANUL ====================
-function computeAllAnalytics() {
-  const N = state.students.length;
-  const kPG = state.config.jmlPG;
-  const kUR = state.config.jmlUR;
-  const kunci = (state.config.kunciPG || '').toUpperCase().replace(/\s/g, '').padEnd(kPG, '!');
-  const kktp = state.meta.kktp;
+function computeAllAnalyticsForSession(targetSes) {
+  const N = targetSes.students.length;
+  const kPG = targetSes.config.jmlPG;
+  const kUR = targetSes.config.jmlUR;
+  const kunci = (targetSes.config.kunciPG || '').toUpperCase().replace(/\s/g, '').padEnd(kPG, '!');
+  const kktp = targetSes.meta.kktp;
   const rTabel = getRTable(N);
 
-  const pgMatrix = state.students.map(st => {
-    const ans = (st.pg || '').toUpperCase().replace(/\s/g, '').padEnd(kPG, 'X');
+  // Catatan: Jawaban kosong / tidak diisi dicatat sebagai 'V', pilih semua opsi / ganda sebagai 'X'
+  const pgMatrix = targetSes.students.map(st => {
+    const ans = (st.pg || '').toUpperCase().replace(/\s/g, '').padEnd(kPG, 'V');
     const row = [];
     let skor = 0;
     for (let j = 0; j < kPG; j++) {
@@ -978,10 +1539,10 @@ function computeAllAnalytics() {
     return { row, skor, nilai, tuntas, ans };
   });
 
-  const kBS = state.config.jmlBS || 0;
-  const keyBS = (state.config.kunciBS || '').padEnd(kBS, '!');
-  const bsMatrix = state.students.map(st => {
-    const ans = (st.bs || '').toUpperCase().replace(/\s/g, '').padEnd(kBS, 'X');
+  const kBS = targetSes.config.jmlBS || 0;
+  const keyBS = (targetSes.config.kunciBS || '').padEnd(kBS, '!');
+  const bsMatrix = targetSes.students.map(st => {
+    const ans = (st.bs || '').toUpperCase().replace(/\s/g, '').padEnd(kBS, 'V');
     const row = [];
     let skor = 0;
     for (let j = 0; j < kBS; j++) {
@@ -992,7 +1553,7 @@ function computeAllAnalytics() {
     return { row, skor, nilai: kBS ? (skor / kBS) * 100 : 0, ans };
   });
 
-  const objMatrix = state.students.map((st, i) => {
+  const objMatrix = targetSes.students.map((st, i) => {
     const total = kPG + kBS;
     const skor = pgMatrix[i].skor + bsMatrix[i].skor;
     const nilai = total ? (skor / total) * 100 : 0;
@@ -1003,22 +1564,22 @@ function computeAllAnalytics() {
     let benar = 0, salah = 0, kosong = 0, ganda = 0, belumDinilai = 0;
     const keyReady = keyBS[j] === 'B' || keyBS[j] === 'S';
     bsMatrix.forEach(m => {
-      const ans = m.ans[j] || 'X';
-      if (ans === 'X') kosong++;
-      else if (ans === 'V') ganda++;
+      const ans = m.ans[j] || 'V';
+      if (ans === 'V') kosong++;
+      else if (ans === 'X') ganda++;
       else if (!keyReady) belumDinilai++;
       else if (ans === keyBS[j]) benar++;
       else salah++;
     });
-    return { no: getBSQuestionNo(j), benar, salah, kosong, ganda, belumDinilai, tk: N ? benar / N : 0, keyReady };
+    return { no: kPG + j + 1, benar, salah, kosong, ganda, belumDinilai, tk: N ? benar / N : 0, keyReady };
   });
 
-  const totalMaxUR = state.config.maxUR.slice(0, kUR).reduce((a, b) => a + b, 0);
-  const urMatrix = state.students.map(st => {
+  const totalMaxUR = targetSes.config.maxUR.slice(0, kUR).reduce((a, b) => a + b, 0);
+  const urMatrix = targetSes.students.map(st => {
     const row = [];
     let skor = 0;
     for (let j = 0; j < kUR; j++) {
-      const v = Math.min(state.config.maxUR[j] || 4, Math.max(0, parseFloat((st.ur || [])[j]) || 0));
+      const v = Math.min(targetSes.config.maxUR[j] || 4, Math.max(0, parseFloat((st.ur || [])[j]) || 0));
       row.push(v);
       skor += v;
     }
@@ -1027,9 +1588,9 @@ function computeAllAnalytics() {
     return { row, skor, nilai, tuntas };
   });
 
-  const bPG = kUR === 0 ? 1 : state.config.bobotPG;
-  const bUR = kUR === 0 ? 0 : state.config.bobotUR;
-  const gabungan = state.students.map((st, i) => {
+  const bPG = kUR === 0 ? 1 : targetSes.config.bobotPG;
+  const bUR = kUR === 0 ? 0 : targetSes.config.bobotUR;
+  const gabungan = targetSes.students.map((st, i) => {
     const nPG = objMatrix[i].nilai;
     const nUR = urMatrix[i].nilai;
     const nGab = (nPG * bPG) + (nUR * bUR);
@@ -1115,7 +1676,7 @@ function computeAllAnalytics() {
   const itemsUR = [];
   let sumVarItemsUR = 0;
   for (let j = 0; j < kUR; j++) {
-    const maxS = state.config.maxUR[j] || 4;
+    const maxS = targetSes.config.maxUR[j] || 4;
     const col = urMatrix.map(u => u.row[j]);
     const meanItem = N > 0 ? col.reduce((a, b) => a + b, 0) / N : 0;
     const tk = maxS > 0 ? meanItem / maxS : 0;
@@ -1145,6 +1706,10 @@ function computeAllAnalytics() {
     itemsPG, itemsBS, kr20, relStatusPG,
     itemsUR, cronbachUR, relStatusUR
   };
+}
+
+function computeAllAnalytics() {
+  return computeAllAnalyticsForSession(state);
 }
 
 // ==================== PEMBUAT LJK EFISIEN & KOORDINAT OMR ====================
@@ -1315,8 +1880,7 @@ function updateLJKLayoutConfig() {
   renderLJKPreview();
 }
 
-function renderLJKPreview() {
-  const canvas = document.getElementById('ljkGeneratorCanvas');
+function drawLJKOnCanvas(canvas, studentObj = null) {
   const ctx = canvas.getContext('2d');
   const W = canvas.width, H = canvas.height;
   ctx.fillStyle = '#ffffff';
@@ -1367,10 +1931,16 @@ function renderLJKPreview() {
   ctx.strokeRect(leftBoxX, idBoxY, leftBoxW, 132);
   ctx.fillStyle = '#0f172a';
   ctx.font = 'bold 10px sans-serif';
-  const lineDots = '_'.repeat(Math.max(24, Math.floor((leftBoxW - 110) / 5.6)));
-  const halfDots = '_'.repeat(Math.max(10, Math.floor((leftBoxW - 190) / 11.2)));
-  ctx.fillText(`NAMA SISWA  : ${lineDots}`, leftBoxX + 10, idBoxY + 24);
-  ctx.fillText(`KELAS / RUANG : ${halfDots}   PARAF: ${halfDots}`, leftBoxX + 10, idBoxY + 50);
+
+  if (studentObj) {
+    ctx.fillText(`NAMA SISWA  : ${studentObj.nama}`, leftBoxX + 10, idBoxY + 24);
+    ctx.fillText(`KELAS / ID    : ${state.meta.kelas}   |   ${getIdFieldLabel()}: ${studentObj.nis || '-'}`, leftBoxX + 10, idBoxY + 50);
+  } else {
+    const lineDots = '_'.repeat(Math.max(24, Math.floor((leftBoxW - 110) / 5.6)));
+    const halfDots = '_'.repeat(Math.max(10, Math.floor((leftBoxW - 190) / 11.2)));
+    ctx.fillText(`NAMA SISWA  : ${lineDots}`, leftBoxX + 10, idBoxY + 24);
+    ctx.fillText(`KELAS / RUANG : ${halfDots}   PARAF: ${halfDots}`, leftBoxX + 10, idBoxY + 50);
+  }
 
   ctx.strokeStyle = '#cbd5e1';
   ctx.beginPath();
@@ -1416,13 +1986,23 @@ function renderLJKPreview() {
   ctx.textAlign = 'center';
   ctx.fillText(idTitle, absX + absW / 2, absY + 13);
 
-  // Kotak tulis digit per kolom di atas deretan 0-9
+  const prefillCode = studentObj && studentObj.nis
+    ? String(studentObj.nis).replace(/\D/g, '').padStart(layout.idDigits, '0').slice(-layout.idDigits)
+    : '';
+
   const digitBoxW = Math.min(18, layout.colStepPx - 2);
   for (let d = 0; d < layout.idDigits; d++) {
     const cx = layout.firstColX + d * layout.colStepPx;
     ctx.strokeStyle = '#64748b';
     ctx.lineWidth = 0.9;
     ctx.strokeRect(cx - digitBoxW / 2, absY + 21, digitBoxW, 15);
+    if (prefillCode && prefillCode[d] !== undefined) {
+      ctx.fillStyle = '#0f172a';
+      ctx.font = 'bold 10px monospace';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(prefillCode[d], cx, absY + 28.8);
+      ctx.textBaseline = 'alphabetic';
+    }
   }
   ctx.beginPath();
   ctx.moveTo(absX, absY + 38);
@@ -1434,17 +2014,24 @@ function renderLJKPreview() {
     const cx = fx + b.nx * fw;
     const cy = fy + b.ny * fh;
     const rBubble = (b.rNorm || layout.bubbleR_norm) * fw;
+    const isPrefilledId = b.type === 'id_code' && prefillCode && prefillCode[b.digit] === String(b.val);
+
     ctx.beginPath();
     ctx.arc(cx, cy, rBubble, 0, Math.PI * 2);
-    ctx.strokeStyle = '#1e293b';
-    ctx.lineWidth = 1.1;
-    ctx.stroke();
+    if (isPrefilledId) {
+      ctx.fillStyle = '#0f172a';
+      ctx.fill();
+    } else {
+      ctx.strokeStyle = '#1e293b';
+      ctx.lineWidth = 1.1;
+      ctx.stroke();
 
-    ctx.fillStyle = '#475569';
-    ctx.font = `bold ${rBubble < 7 ? 7 : 8}px sans-serif`;
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText(b.type === 'id_code' ? String(b.val) : b.letter, cx, cy + 0.3);
+      ctx.fillStyle = '#475569';
+      ctx.font = `bold ${rBubble < 7 ? 7 : 8}px sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(b.type === 'id_code' ? String(b.val) : b.letter, cx, cy + 0.3);
+    }
   });
 
   ctx.textAlign = 'left';
@@ -1552,11 +2139,19 @@ function renderLJKPreview() {
     ctx.font = 'bold 9.5px sans-serif';
     ctx.fillText(`${romawiUraian}. LEMBAR JAWABAN URAIAN (${state.config.jmlUR} SOAL) TERSEDIA PADA HALAMAN 2`, leftBoxX + 8, secURY + 4);
   }
+  return layout;
+}
+
+function renderLJKPreview() {
+  const canvas = document.getElementById('ljkGeneratorCanvas');
+  const prefillIdx = parseInt(document.getElementById('ljkPrefillStudent')?.value ?? '-1', 10);
+  const studentObj = prefillIdx >= 0 && state.students[prefillIdx] ? state.students[prefillIdx] : null;
+  const layout = drawLJKOnCanvas(canvas, studentObj);
 
   const canvas2 = document.getElementById('ljkUraianCanvas2');
   if (layout.urOnPage2 > 0) {
     canvas2.style.display = 'block';
-    renderUraianContinuationCanvas(canvas2, layout.urOnPage1, state.config.jmlUR);
+    renderUraianContinuationCanvas(canvas2, layout.urOnPage1, state.config.jmlUR, studentObj);
   } else {
     canvas2.style.display = 'none';
   }
@@ -1564,7 +2159,7 @@ function renderLJKPreview() {
   const totalSoal = (Number(state.config.jmlPG) || 0) + (Number(state.config.jmlBS) || 0) + (Number(state.config.jmlUR) || 0);
   const infoEl = document.getElementById('ljkLayoutInfo');
   if (infoEl) {
-    const idSummary = `Identitas: <b>${idTitle} (${layout.idDigits} digit)</b>`;
+    const idSummary = `Identitas: <b>${getIdFieldLabel()} (${layout.idDigits} digit)</b>${studentObj ? ` • Preview: <b>${studentObj.nama}</b>` : ''}`;
     if (layout.urOnPage2 === 0) {
       infoEl.style.background = '#dcfce7';
       infoEl.style.color = '#166534';
@@ -1577,7 +2172,7 @@ function renderLJKPreview() {
   }
 }
 
-function renderUraianContinuationCanvas(canvas, startIdx, totalUR) {
+function renderUraianContinuationCanvas(canvas, startIdx, totalUR, studentObj = null) {
   const ctx = canvas.getContext('2d');
   const W = canvas.width, H = canvas.height;
   ctx.fillStyle = '#ffffff';
@@ -1593,7 +2188,11 @@ function renderUraianContinuationCanvas(canvas, startIdx, totalUR) {
   ctx.fillText('LEMBAR JAWABAN URAIAN (LANJUTAN)', pad + 14, pad + 26);
   ctx.font = '10.5px sans-serif';
   ctx.fillText(`${state.meta.sekolah} • Mapel: ${state.meta.mapel} • Kelas: ${state.meta.kelas}`, pad + 14, pad + 44);
-  ctx.fillText(`Nama Siswa: _____________________________   ${getIdFieldLabel()}: ________________`, pad + 14, pad + 64);
+  if (studentObj) {
+    ctx.fillText(`Nama Siswa: ${studentObj.nama}   |   ${getIdFieldLabel()}: ${studentObj.nis || '-'}`, pad + 14, pad + 64);
+  } else {
+    ctx.fillText(`Nama Siswa: _____________________________   ${getIdFieldLabel()}: ________________`, pad + 14, pad + 64);
+  }
 
   ctx.beginPath();
   ctx.moveTo(pad, pad + 74);
@@ -1643,10 +2242,36 @@ function printLJK() {
   pa.style.display = 'none';
 }
 
+function printAllStudentsLJK() {
+  if (!state.students.length) return alert('Belum ada data siswa.');
+  if (state.students.length > 60 && !confirm(`Akan menyiapkan ${state.students.length} lembar LJK terisi identitas siswa. Lanjutkan?`)) return;
+
+  const off1 = document.createElement('canvas');
+  off1.width = 794; off1.height = 1123;
+  const off2 = document.createElement('canvas');
+  off2.width = 794; off2.height = 1123;
+
+  const pagesHtml = [];
+  state.students.forEach(st => {
+    const layout = drawLJKOnCanvas(off1, st);
+    pagesHtml.push(`<section class="print-page"><img src="${off1.toDataURL('image/png')}" alt="LJK ${escapeAttr(st.nama)}"></section>`);
+    if (layout.urOnPage2 > 0) {
+      renderUraianContinuationCanvas(off2, layout.urOnPage1, state.config.jmlUR, st);
+      pagesHtml.push(`<section class="print-page"><img src="${off2.toDataURL('image/png')}" alt="LJK Hal 2 ${escapeAttr(st.nama)}"></section>`);
+    }
+  });
+
+  const pa = document.getElementById('printArea');
+  pa.style.display = 'block';
+  pa.innerHTML = pagesHtml.join('');
+  window.print();
+  pa.style.display = 'none';
+}
+
 function downloadLJKImage() {
   renderLJKPreview();
   const link = document.createElement('a');
-  link.download = `LJK_${state.meta.mapel}_${state.config.jmlPG}PG.png`;
+  link.download = `LJK_${state.meta.kelas.replace(/\W+/g, '_')}_${state.meta.mapel}_${state.config.jmlPG}PG.png`;
   link.href = document.getElementById('ljkGeneratorCanvas').toDataURL('image/png');
   link.click();
 
@@ -1654,7 +2279,7 @@ function downloadLJKImage() {
   if (canvas2 && canvas2.style.display !== 'none') {
     setTimeout(() => {
       const link2 = document.createElement('a');
-      link2.download = `LJK_${state.meta.mapel}_Uraian_Hal2.png`;
+      link2.download = `LJK_${state.meta.kelas.replace(/\W+/g, '_')}_${state.meta.mapel}_Uraian_Hal2.png`;
       link2.href = canvas2.toDataURL('image/png');
       link2.click();
     }, 350);
@@ -1675,10 +2300,13 @@ function drawScannerIdleCanvas() {
   ctx.fillStyle = '#cbd5e1';
   ctx.font = 'bold 22px sans-serif';
   ctx.textAlign = 'center';
-  ctx.fillText('SIAP MEMINDAI LJK', canvas.width / 2, canvas.height / 2 - 14);
-  ctx.font = '15px sans-serif';
+  ctx.fillText('SIAP MEMINDAI LJK', canvas.width / 2, canvas.height / 2 - 20);
+  ctx.font = '14px sans-serif';
+  ctx.fillStyle = '#93c5fd';
+  ctx.fillText(`${state.meta.kelas} • ${state.meta.mapel}`, canvas.width / 2, canvas.height / 2 + 6);
+  ctx.font = '13px sans-serif';
   ctx.fillStyle = '#94a3b8';
-  ctx.fillText('Tekan "Buka Kamera" atau "Pilih File LJK"', canvas.width / 2, canvas.height / 2 + 18);
+  ctx.fillText('Tekan "Buka Kamera" atau "Pilih File LJK"', canvas.width / 2, canvas.height / 2 + 32);
   ctx.textAlign = 'left';
 }
 
@@ -1812,11 +2440,9 @@ function resolveScannedStudent(detectedDigits) {
   let matchMethod = '';
 
   if (cleanDigits.length > 0) {
-    // 1. Cocokkan eksak dengan kolom NISN / Nomor Peserta
     matchedIdx = state.students.findIndex(st => (st.nis || '').trim() === detectedDigits);
     if (matchedIdx >= 0) matchMethod = 'Cocok Eksak';
 
-    // 2. Cocokkan nilai numerik (misal "005" cocok dengan "5" atau "0005")
     if (matchedIdx < 0 && hasCompleteDigits && /^\d+$/.test(detectedDigits)) {
       const targetNum = parseInt(detectedDigits, 10);
       matchedIdx = state.students.findIndex(st => {
@@ -1826,7 +2452,6 @@ function resolveScannedStudent(detectedDigits) {
       if (matchedIdx >= 0) matchMethod = 'Cocok Numerik';
     }
 
-    // 3. Fallback ke nomor urut peserta jika mode Nomor Peserta dan angka berada dalam 1..N
     if (matchedIdx < 0 && state.config.idFieldType === 'nomor_peserta' && hasCompleteDigits && /^\d+$/.test(detectedDigits)) {
       const seqNo = parseInt(detectedDigits, 10);
       if (seqNo >= 1 && seqNo <= state.students.length) {
@@ -2173,7 +2798,7 @@ function reprocessOMR() {
     if (!top || top.fillScore < minFillCutoff) return [];
     const chosen = [];
     opts.forEach(opt => {
-      if (opt.fillScore >= minFillCutoff && opt.fillScore >= top.fillScore * 0.72) {
+      if (opt.fillScore >= minFillCutoff && opt.fillScore >= top.fillScore * 0.65) {
         opt.filled = true;
         chosen.push(opt.letter);
       }
@@ -2187,7 +2812,7 @@ function reprocessOMR() {
     if (!top || top.fillScore < minFillCutoff) return [];
     const chosen = [];
     opts.forEach(opt => {
-      if (opt.fillScore >= minFillCutoff && opt.fillScore >= top.fillScore * 0.72) {
+      if (opt.fillScore >= minFillCutoff && opt.fillScore >= top.fillScore * 0.65) {
         opt.filled = true;
         chosen.push(opt.letter);
       }
@@ -2222,8 +2847,21 @@ function reprocessOMR() {
 
   resolveScannedStudent(detectedCode);
 
-  currentScannedPG = pgChoices.map(a => !a.length ? 'X' : a.length > 1 ? 'V' : a[0]);
-  currentScannedBS = bsChoices.map(a => !a.length ? 'X' : a.length > 1 ? 'V' : a[0]);
+  // LOGIKA JAWABAN OBJEKTIF (PG & BS):
+  // - Jika peserta tidak menjawab salah satu gelembung / dikosongkan semua (a.length === 0) => "V"
+  // - Jika peserta memilih semua opsi gelembung (a.length === totalOpsi) atau ganda (a.length > 1) => "X"
+  // - Jika memilih 1 gelembung => huruf opsi terpilih (A-E atau B/S)
+  const opsiPGCount = Math.min(5, Math.max(3, Number(state.config.opsiPG) || 4));
+  currentScannedPG = pgChoices.map(a => {
+    if (!a || a.length === 0) return 'V';
+    if (a.length >= opsiPGCount || a.length > 1) return 'X';
+    return a[0];
+  });
+  currentScannedBS = bsChoices.map(a => {
+    if (!a || a.length === 0) return 'V';
+    if (a.length >= 2 || a.length > 1) return 'X';
+    return a[0];
+  });
   renderScannedEditor();
 }
 
@@ -2232,7 +2870,8 @@ function renderScannedEditor() {
   const kBS = state.config.jmlBS || 0;
   const keyPG = (state.config.kunciPG || '').toUpperCase().replace(/\s/g, '').padEnd(kPG, '!');
   const keyBS = (state.config.kunciBS || '').toUpperCase().replace(/\s/g, '').padEnd(kBS, '!');
-  let benarPG = 0, benarBS = 0;
+  let benarPG = 0, kosongPG = 0, semuaOpsiPG = 0;
+  let benarBS = 0, kosongBS = 0, semuaOpsiBS = 0;
   const ed = document.getElementById('scanAnswersEditor');
   ed.innerHTML = '';
 
@@ -2245,8 +2884,19 @@ function renderScannedEditor() {
   const addChip = (label, ans, isOk, title, onCycle) => {
     const chip = document.createElement('button');
     chip.className = 'btn btn-sm';
-    chip.style.background = isOk ? '#dcfce7' : (ans === 'X' || ans === 'V' ? '#fef3c7' : '#fee2e2');
-    chip.style.color = isOk ? '#166534' : '#92400e';
+    if (isOk) {
+      chip.style.background = '#dcfce7';
+      chip.style.color = '#166534';
+    } else if (ans === 'V') {
+      chip.style.background = '#fef3c7';
+      chip.style.color = '#92400e';
+    } else if (ans === 'X') {
+      chip.style.background = '#f3e8ff';
+      chip.style.color = '#6b21a8';
+    } else {
+      chip.style.background = '#fee2e2';
+      chip.style.color = '#991b1b';
+    }
     chip.style.border = '1px solid #cbd5e1';
     chip.textContent = `${label}:${ans}`;
     chip.title = title;
@@ -2257,11 +2907,13 @@ function renderScannedEditor() {
   if (kPG > 0) {
     heading('PILIHAN GANDA');
     for (let i = 0; i < kPG; i++) {
-      const ans = currentScannedPG[i] || 'X';
+      const ans = currentScannedPG[i] || 'V';
       const isOk = ans === keyPG[i];
       if (isOk) benarPG++;
-      addChip(i + 1, ans, isOk, `Klik untuk ubah jawaban PG No.${i + 1} (Kunci: ${keyPG[i]})`, () => {
-        const opts = ['A', 'B', 'C', 'D', 'E'].slice(0, state.config.opsiPG).concat(['X', 'V']);
+      if (ans === 'V') kosongPG++;
+      if (ans === 'X') semuaOpsiPG++;
+      addChip(i + 1, ans, isOk, `Klik untuk ubah jawaban PG No.${i + 1} (Kunci: ${keyPG[i]} | V=Kosong, X=Semua Opsi/Ganda)`, () => {
+        const opts = ['A', 'B', 'C', 'D', 'E'].slice(0, state.config.opsiPG).concat(['V', 'X']);
         currentScannedPG[i] = opts[(opts.indexOf(ans) + 1) % opts.length];
         renderScannedEditor();
       });
@@ -2271,11 +2923,13 @@ function renderScannedEditor() {
   if (kBS > 0) {
     heading('BENAR - SALAH');
     for (let i = 0; i < kBS; i++) {
-      const ans = currentScannedBS[i] || 'X';
+      const ans = currentScannedBS[i] || 'V';
       const isOk = ans === keyBS[i];
       if (isOk) benarBS++;
-      addChip(`B-S ${getBSQuestionNo(i)}`, ans, isOk, `Klik untuk ubah jawaban B-S No.${getBSQuestionNo(i)} (Kunci: ${keyBS[i]})`, () => {
-        const opts = ['B', 'S', 'X', 'V'];
+      if (ans === 'V') kosongBS++;
+      if (ans === 'X') semuaOpsiBS++;
+      addChip(`B-S ${getBSQuestionNo(i)}`, ans, isOk, `Klik untuk ubah jawaban B-S No.${getBSQuestionNo(i)} (Kunci: ${keyBS[i]} | V=Kosong, X=Semua Opsi/Ganda)`, () => {
+        const opts = ['B', 'S', 'V', 'X'];
         currentScannedBS[i] = opts[(opts.indexOf(ans) + 1) % opts.length];
         renderScannedEditor();
       });
@@ -2286,9 +2940,9 @@ function renderScannedEditor() {
   const nilaiBS = kBS > 0 ? ((benarBS / kBS) * 100).toFixed(1) : '—';
   document.getElementById('scanResultSummary').innerHTML =
     (lastDetectedIdDigits ? `<b>${getIdFieldLabel()} Terbaca:</b> <code>${lastDetectedIdDigits}</code><br>` : '') +
-    `<b>PG:</b> <code>${currentScannedPG.join('')}</code> • Skor <b>${benarPG}/${kPG}</b> • Nilai <b>${nilaiPG}</b>` +
-    (kBS ? `<br><b>B-S:</b> <code>${currentScannedBS.join('')}</code> • Skor <b>${benarBS}/${kBS}</b> • Nilai <b>${nilaiBS}</b>` : '') +
-    `<br><small style="color:#64748b;">Ketuk kotak nomor di bawah jika ingin mengoreksi manual. (X = kosong, V = ganda)</small>`;
+    `<b>PG:</b> <code>${currentScannedPG.join('')}</code> • Benar <b>${benarPG}/${kPG}</b> • Nilai <b>${nilaiPG}</b> <small>(Kosong V: ${kosongPG}, Semua/Ganda X: ${semuaOpsiPG})</small>` +
+    (kBS ? `<br><b>B-S:</b> <code>${currentScannedBS.join('')}</code> • Benar <b>${benarBS}/${kBS}</b> • Nilai <b>${nilaiBS}</b> <small>(Kosong V: ${kosongBS}, Semua/Ganda X: ${semuaOpsiBS})</small>` : '') +
+    `<br><small style="color:#64748b;">Ketuk kotak nomor di bawah jika ingin mengoreksi manual. (<b>V</b> = kosong/dikosongkan semua, <b>X</b> = pilih semua opsi/ganda)</small>`;
 
   syncScanUraianForStudent();
 }
@@ -2338,8 +2992,12 @@ function renderInputJawabanTable() {
   const tbody = document.getElementById('tbodyInputJawaban');
   tbody.innerHTML = '';
   const analytics = computeAllAnalytics();
+  const filterQ = (document.getElementById('searchInputJawaban')?.value || '').trim().toLowerCase();
 
   state.students.forEach((st, i) => {
+    if (filterQ && !(st.nama || '').toLowerCase().includes(filterQ) && !(st.nis || '').toLowerCase().includes(filterQ)) {
+      return;
+    }
     const p = analytics.pgMatrix[i];
     const u = analytics.urMatrix[i];
     const bs = analytics.bsMatrix[i];
@@ -2349,13 +3007,13 @@ function renderInputJawabanTable() {
       <td>${i + 1}</td>
       <td style="font-family:monospace;">${escapeAttr(st.nis || '-')}</td>
       <td><b>${escapeAttr(st.nama)}</b></td>
-      <td><input value="${escapeAttr(st.pg || '')}" maxlength="${state.config.jmlPG}" placeholder="Ketik A-E..."
-        oninput="state.students[${i}].pg=this.value.toUpperCase(); persistNow();"
+      <td><input value="${escapeAttr(st.pg || '')}" maxlength="${state.config.jmlPG}" placeholder="A-E / V / X..."
+        oninput="state.students[${i}].pg=this.value.toUpperCase().replace(/[^A-EVX]/g,''); this.value=state.students[${i}].pg; persistNow();"
         onchange="saveState();" style="font-family:monospace; letter-spacing:1px; min-width:130px;" /></td>
       <td>${p.skor} / ${state.config.jmlPG}</td>
       <td><span class="badge ${p.tuntas === 'Tuntas' ? 'badge-tuntas' : 'badge-remed'}">${p.nilai.toFixed(1)}</span></td>
-      <td><input value="${escapeAttr(st.bs || '')}" maxlength="${state.config.jmlBS}" placeholder="BSSB"
-        oninput="state.students[${i}].bs=this.value.toUpperCase().replace(/[^BSXV]/g,''); persistNow();"
+      <td><input value="${escapeAttr(st.bs || '')}" maxlength="${state.config.jmlBS}" placeholder="B/S/V/X"
+        oninput="state.students[${i}].bs=this.value.toUpperCase().replace(/[^BSXV]/g,''); this.value=state.students[${i}].bs; persistNow();"
         onchange="saveState();" style="width:90px; font-family:monospace;" /></td>
       <td>${bs.skor}/${state.config.jmlBS || 0}</td>
       <td>${bs.nilai.toFixed(1)}</td>
@@ -2408,7 +3066,7 @@ function chartBarRows(title, rows, maxValue) {
   const max = Math.max(1, maxValue || Math.max(0, ...rows.map(x => x.value)));
   return `<div class="card"><h3>${title}</h3>${rows.map(r => {
     const pct = Math.max(0, Math.min(100, (r.value / max) * 100));
-    return `<div class="bar-row"><div style="width:115px;white-space:normal;">${r.label}</div><div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${r.color || '#2563eb'}"></div></div><div style="width:58px;text-align:right"><b>${r.display !== undefined ? r.display : r.value}</b></div></div>`;
+    return `<div class="bar-row"><div style="width:125px;white-space:normal;">${r.label}</div><div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${r.color || '#2563eb'}"></div></div><div style="width:65px;text-align:right"><b>${r.display !== undefined ? r.display : r.value}</b></div></div>`;
   }).join('')}</div>`;
 }
 
@@ -2519,10 +3177,11 @@ function renderReport() {
       return `<div class="bar-row"><div style="width:110px;">${lbl} (${cnt})</div><div class="bar-track"><div class="bar-fill" style="width:${pct}%; background:${color};"></div></div><div style="width:42px; text-align:right;"><b>${pct}%</b></div></div>`;
     };
 
+    // V = Kosong (tidak diisi), X = Pilih Semua Opsi / Ganda
     const pgResponses = a.pgMatrix.reduce((o, m) => {
       for (const ch of m.ans) {
-        if (ch === 'X') o.kosong++;
-        else if (ch === 'V') o.ganda++;
+        if (ch === 'V') o.kosong++;
+        else if (ch === 'X') o.ganda++;
       }
       return o;
     }, { kosong: 0, ganda: 0 });
@@ -2552,7 +3211,12 @@ function renderReport() {
         </div>
       </div>
       <div class="grid-2">
-        ${chartDonut('Komposisi Jawaban PG Seluruh Siswa', [{ label: 'Benar', value: pgCorrect, color: '#16a34a' }, { label: 'Salah', value: pgWrong, color: '#ef4444' }, { label: 'Kosong', value: pgResponses.kosong, color: '#f59e0b' }, { label: 'Ganda', value: pgResponses.ganda, color: '#7c3aed' }])}
+        ${chartDonut('Komposisi Jawaban PG Seluruh Siswa', [
+          { label: 'Benar', value: pgCorrect, color: '#16a34a' },
+          { label: 'Salah', value: pgWrong, color: '#ef4444' },
+          { label: 'Kosong (V)', value: pgResponses.kosong, color: '#f59e0b' },
+          { label: 'Semua Opsi / Ganda (X)', value: pgResponses.ganda, color: '#7c3aed' }
+        ])}
         ${chartBarRows('Persentase Jawaban Benar per Butir PG', pgPerItem, 100)}
       </div>
       <div class="card" style="background:#f8fafc;">
@@ -2581,9 +3245,15 @@ function renderReport() {
     const keyMissing = a.itemsBS.filter(x => !x.keyReady).length;
     box.innerHTML = renderHeaderKop('GRAFIK ANALISIS BENAR-SALAH (B-S)') +
       (keyMissing ? `<div class="card" style="background:#fff7ed;color:#9a3412"><b>Perhatian:</b> ${keyMissing} kunci B-S belum diisi. Grafik ketepatan untuk nomor tersebut belum dapat dihitung.</div>` : '') +
-      `<div class="grid-2">${chartDonut('Komposisi Respons B-S', [{ label: 'Benar', value: benar, color: '#16a34a' }, { label: 'Salah', value: salah, color: '#ef4444' }, { label: 'Kosong', value: kosong, color: '#f59e0b' }, { label: 'Ganda', value: ganda, color: '#7c3aed' }, { label: 'Belum dinilai', value: belumDinilai, color: '#64748b' }])}${chartBarRows('Ketepatan Jawaban per Butir B-S', perItem, 100)}</div>
+      `<div class="grid-2">${chartDonut('Komposisi Respons B-S', [
+        { label: 'Benar', value: benar, color: '#16a34a' },
+        { label: 'Salah', value: salah, color: '#ef4444' },
+        { label: 'Kosong (V)', value: kosong, color: '#f59e0b' },
+        { label: 'Semua Opsi / Ganda (X)', value: ganda, color: '#7c3aed' },
+        { label: 'Belum dinilai', value: belumDinilai, color: '#64748b' }
+      ])}${chartBarRows('Ketepatan Jawaban per Butir B-S', perItem, 100)}</div>
       ${keyMissing === 0 ? chartLine('Perbandingan Skor B-S per Siswa', a.bsMatrix.map(x => x.nilai), state.students.map((x, i) => `${i + 1}. ${x.nama}`)) : '<div class="card"><h3>Skor per Siswa</h3><p>Grafik nilai siswa akan aktif setelah seluruh kunci B-S dilengkapi.</p></div>'}
-      <div class="card"><h3>Rincian Respons per Pernyataan B-S</h3><div class="table-wrap"><table><thead><tr><th>No Soal</th><th>Kunci</th><th>Benar</th><th>Salah</th><th>Kosong</th><th>Ganda</th><th>Belum Dinilai</th><th>Ketepatan</th></tr></thead><tbody>${a.itemsBS.map((x, i) => `<tr><td>${x.no}</td><td>${(state.config.kunciBS || '')[i] || '—'}</td><td>${x.benar}</td><td>${x.salah}</td><td>${x.kosong}</td><td>${x.ganda}</td><td>${x.belumDinilai}</td><td>${x.keyReady ? Math.round(x.tk * 100) + '%' : 'Belum tersedia'}</td></tr>`).join('')}</tbody></table></div></div>`;
+      <div class="card"><h3>Rincian Respons per Pernyataan B-S</h3><div class="table-wrap"><table><thead><tr><th>No Soal</th><th>Kunci</th><th>Benar</th><th>Salah</th><th>Kosong (V)</th><th>Semua/Ganda (X)</th><th>Belum Dinilai</th><th>Ketepatan</th></tr></thead><tbody>${a.itemsBS.map((x, i) => `<tr><td>${x.no}</td><td>${(state.config.kunciBS || '')[i] || '—'}</td><td>${x.benar}</td><td>${x.salah}</td><td>${x.kosong}</td><td>${x.ganda}</td><td>${x.belumDinilai}</td><td>${x.keyReady ? Math.round(x.tk * 100) + '%' : 'Belum tersedia'}</td></tr>`).join('')}</tbody></table></div></div>`;
   }
 
   else if (currentReportTab === 'grafik_ur') {
@@ -2740,6 +3410,189 @@ function renderReport() {
         </table>
       </div>`;
   }
+
+  // ==================== LAPORAN BARU 1: LEGER MULTI-PELAJARAN PER KELAS ====================
+  else if (currentReportTab === 'leger_mapel') {
+    const curKelas = (state.meta.kelas || '').trim();
+    const classSessions = workspace.sessions.filter(s => (s.meta.kelas || '').trim() === curKelas);
+    const analyticsPerSes = classSessions.map(s => ({
+      ses: s,
+      ana: computeAllAnalyticsForSession(s)
+    }));
+
+    // Gabungkan daftar siswa unik berdasarkan NIS/Nomor Peserta atau Nama
+    const rosterMap = new Map();
+    classSessions.forEach(s => {
+      s.students.forEach(st => {
+        const key = (st.nis || '').trim() ? `ID:${st.nis.trim()}` : `NM:${(st.nama || '').trim().toUpperCase()}`;
+        if (!rosterMap.has(key)) {
+          rosterMap.set(key, { nis: st.nis || '-', nama: st.nama || '-' });
+        }
+      });
+    });
+    const roster = Array.from(rosterMap.values());
+
+    const rows = roster.map(person => {
+      let totalNilai = 0;
+      let countMapel = 0;
+      let countTuntas = 0;
+      const scores = analyticsPerSes.map(({ ses, ana }) => {
+        const sIdx = ses.students.findIndex(st =>
+          ((person.nis && person.nis !== '-' && (st.nis || '').trim() === person.nis) ||
+           ((st.nama || '').trim().toUpperCase() === person.nama.trim().toUpperCase()))
+        );
+        if (sIdx < 0) return null;
+        const g = ana.gabungan[sIdx];
+        totalNilai += g.nAkhir;
+        countMapel++;
+        if (g.ketAkhir === 'Tuntas') countTuntas++;
+        return { nilai: g.nAkhir, ket: g.ketAkhir };
+      });
+      const avg = countMapel > 0 ? totalNilai / countMapel : 0;
+      return { ...person, scores, totalNilai, avg, countMapel, countTuntas };
+    });
+
+    // Hitung peringkat berdasarkan rata-rata nilai
+    const sortedAvgs = [...rows].map(r => r.avg).sort((x, y) => y - x);
+    rows.forEach(r => {
+      r.rank = sortedAvgs.indexOf(r.avg) + 1;
+    });
+
+    const mapelBars = analyticsPerSes.map(({ ses, ana }) => {
+      const avgMapel = ana.N > 0 ? ana.gabungan.reduce((sum, g) => sum + g.nAkhir, 0) / ana.N : 0;
+      return {
+        label: ses.meta.mapel || 'Mapel',
+        value: Number(avgMapel.toFixed(1)),
+        display: avgMapel.toFixed(1),
+        color: '#1d4ed8'
+      };
+    });
+
+    box.innerHTML = renderHeaderKop(`LEGER NILAI MULTI-PELAJARAN • KELAS ${curKelas.toUpperCase()}`) + `
+      <div style="margin-bottom:10px; font-size:0.8rem; background:#eff6ff; color:#1e3a8a; padding:8px 10px; border-radius:8px;">
+        Menampilkan rekap nilai akhir lintas <b>${classSessions.length} Mata Pelajaran</b> pada kelas <b>${escapeAttr(curKelas)}</b> (${roster.length} siswa).
+      </div>
+      ${chartBarRows(`Rata-rata Nilai per Mata Pelajaran (${escapeAttr(curKelas)})`, mapelBars, 100)}
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>No</th>
+              <th>${getIdFieldLabel()}</th>
+              <th>Nama Siswa</th>
+              ${classSessions.map(s => `<th>${escapeAttr(s.meta.mapel)}<br><small style="font-weight:400;">(KKTP ${s.meta.kktp})</small></th>`).join('')}
+              <th>Jumlah</th>
+              <th>Rata-rata</th>
+              <th>Ketuntasan</th>
+              <th>Peringkat</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${rows.map((r, idx) => `
+              <tr>
+                <td>${idx + 1}</td>
+                <td style="font-family:monospace;">${escapeAttr(r.nis)}</td>
+                <td><b>${escapeAttr(r.nama)}</b></td>
+                ${r.scores.map(sc => sc
+                  ? `<td><span class="badge ${sc.ket === 'Tuntas' ? 'badge-tuntas' : 'badge-remed'}">${sc.nilai.toFixed(1)}</span></td>`
+                  : `<td style="color:#94a3b8;">-</td>`
+                ).join('')}
+                <td><b>${r.totalNilai.toFixed(1)}</b></td>
+                <td><b>${r.avg.toFixed(2)}</b></td>
+                <td>${r.countTuntas}/${r.countMapel} Mapel</td>
+                <td><span class="badge badge-info">#${r.rank}</span></td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>`;
+  }
+
+  // ==================== LAPORAN BARU 2: REKAP & PERBANDINGAN ANTAR KELAS & MAPEL ====================
+  else if (currentReportTab === 'rekap_kelas') {
+    const summaryRows = workspace.sessions.map(s => {
+      const ana = computeAllAnalyticsForSession(s);
+      const doneCnt = s.students.filter(st => (st.pg && st.pg.length > 0) || (st.bs && st.bs.length > 0)).length;
+      const finals = ana.gabungan.map(g => g.nAkhir);
+      const avg = ana.N > 0 ? finals.reduce((a, b) => a + b, 0) / ana.N : 0;
+      const maxVal = ana.N > 0 ? Math.max(...finals) : 0;
+      const minVal = ana.N > 0 ? Math.min(...finals) : 0;
+      const tuntasCnt = ana.gabungan.filter(g => g.ketAkhir === 'Tuntas').length;
+      const pctTuntas = ana.N > 0 ? (tuntasCnt / ana.N) * 100 : 0;
+      return {
+        ses: s,
+        totalSiswa: ana.N,
+        doneCnt,
+        avg,
+        maxVal,
+        minVal,
+        tuntasCnt,
+        pctTuntas
+      };
+    });
+
+    const avgBars = summaryRows.map(r => ({
+      label: `${r.ses.meta.kelas} (${r.ses.meta.mapel})`,
+      value: Number(r.avg.toFixed(1)),
+      display: r.avg.toFixed(1),
+      color: '#059669'
+    }));
+
+    const tuntasBars = summaryRows.map(r => ({
+      label: `${r.ses.meta.kelas} (${r.ses.meta.mapel})`,
+      value: Math.round(r.pctTuntas),
+      display: `${Math.round(r.pctTuntas)}%`,
+      color: r.pctTuntas >= 75 ? '#16a34a' : (r.pctTuntas >= 50 ? '#f59e0b' : '#ef4444')
+    }));
+
+    box.innerHTML = renderHeaderKop('REKAPITULASI & PERBANDINGAN MULTI-KELAS DAN MULTI-PELAJARAN') + `
+      <div class="grid-2">
+        ${chartBarRows('Perbandingan Rata-rata Nilai Akhir', avgBars, 100)}
+        ${chartBarRows('Persentase Ketuntasan Klasikal (%)', tuntasBars, 100)}
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>No</th>
+              <th>Kelas</th>
+              <th>Mata Pelajaran</th>
+              <th>Peserta</th>
+              <th>Terkoreksi</th>
+              <th>KKTP</th>
+              <th>Rata-rata</th>
+              <th>Tertinggi</th>
+              <th>Terendah</th>
+              <th>Tuntas</th>
+              <th>% Tuntas</th>
+              <th>Aksi</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${summaryRows.map((r, idx) => `
+              <tr style="${r.ses.id === state.id ? 'background:#eff6ff;' : ''}">
+                <td>${idx + 1}</td>
+                <td><b>${escapeAttr(r.ses.meta.kelas)}</b></td>
+                <td><b>${escapeAttr(r.ses.meta.mapel)}</b></td>
+                <td>${r.totalSiswa}</td>
+                <td>${r.doneCnt}/${r.totalSiswa}</td>
+                <td>${r.ses.meta.kktp}</td>
+                <td><b>${r.avg.toFixed(2)}</b></td>
+                <td>${r.maxVal.toFixed(1)}</td>
+                <td>${r.minVal.toFixed(1)}</td>
+                <td>${r.tuntasCnt}/${r.totalSiswa}</td>
+                <td><span class="badge ${r.pctTuntas >= 75 ? 'badge-tuntas' : 'badge-warn'}">${r.pctTuntas.toFixed(1)}%</span></td>
+                <td>
+                  ${r.ses.id !== state.id
+                    ? `<button class="btn btn-primary btn-xs" onclick="switchActiveSession('${r.ses.id}')">Buka Sesi</button>`
+                    : `<span class="badge badge-info">Aktif</span>`}
+                </td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>`;
+  }
 }
 
 function printCurrentReport() {
@@ -2755,7 +3608,7 @@ function printCurrentReport() {
   pa.style.display = 'none';
 }
 
-// ==================== EKSPOR EXCEL MULTI-SHEET IDENTIK KORANUL ====================
+// ==================== EKSPOR EXCEL MULTI-SHEET IDENTIK KORANUL + LEGER MULTI-KELAS ====================
 function exportKoranulExcel() {
   if (typeof XLSX === 'undefined') return alert('Library Excel sedang dimuat, silakan coba sebentar lagi.');
   const a = computeAllAnalytics();
@@ -2779,7 +3632,7 @@ function exportKoranulExcel() {
 
   const blocksKunci = state.config.kunciPG.slice(0, a.kPG).match(/.{1,5}/g) || [];
   const wsDataMC = XLSX.utils.aoa_to_sheet([
-    ['DATA JAWABAN SISWA PILIHAN GANDA'],
+    ['DATA JAWABAN SISWA PILIHAN GANDA (V = Kosong, X = Semua Opsi/Ganda)'],
     ['Kunci Jawaban (per 5 nomor)', ...blocksKunci],
     ['No', 'NAMA SISWA', '1-5', '6-10', '11-15', '16-20', '21-25', '26-30', '31-35', '36-40', '41-45', '46-50'],
     ...state.students.map((s, i) => {
@@ -2791,7 +3644,7 @@ function exportKoranulExcel() {
 
   if (a.kBS > 0) {
     const w = XLSX.utils.aoa_to_sheet([
-      ['DATA BENAR-SALAH'],
+      ['DATA BENAR-SALAH (V = Kosong, X = Semua Opsi/Ganda)'],
       ['Kunci', state.config.kunciBS],
       ['No', 'Nama', 'Jawaban', 'Skor', 'Nilai'],
       ...state.students.map((st, i) => [i + 1, st.nama, st.bs || '', a.bsMatrix[i].skor, Number(a.bsMatrix[i].nilai.toFixed(2))])
@@ -2800,7 +3653,7 @@ function exportKoranulExcel() {
 
     const wa = XLSX.utils.aoa_to_sheet([
       ['ANALISIS BUTIR BENAR-SALAH'],
-      ['Nomor Soal', 'Kunci', 'Benar', 'Salah', 'Kosong', 'Ganda', 'Belum Dinilai', 'Tingkat Ketepatan'],
+      ['Nomor Soal', 'Kunci', 'Benar', 'Salah', 'Kosong (V)', 'Semua Opsi/Ganda (X)', 'Belum Dinilai', 'Tingkat Ketepatan'],
       ...a.itemsBS.map((it, i) => [it.no, (state.config.kunciBS || '')[i] || '', it.benar, it.salah, it.kosong, it.ganda, it.belumDinilai, it.keyReady ? Number((it.tk * 100).toFixed(2)) + '%' : 'Kunci belum diisi'])
     ]);
     XLSX.utils.book_append_sheet(wb, wa, 'Analisis BS');
@@ -2870,7 +3723,62 @@ function exportKoranulExcel() {
   ]);
   XLSX.utils.book_append_sheet(wb, wsPerbaikan, 'Perbaikan');
 
-  XLSX.writeFile(wb, `KORANUL_${m.mapel}_${m.sekolah.replace(/\s+/g, '_')}.xlsx`);
+  // Tambahan Sheet Leger Kelas (jika terdapat >1 mata pelajaran pada kelas aktif)
+  const curKelas = (m.kelas || '').trim();
+  const classSessions = workspace.sessions.filter(s => (s.meta.kelas || '').trim() === curKelas);
+  if (classSessions.length > 1) {
+    const anaList = classSessions.map(s => ({ ses: s, ana: computeAllAnalyticsForSession(s) }));
+    const rosterMap = new Map();
+    classSessions.forEach(s => {
+      s.students.forEach(st => {
+        const key = (st.nis || '').trim() ? `ID:${st.nis.trim()}` : `NM:${(st.nama || '').trim().toUpperCase()}`;
+        if (!rosterMap.has(key)) rosterMap.set(key, { nis: st.nis || '-', nama: st.nama || '-' });
+      });
+    });
+    const legerRows = Array.from(rosterMap.values()).map((person, idx) => {
+      let tot = 0, cnt = 0;
+      const vals = anaList.map(({ ses, ana }) => {
+        const sIdx = ses.students.findIndex(st =>
+          ((person.nis && person.nis !== '-' && (st.nis || '').trim() === person.nis) ||
+           ((st.nama || '').trim().toUpperCase() === person.nama.trim().toUpperCase()))
+        );
+        if (sIdx < 0) return '';
+        const v = Number(ana.gabungan[sIdx].nAkhir.toFixed(2));
+        tot += v; cnt++;
+        return v;
+      });
+      return [idx + 1, person.nis, person.nama, ...vals, Number(tot.toFixed(2)), cnt > 0 ? Number((tot / cnt).toFixed(2)) : 0];
+    });
+    const wsLeger = XLSX.utils.aoa_to_sheet([
+      [`LEGER NILAI MULTI-PELAJARAN • KELAS ${curKelas.toUpperCase()}`],
+      ['No', getIdFieldLabel(), 'Nama Siswa', ...classSessions.map(s => s.meta.mapel), 'Jumlah', 'Rata-rata'],
+      ...legerRows
+    ]);
+    XLSX.utils.book_append_sheet(wb, wsLeger, 'Leger_Kelas');
+  }
+
+  // Tambahan Sheet Rekap Multi-Kelas & Multi-Pelajaran (jika >1 sesi)
+  if (workspace.sessions.length > 1) {
+    const wsRekapAll = XLSX.utils.aoa_to_sheet([
+      ['REKAPITULASI MULTI-KELAS DAN MULTI-PELAJARAN'],
+      ['No', 'Kelas', 'Mata Pelajaran', 'Jenis Tes', 'Jumlah Siswa', 'KKTP', 'Rata-rata', 'Tertinggi', 'Terendah', 'Jumlah Tuntas', '% Ketuntasan'],
+      ...workspace.sessions.map((s, idx) => {
+        const ana = computeAllAnalyticsForSession(s);
+        const finals = ana.gabungan.map(g => g.nAkhir);
+        const avg = ana.N > 0 ? finals.reduce((x, y) => x + y, 0) / ana.N : 0;
+        const maxV = ana.N > 0 ? Math.max(...finals) : 0;
+        const minV = ana.N > 0 ? Math.min(...finals) : 0;
+        const tuntasCnt = ana.gabungan.filter(g => g.ketAkhir === 'Tuntas').length;
+        const pct = ana.N > 0 ? (tuntasCnt / ana.N) * 100 : 0;
+        return [idx + 1, s.meta.kelas, s.meta.mapel, s.meta.jenisTes, ana.N, s.meta.kktp, Number(avg.toFixed(2)), Number(maxV.toFixed(2)), Number(minV.toFixed(2)), tuntasCnt, Number(pct.toFixed(1))];
+      })
+    ]);
+    XLSX.utils.book_append_sheet(wb, wsRekapAll, 'Rekap_Multi_Kelas_Mapel');
+  }
+
+  const safeKelas = (m.kelas || 'Kelas').replace(/[^a-zA-Z0-9_-]+/g, '_');
+  const safeMapel = (m.mapel || 'Mapel').replace(/[^a-zA-Z0-9_-]+/g, '_');
+  XLSX.writeFile(wb, `KORANUL_${safeKelas}_${safeMapel}.xlsx`);
 }
 
 function switchTab(tabName, btn) {
