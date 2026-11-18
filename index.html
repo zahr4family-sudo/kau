@@ -4,9 +4,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <meta name="theme-color" content="#1d4ed8" />
-  <meta name="description" content="KORANUL OMR Multi-Kelas & Multi-Pelajaran" />
+  <meta name="description" content="KAU - Koreksi & Analisis Ulangan (OMR Multi-Kelas & Multi-Pelajaran)" />
   <link rel="apple-touch-icon" href="./icons/icon-192.png" />
-  <title>KORANUL OMR - Multi-Kelas & Multi-Pelajaran</title>
+  <title>KAU - Koreksi & Analisis Ulangan</title>
   <link rel="manifest" href="./manifest.json" />
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <style>
@@ -29,7 +29,7 @@
       color: #fff; padding: 12px 16px; position: sticky; top: 0; z-index: 55;
       box-shadow: 0 2px 8px rgba(0,0,0,0.15); display: flex; justify-content: space-between; align-items: center; gap: 8px;
     }
-    header h1 { margin: 0; font-size: 1.02rem; letter-spacing: 0.3px; }
+    header h1 { margin: 0; font-size: 1.05rem; letter-spacing: 0.4px; }
     header small { display: block; font-size: 0.72rem; opacity: 0.92; }
     .hdr-actions { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
     .save-pill {
@@ -159,52 +159,76 @@
     }
     .chart-card h3 { margin: 0 0 8px 0; font-size: 0.9rem; color: var(--primary-dark); }
     .chart-svg { width: 100%; height: auto; display: block; }
-   @media print {
+
+    /* Wadah cetak berada di luar layar pada mode normal, lalu mengambil penuh halaman saat dicetak */
+    #printArea {
+      display: none;
+    }
+    @media screen {
+      #printArea.is-printing {
+        display: block !important;
+        position: fixed;
+        left: -12000px;
+        top: 0;
+        width: 210mm;
+        opacity: 0;
+        pointer-events: none;
+        z-index: -1;
+      }
+    }
+
+    @media print {
       html, body {
-        background: #fff !important;
         margin: 0 !important;
         padding: 0 !important;
+        background: #ffffff !important;
+        width: 100% !important;
         height: auto !important;
         overflow: visible !important;
-      }
-      body > *:not(#printArea) {
-        display: none !important;
-      }
-      #printArea {
-        display: block !important;
-        position: static !important;
-        width: 100% !important;
-        margin: 0 !important;
-        padding: 0 !important;
-        background: #fff !important;
-        visibility: visible !important;
-      }
-      #printArea * {
-        visibility: visible !important;
         -webkit-print-color-adjust: exact !important;
         print-color-adjust: exact !important;
       }
+      #appRoot {
+        display: none !important;
+      }
+      #printArea, #printArea.is-printing {
+        display: block !important;
+        position: static !important;
+        left: auto !important;
+        top: auto !important;
+        opacity: 1 !important;
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        background: #ffffff !important;
+      }
       #printArea .print-page {
-        width: 100%;
-        box-sizing: border-box;
+        width: 100% !important;
+        box-sizing: border-box !important;
+        margin: 0 auto !important;
+        padding: 0 !important;
         page-break-after: always;
         break-after: page;
-        padding: 0;
-        margin: 0;
+        page-break-inside: avoid;
+        break-inside: avoid;
       }
       #printArea .print-page:last-child {
         page-break-after: auto;
         break-after: auto;
       }
-      #printArea img {
-        width: 100%;
-        max-height: 315mm;
-        object-fit: contain;
-        height: auto;
-        display: block;
-        margin: 0 auto;
+      #printArea .print-page.ljk-sheet img {
+        width: auto !important;
+        max-width: 100% !important;
+        max-height: 282mm !important;
+        height: auto !important;
+        margin: 0 auto !important;
+        display: block !important;
       }
-      #printArea .table-wrap { max-height: none !important; overflow: visible !important; border: none !important; }
+      #printArea .table-wrap {
+        max-height: none !important;
+        overflow: visible !important;
+        border: none !important;
+      }
       #printArea .chart-card {
         border: 1px solid #cbd5e1 !important;
         break-inside: avoid !important;
@@ -215,436 +239,440 @@
         height: auto !important;
         display: block !important;
       }
-      @page { size: 215mm 330mm; margin: 6mm; }
-    } 
+      @page {
+        margin: 6mm;
+      }
+    }
   </style>
 </head>
 <body>
 
-<header>
-  <div>
-    <h1>KORANUL OMR</h1>
-    <small id="hdrSubtitle">Koreksi LJK & Analisis Butir Soal • Multi-Kelas & Multi-Pelajaran</small>
-  </div>
-  <div class="hdr-actions">
-    <span id="saveStatusBadge" class="save-pill">💾 Tersimpan</span>
-    <button class="btn-export-top" onclick="exportKoranulExcel()">📥 Excel (.xlsx)</button>
-  </div>
-</header>
-
-<!-- BAR PEMILIH CEPAT MULTI-KELAS & MULTI-PELAJARAN -->
-<div class="context-bar">
-  <div class="context-inner">
+<div id="appRoot">
+  <header>
     <div>
-      <label for="quickClassSelect">🏫 Kelas Aktif</label>
-      <select id="quickClassSelect" onchange="onQuickClassChange(this.value)"></select>
+      <h1>KAU</h1>
+      <small id="hdrSubtitle">Koreksi & Analisis Ulangan • Multi-Kelas & Multi-Pelajaran</small>
     </div>
-    <div>
-      <label for="quickSubjectSelect">📚 Mata Pelajaran / Sesi</label>
-      <select id="quickSubjectSelect" onchange="onQuickSubjectChange(this.value)"></select>
+    <div class="hdr-actions">
+      <span id="saveStatusBadge" class="save-pill">💾 Tersimpan</span>
+      <button class="btn-export-top" onclick="exportKAUExcel()">📥 Excel (.xlsx)</button>
     </div>
-    <div class="context-actions">
-      <button class="btn btn-primary btn-sm" onclick="createNewSessionPrompt()" title="Tambah Sesi Kelas / Mata Pelajaran Baru">+ Sesi Baru</button>
-      <button class="btn btn-outline btn-sm" onclick="duplicateActiveSession()" title="Duplikat Konfigurasi & Siswa ke Kelas/Mapel Lain">📋 Duplikat</button>
-      <span class="badge badge-info" id="quickSessionStats">0/0 Terkoreksi</span>
+  </header>
+
+  <!-- BAR PEMILIH CEPAT MULTI-KELAS & MULTI-PELAJARAN -->
+  <div class="context-bar">
+    <div class="context-inner">
+      <div>
+        <label for="quickClassSelect">🏫 Kelas Aktif</label>
+        <select id="quickClassSelect" onchange="onQuickClassChange(this.value)"></select>
+      </div>
+      <div>
+        <label for="quickSubjectSelect">📚 Mata Pelajaran / Sesi</label>
+        <select id="quickSubjectSelect" onchange="onQuickSubjectChange(this.value)"></select>
+      </div>
+      <div class="context-actions">
+        <button class="btn btn-primary btn-sm" onclick="createNewSessionPrompt()" title="Tambah Sesi Kelas / Mata Pelajaran Baru">+ Sesi Baru</button>
+        <button class="btn btn-outline btn-sm" onclick="duplicateActiveSession()" title="Duplikat Konfigurasi & Siswa ke Kelas/Mapel Lain">📋 Duplikat</button>
+        <span class="badge badge-info" id="quickSessionStats">0/0 Terkoreksi</span>
+      </div>
     </div>
   </div>
-</div>
 
-<div class="container">
+  <div class="container">
 
-  <!-- ==================== TAB 1: IDENTITAS & SISWA ==================== -->
-  <section id="tab-data" class="tab-page active">
+    <!-- ==================== TAB 1: IDENTITAS & SISWA ==================== -->
+    <section id="tab-data" class="tab-page active">
 
-    <!-- MANAJEMEN MULTI-KELAS & MULTI-PELAJARAN -->
-    <div class="card" style="border-color:#93c5fd; background:linear-gradient(to bottom, #eff6ff, #ffffff);">
-      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px; border-bottom:1px solid #bfdbfe; padding-bottom:6px; margin-bottom:10px;">
-        <h2 style="border:none; margin:0; padding:0;">0. Manajemen Multi-Kelas & Multi-Pelajaran (<span id="lblTotalSessions">1</span> Sesi Tersimpan)</h2>
-        <div style="display:flex; gap:6px; flex-wrap:wrap;">
-          <button class="btn btn-primary btn-xs" onclick="createNewSessionPrompt()">+ Tambah Kelas / Mapel</button>
-          <button class="btn btn-outline btn-xs" onclick="applySchoolIdentityToAll()">🏫 Terapkan Info Sekolah ke Semua Sesi</button>
+      <!-- MANAJEMEN MULTI-KELAS & MULTI-PELAJARAN -->
+      <div class="card" style="border-color:#93c5fd; background:linear-gradient(to bottom, #eff6ff, #ffffff);">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px; border-bottom:1px solid #bfdbfe; padding-bottom:6px; margin-bottom:10px;">
+          <h2 style="border:none; margin:0; padding:0;">0. Manajemen Multi-Kelas & Multi-Pelajaran (<span id="lblTotalSessions">1</span> Sesi Tersimpan)</h2>
+          <div style="display:flex; gap:6px; flex-wrap:wrap;">
+            <button class="btn btn-primary btn-xs" onclick="createNewSessionPrompt()">+ Tambah Kelas / Mapel</button>
+            <button class="btn btn-outline btn-xs" onclick="applySchoolIdentityToAll()">🏫 Terapkan Info Sekolah ke Semua Sesi</button>
+          </div>
         </div>
-      </div>
-      <p style="font-size:0.78rem; color:var(--muted); margin:0 0 8px 0;">
-        Kelola banyak kelas dan mata pelajaran secara terpisah. Daftar siswa pada kelas yang sama akan otomatis disalin saat Anda menambahkan mata pelajaran baru.
-      </p>
-      <div class="table-wrap" style="max-height:220px;">
-        <table>
-          <thead>
-            <tr>
-              <th>Status</th>
-              <th>Kelas</th>
-              <th>Mata Pelajaran</th>
-              <th>Jenis Tes</th>
-              <th>Peserta</th>
-              <th>Rata-rata</th>
-              <th>Aksi</th>
-            </tr>
-          </thead>
-          <tbody id="tbodySessions"></tbody>
-        </table>
-      </div>
-    </div>
-
-    <div class="card">
-      <h2>1. Data Identitas Ujian (Sheet: data)</h2>
-      <div class="grid-2">
-        <div><label>Nama Sekolah</label><input id="inSekolah" value="SDN Nagreg" oninput="saveState()" onchange="saveState()" /></div>
-        <div>
-          <label>Mata Pelajaran</label>
-          <input id="inMapel" list="listMasterMapel" value="PAI" oninput="saveState()" onchange="onIdentityClassOrSubjectEdited()" />
-          <datalist id="listMasterMapel"></datalist>
-        </div>
-        <div><label>Kepala Sekolah</label><input id="inKepsek" value="Aep Sudrajat, S.Pd" oninput="saveState()" onchange="saveState()" /></div>
-        <div><label>NIP Kepala Sekolah</label><input id="inNipKepsek" value="19000000 000000 0 000" oninput="saveState()" onchange="saveState()" /></div>
-        <div><label>Guru Pengajar</label><input id="inGuru" value="Apipudin, S.Pd.I" oninput="saveState()" onchange="saveState()" /></div>
-        <div><label>NIP Guru</label><input id="inNipGuru" value="19000000 000000 0 021" oninput="saveState()" onchange="saveState()" /></div>
-        <div><label>Jenis Tes</label><input id="inJenisTes" value="PENILAIAN SUMATIF AKHIR SEMESTER" oninput="saveState()" onchange="saveState()" /></div>
-        <div><label>Materi Pokok</label><input id="inMateri" value="BAB I - BAB V" oninput="saveState()" onchange="saveState()" /></div>
-        <div>
-          <label>Kelas / Semester</label>
-          <input id="inKelas" list="listMasterKelas" value="I (Satu)/ Ganjil" oninput="saveState()" onchange="onIdentityClassOrSubjectEdited()" />
-          <datalist id="listMasterKelas"></datalist>
-        </div>
-        <div><label>Tahun Pelajaran</label><input id="inTapel" value="2025 - 2026" oninput="saveState()" onchange="saveState()" /></div>
-        <div><label>Tanggal Tes</label><input id="inTglTes" value="29 September 2025" oninput="saveState()" onchange="saveState()" /></div>
-        <div><label>Tanggal Periksa</label><input id="inTglPeriksa" value="30 September 2025" oninput="saveState()" onchange="saveState()" /></div>
-        <div><label>Nilai KKTP / KKM</label><input type="number" id="inKktp" value="70" oninput="saveState()" onchange="saveState()" /></div>
-        <div><label>Tempat TTD</label><input id="inTempat" value="Bandung" oninput="saveState()" onchange="saveState()" /></div>
-      </div>
-    </div>
-
-    <div class="card">
-      <h2>2. Konfigurasi Soal, Kunci & Gelembung Identitas LJK</h2>
-      <div class="grid-3">
-        <div>
-          <label>Bentuk Gelembung LJK</label>
-          <select id="inBubbleShape" onchange="onBubbleShapeChange(this.value)">
-            <option value="circle" selected>⭕ Lingkaran (Bulatan)</option>
-            <option value="square">⬜ Persegi / Kotak (Dukung Silang ✕)</option>
-          </select>
-        </div>
-        <div>
-          <label>Jenis Gelembung Identitas LJK</label>
-          <select id="inIdFieldType" onchange="onIdFieldTypeChange(this.value)">
-            <option value="nomor_peserta" selected>NOMOR PESERTA</option>
-            <option value="nisn">NISN</option>
-          </select>
-        </div>
-        <div>
-          <label>Banyak Digit Gelembung (2–12)</label>
-          <input type="number" id="inIdDigits" min="2" max="12" value="3" oninput="onIdDigitsChange(this.value)" onchange="onIdDigitsChange(this.value)" />
-        </div>
-        <div>
-          <label>Jumlah Soal Pilihan Ganda (1–50)</label>
-          <input type="number" id="inJmlPG" min="1" max="50" value="20" oninput="updateQuestionConfig()" onchange="updateQuestionConfig()" />
-        </div>
-        <div>
-          <label>Opsi Pilihan Ganda</label>
-          <select id="inOpsiPG" onchange="updateQuestionConfig()">
-            <option value="3">A - C (3 Opsi / SD Rendah)</option>
-            <option value="4" selected>A - D (4 Opsi / SD-SMP)</option>
-            <option value="5">A - E (5 Opsi / SMA-SMK)</option>
-          </select>
-        </div>
-        <div>
-          <label>Jumlah Soal Benar-Salah (0–50)</label>
-          <input type="number" id="inJmlBS" min="0" max="50" value="0" oninput="updateQuestionConfig()" onchange="updateQuestionConfig()" />
-        </div>
-        <div>
-          <label>Jumlah Soal Uraian (0–40)</label>
-          <input type="number" id="inJmlUR" min="0" max="40" value="5" oninput="updateQuestionConfig()" onchange="updateQuestionConfig()" />
-        </div>
-      </div>
-      <div style="margin-top:10px;">
-        <label>Kunci Jawaban PG (Otomatis dikelompokkan per 5 nomor seperti KORANUL)</label>
-        <input id="inKunciPG" value="BBACABCCBCCBABBCCAAC" placeholder="Contoh: BBACABCCBC..." oninput="this.value=this.value.toUpperCase().replace(/[^A-E]/g,''); saveState();" />
-        <small style="color:var(--muted);" id="kunciPreview">Blok 5-an: BBACA | CCBCC | CBABB | CCAAC</small>
-      </div>
-      <div style="margin-top:10px;">
-        <label>Kunci Benar-Salah (B=Benar, S=Salah)</label>
-        <input id="inKunciBS" value="" placeholder="BSSBB" oninput="this.value=this.value.toUpperCase().replace(/[^BS]/g,''); saveState();" />
-        <small style="color:var(--muted);" id="kunciBSPreview"></small>
-      </div>
-      <div style="margin-top:10px;" id="urMaxContainer">
-        <label>Skor Maksimum Tiap Soal Uraian (pisahkan koma)</label>
-        <input id="inMaxUR" value="3,3,3,3,4" oninput="saveState()" onchange="saveState()" />
-      </div>
-    </div>
-
-    <div class="card">
-      <h2>3. Daftar Peserta Ujian (Maks. 500 Siswa • <span id="lblTotalPesertaBadge">10 Peserta</span>)</h2>
-      <div class="toolbar">
-        <button class="btn btn-primary btn-sm" onclick="addStudent()">+ Tambah Siswa</button>
-        <label class="btn btn-outline btn-sm" style="margin:0;cursor:pointer;">⬆️ Import CSV<input type="file" accept=".csv,text/csv" style="display:none" onchange="importStudentsCSV(event)"></label>
-        <button class="btn btn-outline btn-sm" onclick="downloadCSVTemplate()">Template CSV</button>
-        <button class="btn btn-outline btn-sm" onclick="bulkImportStudents()">📋 Paste Daftar Nama</button>
-        <button class="btn btn-outline btn-sm" onclick="copyStudentsFromOtherSession()">👥 Salin dari Kelas/Sesi Lain</button>
-        <button class="btn btn-outline btn-sm" onclick="autoNumberStudents()">🔢 Urutkan Nomor</button>
-      </div>
-      <div style="margin-bottom:8px;">
-        <input id="searchStudentInput" placeholder="🔍 Cari nama atau nomor peserta / NISN..." oninput="renderStudentsTable()" style="padding:6px 10px; font-size:0.82rem;" />
-      </div>
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th style="width:50px;">No</th>
-              <th style="width:150px;" id="thIdPeserta">NOMOR PESERTA</th>
-              <th>Nama Siswa</th>
-              <th style="width:60px;">Aksi</th>
-            </tr>
-          </thead>
-          <tbody id="tbodySiswa"></tbody>
-        </table>
-      </div>
-    </div>
-
-    <div class="card" style="border-color:#cbd5e1; background:#f8fafc;">
-      <h2>4. Penyimpanan Permanen, Cadangan & Reset Pengaturan</h2>
-      <p style="font-size:0.8rem; color:var(--muted); margin-top:0;">
-        Seluruh data semua kelas dan mata pelajaran otomatis tersimpan permanen di penyimpanan lokal browser (<b>localStorage + IndexedDB</b>) sehingga tidak akan hilang saat halaman di-refresh atau aplikasi ditutup.
-      </p>
-      <div class="toolbar" style="margin-bottom:0;">
-        <button class="btn btn-outline btn-sm" onclick="exportBackupJSON()">💾 Unduh Cadangan Semua Kelas (.json)</button>
-        <label class="btn btn-outline btn-sm" style="margin:0;cursor:pointer;">📂 Pulihkan Cadangan (.json)<input type="file" accept=".json,application/json" style="display:none" onchange="importBackupJSON(event)"></label>
-        <button class="btn btn-warning btn-sm" onclick="startFreshExam()">🧹 Kosongkan Jawaban Sesi Ini</button>
-        <button class="btn btn-danger btn-sm" onclick="resetToDefaultSettings()">🔄 Reset / Kembali ke Pengaturan Awal</button>
-      </div>
-    </div>
-  </section>
-
-  <!-- ==================== TAB 2: BUAT & CETAK LJK ==================== -->
-  <section id="tab-ljk" class="tab-page">
-    <div class="card">
-      <h2>Pembuat Lembar Jawaban Komputer (LJK) Siap Cetak</h2>
-      <p style="font-size:0.82rem; color:var(--muted); margin-top:0;">
-        Pilih bentuk gelembung <b>Lingkaran (○)</b> atau <b>Persegi / Kotak (□)</b>. Untuk bentuk kotak, siswa cukup memberikan <b>tanda silang (✕)</b> atau menghitamkan penuh dan pemindai OMR akan membacanya secara akurat.
-      </p>
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:12px 0;padding:12px;border:1px solid #cbd5e1;border-radius:10px;background:#f8fafc;">
-        <div>
-          <label for="ljkBubbleShape">Bentuk Gelembung</label>
-          <select id="ljkBubbleShape" onchange="onBubbleShapeChange(this.value)">
-            <option value="circle" selected>⭕ Lingkaran</option>
-            <option value="square">⬜ Persegi / Kotak</option>
-          </select>
-        </div>
-        <div>
-          <label for="ljkIdFieldType">Gelembung Identitas</label>
-          <select id="ljkIdFieldType" onchange="onIdFieldTypeChange(this.value)">
-            <option value="nomor_peserta" selected>NOMOR PESERTA</option>
-            <option value="nisn">NISN</option>
-          </select>
-        </div>
-        <div>
-          <label for="ljkIdDigits">Digit Identitas (2–12)</label>
-          <input type="number" id="ljkIdDigits" min="2" max="12" value="3" onchange="onIdDigitsChange(this.value)">
-        </div>
-        <div><label for="ljkPGCols">Kolom PG (Otomatis/1–5)</label><input type="number" id="ljkPGCols" min="0" max="5" value="0" onchange="updateLJKLayoutConfig()" title="0 = Otomatis efisien sesuai jumlah soal"></div>
-        <div><label for="ljkPGRows">Maks Baris/Kolom PG (5–15)</label><input type="number" id="ljkPGRows" min="5" max="15" value="10" onchange="updateLJKLayoutConfig()"></div>
-        <div><label for="ljkBSCols">Kolom B-S (Otomatis/1–5)</label><input type="number" id="ljkBSCols" min="0" max="5" value="0" onchange="updateLJKLayoutConfig()" title="0 = Otomatis efisien sesuai jumlah soal"></div>
-        <div><label for="ljkBSRows">Maks Baris/Kolom B-S (4–12)</label><input type="number" id="ljkBSRows" min="4" max="12" value="8" onchange="updateLJKLayoutConfig()"></div>
-        <div>
-          <label for="ljkUraianMode">Penempatan Uraian</label>
-          <select id="ljkUraianMode" onchange="updateLJKLayoutConfig()">
-            <option value="auto" selected>Otomatis 1 Halaman (jika muat)</option>
-            <option value="single">Paksa Gabung 1 Halaman</option>
-            <option value="separate">Selalu Halaman Terpisah</option>
-          </select>
-        </div>
-        <div>
-          <label for="ljkPrefillStudent">Isi Identitas Siswa (Preview)</label>
-          <select id="ljkPrefillStudent" onchange="renderLJKPreview()">
-            <option value="-1">Kosong (Template Umum)</option>
-          </select>
-        </div>
-      </div>
-      <div id="ljkLayoutInfo" style="font-size:0.8rem; padding:8px 10px; border-radius:8px; background:#eff6ff; color:#1e3a8a; margin-bottom:10px;">
-        Menghitung tata letak LJK...
-      </div>
-      <div class="toolbar">
-        <button class="btn btn-primary" onclick="renderLJKPreview()">🔄 Perbarui Preview LJK</button>
-        <button class="btn btn-success" onclick="printLJK()">🖨️ Cetak / Simpan PDF LJK</button>
-        <button class="btn btn-warning" onclick="printAllStudentsLJK()">🖨️ Cetak Massal LJK Semua Siswa</button>
-        <button class="btn btn-outline" onclick="downloadLJKImage()">🖼️ Unduh Gambar LJK (.png)</button>
-      </div>
-      <div class="ljk-preview-stack" id="ljkPreviewStack">
-        <canvas id="ljkGeneratorCanvas" width="794" height="1123"></canvas>
-        <canvas id="ljkUraianCanvas2" width="794" height="1123" style="display:none;"></canvas>
-      </div>
-    </div>
-  </section>
-
-  <!-- ==================== TAB 3: SCAN KAMERA / FOTO OMR (CAMSCANNER UX) ==================== -->
-  <section id="tab-scan" class="tab-page">
-    <div class="card">
-      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px; border-bottom:1px solid #e2e8f0; padding-bottom:6px; margin-bottom:10px;">
-        <h2 style="border:none; margin:0; padding:0;">Smart Scanner LJK (Mode CamScanner & OMR)</h2>
-        <div style="display:flex; gap:6px; align-items:center;">
-          <span class="badge badge-info" id="batchQueueBadge" style="display:none;">Antrean: 0 Foto</span>
-          <span class="badge badge-tuntas" id="scanCounterBadge">Terscan Sesi Ini: 0 LJK</span>
+        <p style="font-size:0.78rem; color:var(--muted); margin:0 0 8px 0;">
+          Kelola banyak kelas dan mata pelajaran secara terpisah. Daftar siswa pada kelas yang sama akan otomatis disalin saat Anda menambahkan mata pelajaran baru.
+        </p>
+        <div class="table-wrap" style="max-height:220px;">
+          <table>
+            <thead>
+              <tr>
+                <th>Status</th>
+                <th>Kelas</th>
+                <th>Mata Pelajaran</th>
+                <th>Jenis Tes</th>
+                <th>Peserta</th>
+                <th>Rata-rata</th>
+                <th>Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="tbodySessions"></tbody>
+          </table>
         </div>
       </div>
 
-      <div style="background:#f8fafc; border:1px solid #cbd5e1; border-radius:8px; padding:7px 10px; font-size:0.78rem; margin-bottom:10px; color:#334155;">
-        <b>Aturan Pembacaan Gelembung (Lingkaran / Kotak Silang ✕):</b>
-        Kosong / tidak dijawab salah satu = <b><code>V</code></b> &nbsp;|&nbsp;
-        Memilih semua opsi / ganda = <b><code>X</code></b> &nbsp;|&nbsp;
-        1 gelembung terisi/disilang = <b>Opsi Terpilih</b>.
-      </div>
-
-      <div class="toolbar">
-        <button class="btn btn-primary" onclick="startCamera()">📷 Buka Kamera</button>
-        <button class="btn btn-success" onclick="captureFromVideo()">⚡ Jepret & Luruskan</button>
-        <label class="btn btn-outline" style="margin:0; cursor:pointer;">
-          📁 Pilih Foto LJK (Bisa Banyak)
-          <input id="omrFileInput" type="file" accept="image/*" multiple style="display:none;" onchange="loadImageFiles(event)" />
-        </label>
-        <button class="btn btn-outline btn-sm" id="btnToggleAutoCap" onclick="toggleAutoCapture()">🤖 Auto-Jepret: ON</button>
-        <button class="btn btn-warning btn-sm" onclick="prepareNextScan(false)">🔄 Scan Ulang / Bersihkan</button>
-      </div>
-
-      <!-- Viewfinder Live CamScanner -->
-      <div class="scanner-box" id="videoBox" style="display:none;">
-        <video id="cameraVideo" autoplay playsinline muted></video>
-        <canvas id="liveGuideCanvas"></canvas>
-        <div class="cam-hud-top">
-          <span class="cam-status-pill" id="liveCamStatus">🔍 Arahkan ke 4 sudut hitam LJK...</span>
-          <button class="cam-mini-btn" onclick="stopCamera()">✕ Tutup</button>
-        </div>
-        <div class="cam-hud-bottom">
-          <button class="cam-mini-btn" id="btnTorchCam" onclick="toggleCameraTorch()">🔦 Senter</button>
-          <button class="cam-shutter-btn" onclick="captureFromVideo()" title="Jepret Sekarang">📸</button>
-          <button class="cam-mini-btn" onclick="switchCameraFacing()">🔄 Putar</button>
-        </div>
-      </div>
-
-      <div class="grid-3" style="margin-bottom:10px;">
-        <div>
-          <label>Mode Penentuan Peserta LJK</label>
-          <select id="scanAssignMode" onchange="onScanAssignModeChange()">
-            <option value="auto" selected>🤖 Otomatis (Baca Gelembung LJK)</option>
-            <option value="manual">👆 Manual (Pilih dari Daftar)</option>
-          </select>
-        </div>
-        <div>
-          <label id="lblScanStudentSelect">Peserta Terpilih (Otomatis / Manual)</label>
-          <select id="scanStudentSelect" onchange="onManualStudentSelectChange()"></select>
-        </div>
-        <div>
-          <label>Sensitivitas Tanda/Arsiran: <span id="lblThresh">58</span>%</label>
-          <input type="range" id="omrThreshold" min="30" max="85" value="58" oninput="document.getElementById('lblThresh').textContent=this.value; reprocessOMR();" />
-        </div>
-      </div>
-
-      <!-- Filter CamScanner & Penyesuaian Sudut Manual -->
-      <div class="toolbar" style="background:#f1f5f9; padding:8px; border-radius:8px; margin-bottom:10px;">
-        <span style="font-size:0.76rem; font-weight:700; color:#334155;">✨ Filter CamScanner:</span>
-        <button class="btn btn-xs btn-primary" id="fltMagicBtn" onclick="setScanFilter('magic')">Magic Color (Tajam)</button>
-        <button class="btn btn-xs btn-outline" id="fltBwBtn" onclick="setScanFilter('bw')">Hitam Putih Dokumen</button>
-        <button class="btn btn-xs btn-outline" id="fltOrigBtn" onclick="setScanFilter('original')">Asli</button>
-        <button class="btn btn-xs btn-dark" id="btnManualCornerMode" onclick="toggleManualCornerEditor()" style="margin-left:auto;">🎯 Atur 4 Sudut Manual</button>
-      </div>
-
-      <div id="manualCornerBar" style="display:none; background:#fef3c7; border:1px solid #f59e0b; color:#92400e; padding:8px 10px; border-radius:8px; font-size:0.78rem; margin-bottom:10px;">
-        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
-          <span>✋ <b>Mode Potong Sudut Manual:</b> Geser 4 lingkaran sudut (Kiri-Atas, Kanan-Atas, Kanan-Bawah, Kiri-Bawah) tepat ke tengah 4 kotak jangkar hitam LJK.</span>
-          <button class="btn btn-success btn-xs" onclick="applyManualCorners()">✅ Terapkan & Baca LJK</button>
-        </div>
-      </div>
-
-      <div id="scanIdMatchBanner" style="display:none; font-size:0.8rem; padding:8px 10px; border-radius:8px; margin-bottom:10px; background:#eff6ff; color:#1e3a8a;"></div>
-
-      <div style="text-align:center; background:#0f172a; padding:8px; border-radius:10px; margin-bottom:10px;">
-        <canvas id="omrCanvas" width="794" height="1123" style="max-width:460px; border-radius:6px; margin:0 auto;"></canvas>
-        <div style="color:#cbd5e1; font-size:0.74rem; margin-top:6px;">
-          Hasil pelurusan dokumen otomatis (CamScanner Dewarp). Bingkai <b>hijau/merah</b> = terdeteksi terisi/disilang (✕); titik <b>biru muda</b> = kosong.
-        </div>
-      </div>
-
-      <div class="card" style="background:#f8fafc; margin-bottom:0;">
-        <h3 style="margin:0 0 8px 0; font-size:0.9rem;">Hasil Pembacaan LJK & Koreksi Cepat</h3>
-        <div id="scanResultSummary" style="font-size:0.84rem; margin-bottom:8px;">Belum ada LJK dipindai. Buka kamera atau pilih file foto LJK untuk mulai memindai.</div>
-        <div id="scanAnswersEditor" style="display:flex; flex-wrap:wrap; gap:4px; margin-bottom:10px;"></div>
-        <div id="scanUraianInputs" class="grid-3" style="margin-bottom:10px;"></div>
+      <div class="card">
+        <h2>1. Data Identitas Ujian (Sheet: data)</h2>
         <div class="grid-2">
-          <button class="btn btn-success" style="width:100%;" onclick="saveScannedResult(true)">💾 Simpan & Lanjut Scan Berikutnya ➡️</button>
-          <button class="btn btn-outline" style="width:100%;" onclick="saveScannedResult(false)">💾 Simpan Saja (Tetap di Siswa Ini)</button>
+          <div><label>Nama Sekolah</label><input id="inSekolah" value="SDN Nagreg" oninput="saveState()" onchange="saveState()" /></div>
+          <div>
+            <label>Mata Pelajaran</label>
+            <input id="inMapel" list="listMasterMapel" value="PAI" oninput="saveState()" onchange="onIdentityClassOrSubjectEdited()" />
+            <datalist id="listMasterMapel"></datalist>
+          </div>
+          <div><label>Kepala Sekolah</label><input id="inKepsek" value="Aep Sudrajat, S.Pd" oninput="saveState()" onchange="saveState()" /></div>
+          <div><label>NIP Kepala Sekolah</label><input id="inNipKepsek" value="19000000 000000 0 000" oninput="saveState()" onchange="saveState()" /></div>
+          <div><label>Guru Pengajar</label><input id="inGuru" value="Apipudin, S.Pd.I" oninput="saveState()" onchange="saveState()" /></div>
+          <div><label>NIP Guru</label><input id="inNipGuru" value="19000000 000000 0 021" oninput="saveState()" onchange="saveState()" /></div>
+          <div><label>Jenis Tes</label><input id="inJenisTes" value="PENILAIAN SUMATIF AKHIR SEMESTER" oninput="saveState()" onchange="saveState()" /></div>
+          <div><label>Materi Pokok</label><input id="inMateri" value="BAB I - BAB V" oninput="saveState()" onchange="saveState()" /></div>
+          <div>
+            <label>Kelas / Semester</label>
+            <input id="inKelas" list="listMasterKelas" value="I (Satu)/ Ganjil" oninput="saveState()" onchange="onIdentityClassOrSubjectEdited()" />
+            <datalist id="listMasterKelas"></datalist>
+          </div>
+          <div><label>Tahun Pelajaran</label><input id="inTapel" value="2025 - 2026" oninput="saveState()" onchange="saveState()" /></div>
+          <div><label>Tanggal Tes</label><input id="inTglTes" value="29 September 2025" oninput="saveState()" onchange="saveState()" /></div>
+          <div><label>Tanggal Periksa</label><input id="inTglPeriksa" value="30 September 2025" oninput="saveState()" onchange="saveState()" /></div>
+          <div><label>Nilai KKTP / KKM</label><input type="number" id="inKktp" value="70" oninput="saveState()" onchange="saveState()" /></div>
+          <div><label>Tempat TTD</label><input id="inTempat" value="Bandung" oninput="saveState()" onchange="saveState()" /></div>
         </div>
       </div>
-    </div>
-  </section>
 
-  <!-- ==================== TAB 4: INPUT MANUAL & REKAP JAWABAN ==================== -->
-  <section id="tab-input" class="tab-page">
-    <div class="card">
-      <h2>Input / Edit Jawaban PG (`DATA MC`), B-S & Skor Uraian (`DATA UR`)</h2>
-      <p style="font-size:0.78rem; color:var(--muted);">
-        Anda dapat mengisi atau mengedit langsung jawaban PG (<code>A–E</code>, <code>V</code> = kosong, <code>X</code> = semua opsi/ganda), Benar-Salah (<code>B/S/V/X</code>), maupun skor tiap nomor soal Uraian di tabel ini.
-      </p>
-      <div style="margin-bottom:8px;">
-        <input id="searchInputJawaban" placeholder="🔍 Filter nama siswa atau nomor peserta..." oninput="renderInputJawabanTable()" style="padding:6px 10px; font-size:0.82rem;" />
+      <div class="card">
+        <h2>2. Konfigurasi Soal, Kunci & Gelembung Identitas LJK</h2>
+        <div class="grid-3">
+          <div>
+            <label>Bentuk Gelembung LJK</label>
+            <select id="inBubbleShape" onchange="onBubbleShapeChange(this.value)">
+              <option value="circle" selected>⭕ Lingkaran (Bulatan)</option>
+              <option value="square">⬜ Persegi / Kotak (Dukung Silang ✕)</option>
+            </select>
+          </div>
+          <div>
+            <label>Jenis Gelembung Identitas LJK</label>
+            <select id="inIdFieldType" onchange="onIdFieldTypeChange(this.value)">
+              <option value="nomor_peserta" selected>NOMOR PESERTA</option>
+              <option value="nisn">NISN</option>
+            </select>
+          </div>
+          <div>
+            <label>Banyak Digit Gelembung (2–12)</label>
+            <input type="number" id="inIdDigits" min="2" max="12" value="3" oninput="onIdDigitsChange(this.value)" onchange="onIdDigitsChange(this.value)" />
+          </div>
+          <div>
+            <label>Jumlah Soal Pilihan Ganda (1–50)</label>
+            <input type="number" id="inJmlPG" min="1" max="50" value="20" oninput="updateQuestionConfig()" onchange="updateQuestionConfig()" />
+          </div>
+          <div>
+            <label>Opsi Pilihan Ganda</label>
+            <select id="inOpsiPG" onchange="updateQuestionConfig()">
+              <option value="3">A - C (3 Opsi / SD Rendah)</option>
+              <option value="4" selected>A - D (4 Opsi / SD-SMP)</option>
+              <option value="5">A - E (5 Opsi / SMA-SMK)</option>
+            </select>
+          </div>
+          <div>
+            <label>Jumlah Soal Benar-Salah (0–50)</label>
+            <input type="number" id="inJmlBS" min="0" max="50" value="0" oninput="updateQuestionConfig()" onchange="updateQuestionConfig()" />
+          </div>
+          <div>
+            <label>Jumlah Soal Uraian (0–40)</label>
+            <input type="number" id="inJmlUR" min="0" max="40" value="5" oninput="updateQuestionConfig()" onchange="updateQuestionConfig()" />
+          </div>
+        </div>
+        <div style="margin-top:10px;">
+          <label>Kunci Jawaban PG (Otomatis dikelompokkan per 5 nomor seperti KAU)</label>
+          <input id="inKunciPG" value="BBACABCCBCCBABBCCAAC" placeholder="Contoh: BBACABCCBC..." oninput="this.value=this.value.toUpperCase().replace(/[^A-E]/g,''); saveState();" />
+          <small style="color:var(--muted);" id="kunciPreview">Blok 5-an: BBACA | CCBCC | CBABB | CCAAC</small>
+        </div>
+        <div style="margin-top:10px;">
+          <label>Kunci Benar-Salah (B=Benar, S=Salah)</label>
+          <input id="inKunciBS" value="" placeholder="BSSBB" oninput="this.value=this.value.toUpperCase().replace(/[^BS]/g,''); saveState();" />
+          <small style="color:var(--muted);" id="kunciBSPreview"></small>
+        </div>
+        <div style="margin-top:10px;" id="urMaxContainer">
+          <label>Skor Maksimum Tiap Soal Uraian (pisahkan koma)</label>
+          <input id="inMaxUR" value="3,3,3,3,4" oninput="saveState()" onchange="saveState()" />
+        </div>
       </div>
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>No</th>
-              <th id="thInputIdPeserta">Nomor Peserta</th>
-              <th>Nama Siswa</th>
-              <th>Jawaban PG (1–<span class="lblJmlPG">20</span>)</th>
-              <th>Skor PG</th>
-              <th>Nilai PG</th>
-              <th>Jawaban B-S</th>
-              <th>Skor B-S</th>
-              <th>Nilai B-S</th>
-              <th>Skor Uraian (per nomor)</th>
-              <th>Nilai UR</th>
-            </tr>
-          </thead>
-          <tbody id="tbodyInputJawaban"></tbody>
-        </table>
+
+      <div class="card">
+        <h2>3. Daftar Peserta Ujian (Maks. 500 Siswa • <span id="lblTotalPesertaBadge">10 Peserta</span>)</h2>
+        <div class="toolbar">
+          <button class="btn btn-primary btn-sm" onclick="addStudent()">+ Tambah Siswa</button>
+          <label class="btn btn-outline btn-sm" style="margin:0;cursor:pointer;">⬆️ Import CSV<input type="file" accept=".csv,text/csv" style="display:none" onchange="importStudentsCSV(event)"></label>
+          <button class="btn btn-outline btn-sm" onclick="downloadCSVTemplate()">Template CSV</button>
+          <button class="btn btn-outline btn-sm" onclick="bulkImportStudents()">📋 Paste Daftar Nama</button>
+          <button class="btn btn-outline btn-sm" onclick="copyStudentsFromOtherSession()">👥 Salin dari Kelas/Sesi Lain</button>
+          <button class="btn btn-outline btn-sm" onclick="autoNumberStudents()">🔢 Urutkan Nomor</button>
+        </div>
+        <div style="margin-bottom:8px;">
+          <input id="searchStudentInput" placeholder="🔍 Cari nama atau nomor peserta / NISN..." oninput="renderStudentsTable()" style="padding:6px 10px; font-size:0.82rem;" />
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th style="width:50px;">No</th>
+                <th style="width:150px;" id="thIdPeserta">NOMOR PESERTA</th>
+                <th>Nama Siswa</th>
+                <th style="width:60px;">Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="tbodySiswa"></tbody>
+          </table>
+        </div>
       </div>
-    </div>
-  </section>
 
-  <!-- ==================== TAB 5: LAPORAN & ANALISIS KORANUL ==================== -->
-  <section id="tab-laporan" class="tab-page">
-    <div class="sub-tabs">
-      <button class="sub-tab active" onclick="switchReport('nilai_mc', this)">NILAI MC</button>
-      <button class="sub-tab" onclick="switchReport('analisis_mc', this)">Analisis MC</button>
-      <button class="sub-tab" onclick="switchReport('grafik_mc', this)">Grafik PG (3D)</button>
-      <button class="sub-tab" onclick="switchReport('grafik_bs', this)">Grafik B-S (3D)</button>
-      <button class="sub-tab" onclick="switchReport('grafik_ur', this)">Grafik Uraian (3D)</button>
-      <button class="sub-tab" onclick="switchReport('nilai_ur', this)">NILAI UR</button>
-      <button class="sub-tab" onclick="switchReport('analisis_ur', this)">Analisis UR</button>
-      <button class="sub-tab" onclick="switchReport('nil_gab', this)">Nil Gab</button>
-      <button class="sub-tab" onclick="switchReport('remed', this)">Remedial Siswa</button>
-      <button class="sub-tab" onclick="switchReport('perbaikan', this)">Perbaikan</button>
-      <button class="sub-tab" onclick="switchReport('leger_mapel', this)">📚 Leger Mapel (Kelas)</button>
-      <button class="sub-tab" onclick="switchReport('rekap_kelas', this)">🏫 Rekap Antar Kelas</button>
-    </div>
+      <div class="card" style="border-color:#cbd5e1; background:#f8fafc;">
+        <h2>4. Penyimpanan Permanen, Cadangan & Reset Pengaturan</h2>
+        <p style="font-size:0.8rem; color:var(--muted); margin-top:0;">
+          Seluruh data semua kelas dan mata pelajaran otomatis tersimpan permanen di penyimpanan lokal browser (<b>localStorage + IndexedDB</b>) sehingga tidak akan hilang saat halaman di-refresh atau aplikasi ditutup.
+        </p>
+        <div class="toolbar" style="margin-bottom:0;">
+          <button class="btn btn-outline btn-sm" onclick="exportBackupJSON()">💾 Unduh Cadangan Semua Kelas (.json)</button>
+          <label class="btn btn-outline btn-sm" style="margin:0;cursor:pointer;">📂 Pulihkan Cadangan (.json)<input type="file" accept=".json,application/json" style="display:none" onchange="importBackupJSON(event)"></label>
+          <button class="btn btn-warning btn-sm" onclick="startFreshExam()">🧹 Kosongkan Jawaban Sesi Ini</button>
+          <button class="btn btn-danger btn-sm" onclick="resetToDefaultSettings()">🔄 Reset / Kembali ke Pengaturan Awal</button>
+        </div>
+      </div>
+    </section>
 
-    <div class="toolbar">
-      <button class="btn btn-success btn-sm" onclick="exportKoranulExcel()">📥 Ekspor Semua ke Excel (.xlsx)</button>
-      <button class="btn btn-primary btn-sm" onclick="printCurrentReport()">🖨️ Cetak Laporan Ini (F4)</button>
-    </div>
+    <!-- ==================== TAB 2: BUAT & CETAK LJK ==================== -->
+    <section id="tab-ljk" class="tab-page">
+      <div class="card">
+        <h2>Pembuat Lembar Jawaban Komputer (LJK) Siap Cetak</h2>
+        <p style="font-size:0.82rem; color:var(--muted); margin-top:0;">
+          Pilih bentuk gelembung <b>Lingkaran (○)</b> atau <b>Persegi / Kotak (□)</b>. Untuk bentuk kotak, siswa cukup memberikan <b>tanda silang (✕)</b> atau menghitamkan penuh dan pemindai OMR akan membacanya secara akurat.
+        </p>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:12px 0;padding:12px;border:1px solid #cbd5e1;border-radius:10px;background:#f8fafc;">
+          <div>
+            <label for="ljkBubbleShape">Bentuk Gelembung</label>
+            <select id="ljkBubbleShape" onchange="onBubbleShapeChange(this.value)">
+              <option value="circle" selected>⭕ Lingkaran</option>
+              <option value="square">⬜ Persegi / Kotak</option>
+            </select>
+          </div>
+          <div>
+            <label for="ljkIdFieldType">Gelembung Identitas</label>
+            <select id="ljkIdFieldType" onchange="onIdFieldTypeChange(this.value)">
+              <option value="nomor_peserta" selected>NOMOR PESERTA</option>
+              <option value="nisn">NISN</option>
+            </select>
+          </div>
+          <div>
+            <label for="ljkIdDigits">Digit Identitas (2–12)</label>
+            <input type="number" id="ljkIdDigits" min="2" max="12" value="3" onchange="onIdDigitsChange(this.value)">
+          </div>
+          <div><label for="ljkPGCols">Kolom PG (Otomatis/1–5)</label><input type="number" id="ljkPGCols" min="0" max="5" value="0" onchange="updateLJKLayoutConfig()" title="0 = Otomatis efisien sesuai jumlah soal"></div>
+          <div><label for="ljkPGRows">Maks Baris/Kolom PG (5–15)</label><input type="number" id="ljkPGRows" min="5" max="15" value="10" onchange="updateLJKLayoutConfig()"></div>
+          <div><label for="ljkBSCols">Kolom B-S (Otomatis/1–5)</label><input type="number" id="ljkBSCols" min="0" max="5" value="0" onchange="updateLJKLayoutConfig()" title="0 = Otomatis efisien sesuai jumlah soal"></div>
+          <div><label for="ljkBSRows">Maks Baris/Kolom B-S (4–12)</label><input type="number" id="ljkBSRows" min="4" max="12" value="8" onchange="updateLJKLayoutConfig()"></div>
+          <div>
+            <label for="ljkUraianMode">Penempatan Uraian</label>
+            <select id="ljkUraianMode" onchange="updateLJKLayoutConfig()">
+              <option value="auto" selected>Otomatis 1 Halaman (jika muat)</option>
+              <option value="single">Paksa Gabung 1 Halaman</option>
+              <option value="separate">Selalu Halaman Terpisah</option>
+            </select>
+          </div>
+          <div>
+            <label for="ljkPrefillStudent">Isi Identitas Siswa (Preview)</label>
+            <select id="ljkPrefillStudent" onchange="renderLJKPreview()">
+              <option value="-1">Kosong (Template Umum)</option>
+            </select>
+          </div>
+        </div>
+        <div id="ljkLayoutInfo" style="font-size:0.8rem; padding:8px 10px; border-radius:8px; background:#eff6ff; color:#1e3a8a; margin-bottom:10px;">
+          Menghitung tata letak LJK...
+        </div>
+        <div class="toolbar">
+          <button class="btn btn-primary" onclick="renderLJKPreview()">🔄 Perbarui Preview LJK</button>
+          <button class="btn btn-success" onclick="printLJK()">🖨️ Cetak / Simpan PDF LJK</button>
+          <button class="btn btn-warning" onclick="printAllStudentsLJK()">🖨️ Cetak Massal LJK Semua Siswa</button>
+          <button class="btn btn-outline" onclick="downloadLJKImage()">🖼️ Unduh Gambar LJK (.png)</button>
+        </div>
+        <div class="ljk-preview-stack" id="ljkPreviewStack">
+          <canvas id="ljkGeneratorCanvas" width="794" height="1123"></canvas>
+          <canvas id="ljkUraianCanvas2" width="794" height="1123" style="display:none;"></canvas>
+        </div>
+      </div>
+    </section>
 
-    <div id="reportContainer" class="card"></div>
-  </section>
+    <!-- ==================== TAB 3: SCAN KAMERA / FOTO OMR (CAMSCANNER UX) ==================== -->
+    <section id="tab-scan" class="tab-page">
+      <div class="card">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px; border-bottom:1px solid #e2e8f0; padding-bottom:6px; margin-bottom:10px;">
+          <h2 style="border:none; margin:0; padding:0;">Smart Scanner LJK (Mode CamScanner & OMR)</h2>
+          <div style="display:flex; gap:6px; align-items:center;">
+            <span class="badge badge-info" id="batchQueueBadge" style="display:none;">Antrean: 0 Foto</span>
+            <span class="badge badge-tuntas" id="scanCounterBadge">Terscan Sesi Ini: 0 LJK</span>
+          </div>
+        </div>
 
+        <div style="background:#f8fafc; border:1px solid #cbd5e1; border-radius:8px; padding:7px 10px; font-size:0.78rem; margin-bottom:10px; color:#334155;">
+          <b>Aturan Pembacaan Gelembung (Lingkaran / Kotak Silang ✕):</b>
+          Kosong / tidak dijawab salah satu = <b><code>V</code></b> &nbsp;|&nbsp;
+          Memilih semua opsi / ganda = <b><code>X</code></b> &nbsp;|&nbsp;
+          1 gelembung terisi/disilang = <b>Opsi Terpilih</b>.
+        </div>
+
+        <div class="toolbar">
+          <button class="btn btn-primary" onclick="startCamera()">📷 Buka Kamera</button>
+          <button class="btn btn-success" onclick="captureFromVideo()">⚡ Jepret & Luruskan</button>
+          <label class="btn btn-outline" style="margin:0; cursor:pointer;">
+            📁 Pilih Foto LJK (Bisa Banyak)
+            <input id="omrFileInput" type="file" accept="image/*" multiple style="display:none;" onchange="loadImageFiles(event)" />
+          </label>
+          <button class="btn btn-outline btn-sm" id="btnToggleAutoCap" onclick="toggleAutoCapture()">🤖 Auto-Jepret: ON</button>
+          <button class="btn btn-warning btn-sm" onclick="prepareNextScan(false)">🔄 Scan Ulang / Bersihkan</button>
+        </div>
+
+        <!-- Viewfinder Live CamScanner -->
+        <div class="scanner-box" id="videoBox" style="display:none;">
+          <video id="cameraVideo" autoplay playsinline muted></video>
+          <canvas id="liveGuideCanvas"></canvas>
+          <div class="cam-hud-top">
+            <span class="cam-status-pill" id="liveCamStatus">🔍 Arahkan ke 4 sudut hitam LJK...</span>
+            <button class="cam-mini-btn" onclick="stopCamera()">✕ Tutup</button>
+          </div>
+          <div class="cam-hud-bottom">
+            <button class="cam-mini-btn" id="btnTorchCam" onclick="toggleCameraTorch()">🔦 Senter</button>
+            <button class="cam-shutter-btn" onclick="captureFromVideo()" title="Jepret Sekarang">📸</button>
+            <button class="cam-mini-btn" onclick="switchCameraFacing()">🔄 Putar</button>
+          </div>
+        </div>
+
+        <div class="grid-3" style="margin-bottom:10px;">
+          <div>
+            <label>Mode Penentuan Peserta LJK</label>
+            <select id="scanAssignMode" onchange="onScanAssignModeChange()">
+              <option value="auto" selected>🤖 Otomatis (Baca Gelembung LJK)</option>
+              <option value="manual">👆 Manual (Pilih dari Daftar)</option>
+            </select>
+          </div>
+          <div>
+            <label id="lblScanStudentSelect">Peserta Terpilih (Otomatis / Manual)</label>
+            <select id="scanStudentSelect" onchange="onManualStudentSelectChange()"></select>
+          </div>
+          <div>
+            <label>Sensitivitas Tanda/Arsiran: <span id="lblThresh">58</span>%</label>
+            <input type="range" id="omrThreshold" min="30" max="85" value="58" oninput="document.getElementById('lblThresh').textContent=this.value; reprocessOMR();" />
+          </div>
+        </div>
+
+        <!-- Filter CamScanner & Penyesuaian Sudut Manual -->
+        <div class="toolbar" style="background:#f1f5f9; padding:8px; border-radius:8px; margin-bottom:10px;">
+          <span style="font-size:0.76rem; font-weight:700; color:#334155;">✨ Filter CamScanner:</span>
+          <button class="btn btn-xs btn-primary" id="fltMagicBtn" onclick="setScanFilter('magic')">Magic Color (Tajam)</button>
+          <button class="btn btn-xs btn-outline" id="fltBwBtn" onclick="setScanFilter('bw')">Hitam Putih Dokumen</button>
+          <button class="btn btn-xs btn-outline" id="fltOrigBtn" onclick="setScanFilter('original')">Asli</button>
+          <button class="btn btn-xs btn-dark" id="btnManualCornerMode" onclick="toggleManualCornerEditor()" style="margin-left:auto;">🎯 Atur 4 Sudut Manual</button>
+        </div>
+
+        <div id="manualCornerBar" style="display:none; background:#fef3c7; border:1px solid #f59e0b; color:#92400e; padding:8px 10px; border-radius:8px; font-size:0.78rem; margin-bottom:10px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+            <span>✋ <b>Mode Potong Sudut Manual:</b> Geser 4 lingkaran sudut (Kiri-Atas, Kanan-Atas, Kanan-Bawah, Kiri-Bawah) tepat ke tengah 4 kotak jangkar hitam LJK.</span>
+            <button class="btn btn-success btn-xs" onclick="applyManualCorners()">✅ Terapkan & Baca LJK</button>
+          </div>
+        </div>
+
+        <div id="scanIdMatchBanner" style="display:none; font-size:0.8rem; padding:8px 10px; border-radius:8px; margin-bottom:10px; background:#eff6ff; color:#1e3a8a;"></div>
+
+        <div style="text-align:center; background:#0f172a; padding:8px; border-radius:10px; margin-bottom:10px;">
+          <canvas id="omrCanvas" width="794" height="1123" style="max-width:460px; border-radius:6px; margin:0 auto;"></canvas>
+          <div style="color:#cbd5e1; font-size:0.74rem; margin-top:6px;">
+            Hasil pelurusan dokumen otomatis (CamScanner Dewarp). Bingkai <b>hijau/merah</b> = terdeteksi terisi/disilang (✕); titik <b>biru muda</b> = kosong.
+          </div>
+        </div>
+
+        <div class="card" style="background:#f8fafc; margin-bottom:0;">
+          <h3 style="margin:0 0 8px 0; font-size:0.9rem;">Hasil Pembacaan LJK & Koreksi Cepat</h3>
+          <div id="scanResultSummary" style="font-size:0.84rem; margin-bottom:8px;">Belum ada LJK dipindai. Buka kamera atau pilih file foto LJK untuk mulai memindai.</div>
+          <div id="scanAnswersEditor" style="display:flex; flex-wrap:wrap; gap:4px; margin-bottom:10px;"></div>
+          <div id="scanUraianInputs" class="grid-3" style="margin-bottom:10px;"></div>
+          <div class="grid-2">
+            <button class="btn btn-success" style="width:100%;" onclick="saveScannedResult(true)">💾 Simpan & Lanjut Scan Berikutnya ➡️</button>
+            <button class="btn btn-outline" style="width:100%;" onclick="saveScannedResult(false)">💾 Simpan Saja (Tetap di Siswa Ini)</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== TAB 4: INPUT MANUAL & REKAP JAWABAN ==================== -->
+    <section id="tab-input" class="tab-page">
+      <div class="card">
+        <h2>Input / Edit Jawaban PG (`DATA MC`), B-S & Skor Uraian (`DATA UR`)</h2>
+        <p style="font-size:0.78rem; color:var(--muted);">
+          Anda dapat mengisi atau mengedit langsung jawaban PG (<code>A–E</code>, <code>V</code> = kosong, <code>X</code> = semua opsi/ganda), Benar-Salah (<code>B/S/V/X</code>), maupun skor tiap nomor soal Uraian di tabel ini.
+        </p>
+        <div style="margin-bottom:8px;">
+          <input id="searchInputJawaban" placeholder="🔍 Filter nama siswa atau nomor peserta..." oninput="renderInputJawabanTable()" style="padding:6px 10px; font-size:0.82rem;" />
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>No</th>
+                <th id="thInputIdPeserta">Nomor Peserta</th>
+                <th>Nama Siswa</th>
+                <th>Jawaban PG (1–<span class="lblJmlPG">20</span>)</th>
+                <th>Skor PG</th>
+                <th>Nilai PG</th>
+                <th>Jawaban B-S</th>
+                <th>Skor B-S</th>
+                <th>Nilai B-S</th>
+                <th>Skor Uraian (per nomor)</th>
+                <th>Nilai UR</th>
+              </tr>
+            </thead>
+            <tbody id="tbodyInputJawaban"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== TAB 5: LAPORAN & ANALISIS KAU ==================== -->
+    <section id="tab-laporan" class="tab-page">
+      <div class="sub-tabs">
+        <button class="sub-tab active" onclick="switchReport('nilai_mc', this)">NILAI MC</button>
+        <button class="sub-tab" onclick="switchReport('analisis_mc', this)">Analisis MC</button>
+        <button class="sub-tab" onclick="switchReport('grafik_mc', this)">Grafik PG (3D)</button>
+        <button class="sub-tab" onclick="switchReport('grafik_bs', this)">Grafik B-S (3D)</button>
+        <button class="sub-tab" onclick="switchReport('grafik_ur', this)">Grafik Uraian (3D)</button>
+        <button class="sub-tab" onclick="switchReport('nilai_ur', this)">NILAI UR</button>
+        <button class="sub-tab" onclick="switchReport('analisis_ur', this)">Analisis UR</button>
+        <button class="sub-tab" onclick="switchReport('nil_gab', this)">Nil Gab</button>
+        <button class="sub-tab" onclick="switchReport('remed', this)">Remedial Siswa</button>
+        <button class="sub-tab" onclick="switchReport('perbaikan', this)">Perbaikan</button>
+        <button class="sub-tab" onclick="switchReport('leger_mapel', this)">📚 Leger Mapel (Kelas)</button>
+        <button class="sub-tab" onclick="switchReport('rekap_kelas', this)">🏫 Rekap Antar Kelas</button>
+      </div>
+
+      <div class="toolbar">
+        <button class="btn btn-success btn-sm" onclick="exportKAUExcel()">📥 Ekspor Semua ke Excel (.xlsx)</button>
+        <button class="btn btn-primary btn-sm" onclick="printCurrentReport()">🖨️ Cetak Laporan Ini</button>
+      </div>
+
+      <div id="reportContainer" class="card"></div>
+    </section>
+
+  </div>
+
+  <nav class="nav-bottom">
+    <button class="nav-btn active" onclick="switchTab('data', this)"><span class="ico">⚙️</span>Data & Kunci</button>
+    <button class="nav-btn" onclick="switchTab('ljk', this)"><span class="ico">📄</span>Buat LJK</button>
+    <button class="nav-btn" onclick="switchTab('scan', this)"><span class="ico">📷</span>Scan LJK</button>
+    <button class="nav-btn" onclick="switchTab('input', this)"><span class="ico">✏️</span>Data Jawaban</button>
+    <button class="nav-btn" onclick="switchTab('laporan', this)"><span class="ico">📊</span>Hasil & Analisis</button>
+  </nav>
 </div>
 
-<!-- Area tersembunyi untuk cetak F4 -->
-<div id="printArea" style="display:none;"></div>
-
-<nav class="nav-bottom">
-  <button class="nav-btn active" onclick="switchTab('data', this)"><span class="ico">⚙️</span>Data & Kunci</button>
-  <button class="nav-btn" onclick="switchTab('ljk', this)"><span class="ico">📄</span>Buat LJK</button>
-  <button class="nav-btn" onclick="switchTab('scan', this)"><span class="ico">📷</span>Scan LJK</button>
-  <button class="nav-btn" onclick="switchTab('input', this)"><span class="ico">✏️</span>Data Jawaban</button>
-  <button class="nav-btn" onclick="switchTab('laporan', this)"><span class="ico">📊</span>Hasil & Analisis</button>
-</nav>
+<!-- Area cetak khusus (terpisah dari #appRoot agar 100% tampil di Printer & Simpan PDF) -->
+<div id="printArea"></div>
 
 <script>
 // ==================== TABEL R PRODUCT MOMENT (TARAF SIGNIFIKANSI 5%) ====================
@@ -767,10 +795,9 @@ let currentDetectedCorners = null;
 let draggingCornerKey = null;
 
 // ==================== PENYIMPANAN PERMANEN (LOCALSTORAGE + INDEXEDDB + PERSIST) ====================
-const STORAGE_KEY_V3 = 'koranul_pwa_workspace_v3';
-const STORAGE_KEY_V2 = 'koranul_pwa_state_v2';
-const STORAGE_KEY_V1 = 'koranul_pwa_state_v1';
-const IDB_NAME = 'koranul_permanent_db';
+const STORAGE_KEY_KAU = 'kau_pwa_workspace_v1';
+const LEGACY_STORAGE_KEYS = ['koranul_pwa_workspace_v3', 'koranul_pwa_state_v2', 'koranul_pwa_state_v1'];
+const IDB_NAME = 'kau_permanent_db';
 const IDB_STORE = 'state_store';
 
 function openIDB() {
@@ -790,7 +817,7 @@ async function saveToIDB(dataObj) {
   try {
     const db = await openIDB();
     const tx = db.transaction(IDB_STORE, 'readwrite');
-    tx.objectStore(IDB_STORE).put(JSON.stringify(dataObj), STORAGE_KEY_V3);
+    tx.objectStore(IDB_STORE).put(JSON.stringify(dataObj), STORAGE_KEY_KAU);
   } catch (e) {}
 }
 
@@ -799,10 +826,10 @@ async function loadFromIDB() {
     const db = await openIDB();
     return await new Promise((resolve) => {
       const tx = db.transaction(IDB_STORE, 'readonly');
-      const req = tx.objectStore(IDB_STORE).get(STORAGE_KEY_V3);
+      const req = tx.objectStore(IDB_STORE).get(STORAGE_KEY_KAU);
       req.onsuccess = () => {
         if (req.result) return resolve(JSON.parse(req.result));
-        const reqOld = tx.objectStore(IDB_STORE).get(STORAGE_KEY_V2);
+        const reqOld = tx.objectStore(IDB_STORE).get('koranul_pwa_workspace_v3');
         reqOld.onsuccess = () => resolve(reqOld.result ? JSON.parse(reqOld.result) : null);
         reqOld.onerror = () => resolve(null);
       };
@@ -817,8 +844,7 @@ function persistNow() {
   try {
     syncMasterListsFromSessions();
     const serialized = JSON.stringify(workspace);
-    localStorage.setItem(STORAGE_KEY_V3, serialized);
-    localStorage.setItem(STORAGE_KEY_V2, JSON.stringify(state));
+    localStorage.setItem(STORAGE_KEY_KAU, serialized);
     saveToIDB(workspace);
     const badge = document.getElementById('saveStatusBadge');
     if (badge) {
@@ -1245,9 +1271,15 @@ async function initApp() {
     navigator.storage.persist().catch(() => {});
   }
   let loaded = null;
-  const rawV3 = localStorage.getItem(STORAGE_KEY_V3) || localStorage.getItem(STORAGE_KEY_V2) || localStorage.getItem(STORAGE_KEY_V1);
-  if (rawV3) {
-    try { loaded = JSON.parse(rawV3); } catch (e) {}
+  let rawStored = localStorage.getItem(STORAGE_KEY_KAU);
+  if (!rawStored) {
+    for (const oldKey of LEGACY_STORAGE_KEYS) {
+      rawStored = localStorage.getItem(oldKey);
+      if (rawStored) break;
+    }
+  }
+  if (rawStored) {
+    try { loaded = JSON.parse(rawStored); } catch (e) {}
   }
   if (!loaded) {
     loaded = await loadFromIDB();
@@ -1366,7 +1398,7 @@ function syncInputsFromState() {
   updateKunciPreview();
   updateIdLabelsUI();
   document.querySelectorAll('.lblJmlPG').forEach(el => el.textContent = state.config.jmlPG);
-  document.getElementById('hdrSubtitle').textContent = `${m.sekolah} • ${m.mapel} (${m.kelas})`;
+  document.getElementById('hdrSubtitle').textContent = `Koreksi & Analisis Ulangan • ${m.sekolah} • ${m.mapel} (${m.kelas})`;
 }
 
 function saveState(skipTableRerender = false) {
@@ -1403,7 +1435,7 @@ function saveState(skipTableRerender = false) {
   updateKunciPreview();
   updateIdLabelsUI();
   document.querySelectorAll('.lblJmlPG').forEach(el => el.textContent = state.config.jmlPG);
-  document.getElementById('hdrSubtitle').textContent = `${state.meta.sekolah} • ${state.meta.mapel} (${state.meta.kelas})`;
+  document.getElementById('hdrSubtitle').textContent = `Koreksi & Analisis Ulangan • ${state.meta.sekolah} • ${state.meta.mapel} (${state.meta.kelas})`;
   persistNow();
   renderMultiContextUI();
 
@@ -1434,7 +1466,7 @@ function exportBackupJSON() {
   const blob = new Blob([JSON.stringify(workspace, null, 2)], { type: 'application/json' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = `Cadangan_KORANUL_MultiKelas_${(state.meta.sekolah || 'Sekolah').replace(/\s+/g, '_')}.json`;
+  a.download = `Cadangan_KAU_MultiKelas_${(state.meta.sekolah || 'Sekolah').replace(/\s+/g, '_')}.json`;
   a.click();
   URL.revokeObjectURL(a.href);
 }
@@ -1455,7 +1487,7 @@ function importBackupJSON(ev) {
       renderInputJawabanTable();
       renderLJKPreview();
       renderReport();
-      alert(`Data cadangan berhasil dipulihkan (${workspace.sessions.length} sesi kelas/pelajaran) dan disimpan permanen!`);
+      alert(`Data cadangan KAU berhasil dipulihkan (${workspace.sessions.length} sesi kelas/pelajaran) dan disimpan permanen!`);
     } catch (err) {
       alert('File cadangan tidak valid: ' + err.message);
     }
@@ -1480,14 +1512,13 @@ function startFreshExam() {
 }
 
 async function resetToDefaultSettings() {
-  if (!confirm('Kembalikan seluruh pengaturan, semua sesi kelas/pelajaran, kunci jawaban, dan data siswa ke pengaturan awal (default)?')) return;
+  if (!confirm('Kembalikan seluruh pengaturan KAU, semua sesi kelas/pelajaran, kunci jawaban, dan data siswa ke pengaturan awal (default)?')) return;
   workspace = getDefaultWorkspace();
   state = workspace.sessions[0];
   sessionScanCount = 0;
   document.getElementById('scanCounterBadge').textContent = 'Terscan Sesi Ini: 0 LJK';
-  localStorage.removeItem(STORAGE_KEY_V3);
-  localStorage.removeItem(STORAGE_KEY_V2);
-  localStorage.removeItem(STORAGE_KEY_V1);
+  localStorage.removeItem(STORAGE_KEY_KAU);
+  LEGACY_STORAGE_KEYS.forEach(k => localStorage.removeItem(k));
   persistNow();
   syncInputsFromState();
   renderMultiContextUI();
@@ -1496,7 +1527,7 @@ async function resetToDefaultSettings() {
   renderLJKPreview();
   prepareNextScan(false);
   renderReport();
-  alert('Aplikasi berhasil dikembalikan ke pengaturan awal.');
+  alert('Aplikasi KAU berhasil dikembalikan ke pengaturan awal.');
 }
 
 // ==================== MANAJEMEN SISWA (MAKS. 500 PESERTA) ====================
@@ -1647,12 +1678,12 @@ function downloadCSVTemplate() {
   const b = new Blob([`\uFEFF${colName},nama,pg,bs,ur,remedial\n${sampleId},CONTOH SISWA,ABCD,BSSB,3|2|4,\n`], { type: 'text/csv;charset=utf-8' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(b);
-  a.download = 'template_import_koranul.csv';
+  a.download = 'template_import_kau.csv';
   a.click();
   URL.revokeObjectURL(a.href);
 }
 
-// ==================== MESIN ANALISIS STATISTIK KORANUL ====================
+// ==================== MESIN ANALISIS STATISTIK KAU ====================
 function computeAllAnalyticsForSession(targetSes) {
   const N = targetSes.students.length;
   const kPG = targetSes.config.jmlPG;
@@ -1661,7 +1692,6 @@ function computeAllAnalyticsForSession(targetSes) {
   const kktp = targetSes.meta.kktp;
   const rTabel = getRTable(N);
 
-  // Aturan: Kosong / tidak dijawab = 'V', Pilih semua opsi / ganda = 'X'
   const pgMatrix = targetSes.students.map(st => {
     const ans = (st.pg || '').toUpperCase().replace(/\s/g, '').padEnd(kPG, 'V');
     const row = [];
@@ -2112,13 +2142,11 @@ function drawLJKOnCanvas(canvas, studentObj = null) {
     ctx.fillText(`2. Tulis & tandai ${layout.idDigits} digit ${idTitle} Anda pada kotak di sebelah kanan.`, leftBoxX + 10, idBoxY + 109);
 
     ctx.fillText('Contoh Benar:', leftBoxX + 10, idBoxY + 124);
-    // Contoh benar 1: kotak disilang penuh
     const bx1 = leftBoxX + 78, by1 = idBoxY + 121;
     ctx.strokeStyle = '#0f172a'; ctx.lineWidth = 1.1;
     ctx.strokeRect(bx1 - 5, by1 - 5, 10, 10);
     ctx.beginPath(); ctx.moveTo(bx1 - 4.2, by1 - 4.2); ctx.lineTo(bx1 + 4.2, by1 + 4.2);
     ctx.moveTo(bx1 + 4.2, by1 - 4.2); ctx.lineTo(bx1 - 4.2, by1 + 4.2); ctx.stroke();
-    // Contoh benar 2: kotak dihitamkan penuh
     ctx.fillStyle = '#0f172a';
     ctx.fillRect(leftBoxX + 94 - 5, by1 - 5, 10, 10);
 
@@ -2151,7 +2179,6 @@ function drawLJKOnCanvas(canvas, studentObj = null) {
     });
   }
 
-  // Kotak Gelembung Identitas (NOMOR PESERTA atau NISN dengan D digit kustom)
   const absX = layout.idGridBoxX;
   const absY = fy + 14;
   const absW = layout.idGridBoxW;
@@ -2205,7 +2232,6 @@ function drawLJKOnCanvas(canvas, studentObj = null) {
       ctx.lineWidth = 1.1;
       ctx.stroke();
 
-      // Huruf panduan dicetak abu-abu lembut agar tanda silang/arsiran siswa mudah dibedakan oleh OMR
       ctx.fillStyle = '#64748b';
       ctx.font = `bold ${rBubble < 7 ? 7 : 8}px sans-serif`;
       ctx.textAlign = 'center';
@@ -2410,20 +2436,58 @@ function renderUraianContinuationCanvas(canvas, startIdx, totalUR, studentObj = 
   }
 }
 
-function printLJK() {
+// ==================== MESIN CETAK ANTI HALAMAN KOSONG (PRINTER & PDF) ====================
+let printCleanupTimer = null;
+async function triggerPrintPages(pagesHtml) {
+  const pa = document.getElementById('printArea');
+  if (!pa) return;
+  if (printCleanupTimer) {
+    clearTimeout(printCleanupTimer);
+    printCleanupTimer = null;
+  }
+
+  pa.innerHTML = pagesHtml;
+  pa.classList.add('is-printing');
+
+  // Tunggu semua gambar LJK selesai di-decode sepenuhnya sebelum memicu dialog Print / Save PDF
+  const imgs = Array.from(pa.querySelectorAll('img'));
+  await Promise.all(imgs.map(img => {
+    if (img.complete && img.naturalWidth > 0) return Promise.resolve();
+    if (typeof img.decode === 'function') {
+      return img.decode().catch(() => {});
+    }
+    return new Promise(res => {
+      img.onload = res;
+      img.onerror = res;
+    });
+  }));
+
+  // Tunggu 2 frame render agar layout print benar-benar siap
+  await new Promise(res => requestAnimationFrame(() => requestAnimationFrame(res)));
+
+  const onAfterPrint = () => {
+    window.removeEventListener('afterprint', onAfterPrint);
+    printCleanupTimer = setTimeout(() => {
+      pa.classList.remove('is-printing');
+      pa.innerHTML = '';
+    }, 1500);
+  };
+  window.addEventListener('afterprint', onAfterPrint);
+
+  window.print();
+}
+
+async function printLJK() {
   renderLJKPreview();
   const dataUrl1 = document.getElementById('ljkGeneratorCanvas').toDataURL('image/png');
   const canvas2 = document.getElementById('ljkUraianCanvas2');
   const hasPage2 = canvas2 && canvas2.style.display !== 'none';
-  const pa = document.getElementById('printArea');
-  pa.style.display = 'block';
-  pa.innerHTML = `<section class="print-page"><img src="${dataUrl1}" alt="LJK Halaman 1"></section>` +
-    (hasPage2 ? `<section class="print-page"><img src="${canvas2.toDataURL('image/png')}" alt="LJK Halaman 2"></section>` : '');
-  window.print();
-  pa.style.display = 'none';
+  const html = `<section class="print-page ljk-sheet"><img src="${dataUrl1}" alt="LJK Halaman 1"></section>` +
+    (hasPage2 ? `<section class="print-page ljk-sheet"><img src="${canvas2.toDataURL('image/png')}" alt="LJK Halaman 2"></section>` : '');
+  await triggerPrintPages(html);
 }
 
-function printAllStudentsLJK() {
+async function printAllStudentsLJK() {
   if (!state.students.length) return alert('Belum ada data siswa.');
   if (state.students.length > 60 && !confirm(`Akan menyiapkan ${state.students.length} lembar LJK terisi identitas siswa. Lanjutkan?`)) return;
 
@@ -2435,24 +2499,20 @@ function printAllStudentsLJK() {
   const pagesHtml = [];
   state.students.forEach(st => {
     const layout = drawLJKOnCanvas(off1, st);
-    pagesHtml.push(`<section class="print-page"><img src="${off1.toDataURL('image/png')}" alt="LJK ${escapeAttr(st.nama)}"></section>`);
+    pagesHtml.push(`<section class="print-page ljk-sheet"><img src="${off1.toDataURL('image/png')}" alt="LJK ${escapeAttr(st.nama)}"></section>`);
     if (layout.urOnPage2 > 0) {
       renderUraianContinuationCanvas(off2, layout.urOnPage1, state.config.jmlUR, st);
-      pagesHtml.push(`<section class="print-page"><img src="${off2.toDataURL('image/png')}" alt="LJK Hal 2 ${escapeAttr(st.nama)}"></section>`);
+      pagesHtml.push(`<section class="print-page ljk-sheet"><img src="${off2.toDataURL('image/png')}" alt="LJK Hal 2 ${escapeAttr(st.nama)}"></section>`);
     }
   });
 
-  const pa = document.getElementById('printArea');
-  pa.style.display = 'block';
-  pa.innerHTML = pagesHtml.join('');
-  window.print();
-  pa.style.display = 'none';
+  await triggerPrintPages(pagesHtml.join(''));
 }
 
 function downloadLJKImage() {
   renderLJKPreview();
   const link = document.createElement('a');
-  link.download = `LJK_${state.meta.kelas.replace(/\W+/g, '_')}_${state.meta.mapel}_${state.config.jmlPG}PG.png`;
+  link.download = `LJK_KAU_${state.meta.kelas.replace(/\W+/g, '_')}_${state.meta.mapel}_${state.config.jmlPG}PG.png`;
   link.href = document.getElementById('ljkGeneratorCanvas').toDataURL('image/png');
   link.click();
 
@@ -2460,7 +2520,7 @@ function downloadLJKImage() {
   if (canvas2 && canvas2.style.display !== 'none') {
     setTimeout(() => {
       const link2 = document.createElement('a');
-      link2.download = `LJK_${state.meta.kelas.replace(/\W+/g, '_')}_${state.meta.mapel}_Uraian_Hal2.png`;
+      link2.download = `LJK_KAU_${state.meta.kelas.replace(/\W+/g, '_')}_${state.meta.mapel}_Uraian_Hal2.png`;
       link2.href = canvas2.toDataURL('image/png');
       link2.click();
     }, 350);
@@ -2502,7 +2562,7 @@ function drawScannerIdleCanvas() {
   ctx.fillStyle = '#cbd5e1';
   ctx.font = 'bold 22px sans-serif';
   ctx.textAlign = 'center';
-  ctx.fillText('SMART SCANNER LJK SIAP', canvas.width / 2, canvas.height / 2 - 24);
+  ctx.fillText('SMART SCANNER LJK KAU SIAP', canvas.width / 2, canvas.height / 2 - 24);
   ctx.font = '14px sans-serif';
   ctx.fillStyle = '#93c5fd';
   ctx.fillText(`${state.meta.kelas} • ${state.meta.mapel} (${state.config.bubbleShape === 'square' ? 'Kotak / Silang ✕' : 'Lingkaran'})`, canvas.width / 2, canvas.height / 2 + 4);
@@ -2627,7 +2687,6 @@ function startLiveScannerLoop() {
         bl: { x: res.bl.x * inv, y: res.bl.y * inv }
       };
 
-      // Hitung kestabilan posisi antar frame
       let maxDelta = 999;
       if (prevLiveCorners) {
         maxDelta = Math.max(
@@ -2645,7 +2704,6 @@ function startLiveScannerLoop() {
         stableCornerFrames = 1;
       }
 
-      // Gambar poligon dokumen terkunci ala CamScanner
       gctx.fillStyle = 'rgba(16, 185, 129, 0.14)';
       gctx.strokeStyle = '#10b981';
       gctx.lineWidth = Math.max(4, vw * 0.006);
@@ -2683,7 +2741,6 @@ function startLiveScannerLoop() {
     } else {
       stableCornerFrames = 0;
       prevLiveCorners = null;
-      // Gambar panduan sudut samar ala CamScanner
       const padX = vw * 0.08, padY = vh * 0.06, arm = Math.min(vw, vh) * 0.07;
       gctx.strokeStyle = 'rgba(255, 255, 255, 0.72)';
       gctx.lineWidth = Math.max(3, vw * 0.004);
@@ -3069,7 +3126,6 @@ function prepareNextScan(advanceStudent = true) {
     sel.value = nextIdx;
   }
 
-  // Jika ada antrean batch foto, otomatis muat foto berikutnya!
   if (advanceStudent && batchFileQueue.length > 0) {
     const nextFile = batchFileQueue.shift();
     updateBatchBadge();
@@ -3246,7 +3302,6 @@ function buildHomographyMapper(tl, tr, br, bl) {
   };
 }
 
-// CamScanner-style Perspective Warp & Document Enhancement
 function warpAndEnhanceDocument(srcCanvas, corners, filterMode) {
   const outW = 794, outH = 1123;
   const margin = 24, mkSize = 26;
@@ -3268,7 +3323,6 @@ function warpAndEnhanceDocument(srcCanvas, corners, filterMode) {
   const outImg = outCtx.createImageData(outW, outH);
   const dst = outImg.data;
 
-  // Hitung histogram luminansi untuk peregangan kontras otomatis ala CamScanner Magic Color
   let minL = 255, maxL = 0;
   const lumBuf = new Uint8Array(outW * outH);
 
@@ -3319,13 +3373,11 @@ function warpAndEnhanceDocument(srcCanvas, corners, filterMode) {
       const p = i * 4;
       if (filterMode === 'bw') {
         const norm = Math.max(0, Math.min(255, ((lumBuf[i] - low) * 255) / span));
-        // Kurva S-contrast untuk kertas putih bersih & tinta/pensil pekat
         const v = norm > 175 ? 255 : (norm < 95 ? Math.round(norm * 0.45) : Math.round(((norm - 95) / 80) * 210 + 42));
         dst[p] = v;
         dst[p + 1] = v;
         dst[p + 2] = v;
       } else {
-        // Magic Color: mempertahankan warna tinta/pensil sekaligus memutihkan latar kertas
         for (let c = 0; c < 3; c++) {
           const stretched = ((dst[p + c] - low) * 265) / span;
           dst[p + c] = Math.max(0, Math.min(255, stretched > 215 ? 255 : stretched));
@@ -3407,7 +3459,6 @@ function processRectifiedOMRFromSource(fullCorners) {
   const fw = W - 2 * fx;
   const fh = H - 2 * fy;
 
-  // Bingkai konfirmasi dokumen lurus ala CamScanner
   ctx.strokeStyle = '#10b981';
   ctx.lineWidth = 2.5;
   ctx.strokeRect(fx, fy, fw, fh);
@@ -3416,7 +3467,6 @@ function processRectifiedOMRFromSource(fullCorners) {
   const isSquare = layout.bubbleShape === 'square';
   const defaultRPx = Math.max(4, fw * layout.bubbleR_norm);
 
-  // DETEKTOR TANDA HIBRIDA (MENDUKUNG ARSIRAN PENUH MAUPUN TANDA SILANG ✕ PADA KOTAK/LINGKARAN)
   const measureBubbleMarkScore = (cx, cy, rad) => {
     const innerR = rad * 0.74;
     const ringR1 = rad * 1.24;
@@ -3480,7 +3530,6 @@ function processRectifiedOMRFromSource(fullCorners) {
     const netStrokeRatio = Math.max(0, strokeRatio - 0.075);
     const quadHits = (qNW > 0 ? 1 : 0) + (qNE > 0 ? 1 : 0) + (qSW > 0 ? 1 : 0) + (qSE > 0 ? 1 : 0);
 
-    // Tanda silang (✕) selalu menyentuh 3-4 kuadran sudut luar inti kotak/lingkaran
     let crossScore = 0;
     if (quadHits >= 3 && strokeRatio >= 0.13) {
       crossScore = Math.min(0.88, 0.25 + netStrokeRatio * 1.65 + (quadHits === 4 ? 0.12 : 0.05));
@@ -3578,9 +3627,6 @@ function processRectifiedOMRFromSource(fullCorners) {
 
   resolveScannedStudent(detectedCode);
 
-  // LOGIKA JAWABAN OBJEKTIF (PG & BS):
-  // - Kosong / tidak dijawab salah satu => "V"
-  // - Memilih semua opsi / ganda => "X"
   const opsiPGCount = Math.min(5, Math.max(3, Number(state.config.opsiPG) || 4));
   currentScannedPG = pgChoices.map(a => {
     if (!a || a.length === 0) return 'V';
@@ -3793,7 +3839,6 @@ function chart3DPie(title, rows) {
     return s;
   });
 
-  // Bagi irisan yang melewati 0 atau PI agar dinding ekstrusi depan (sin > 0) tergambar mulus
   slices.forEach(s => {
     const gId = nextGradId('pie3d');
     const cLight = adjustHexColor(s.color, 26);
@@ -3807,7 +3852,6 @@ function chart3DPie(title, rows) {
       </linearGradient>
     `);
 
-    // Handle 100% single slice
     if (s.sweep >= Math.PI * 1.999) {
       wallPaths.push(`
         <path d="M ${cx - rx} ${cy} A ${rx} ${ry} 0 1 0 ${cx + rx} ${cy} L ${cx + rx} ${cy + depth} A ${rx} ${ry} 0 1 1 ${cx - rx} ${cy + depth} Z"
@@ -3818,7 +3862,6 @@ function chart3DPie(title, rows) {
       return;
     }
 
-    // Sub-arcs untuk dinding 3D depan (sudut berada di [0, PI])
     const splitPoints = [s.a1];
     [Math.PI, Math.PI * 2].forEach(boundary => {
       if (s.a1 < boundary && s.a2 > boundary) splitPoints.push(boundary);
@@ -3843,7 +3886,6 @@ function chart3DPie(title, rows) {
       }
     }
 
-    // Irisan permukaan atas 3D
     const x1 = cx + rx * Math.cos(s.a1), y1 = cy + ry * Math.sin(s.a1);
     const x2 = cx + rx * Math.cos(s.a2), y2 = cy + ry * Math.sin(s.a2);
     const laf = s.sweep > Math.PI ? 1 : 0;
@@ -3925,7 +3967,6 @@ function chart3DColumn(title, rows, maxValue = 100) {
     `);
   });
 
-  // Lantai 3D
   const floorPoly = `
     <polygon points="${padL},${baseY} ${padL + dx3d},${baseY + dy3d} ${padL + dx3d + plotW},${baseY + dy3d} ${padL + plotW},${baseY}"
              fill="#e2e8f0" stroke="#94a3b8" stroke-width="1"/>
@@ -3955,22 +3996,16 @@ function chart3DColumn(title, rows, maxValue = 100) {
     const shortLbl = String(r.label).length > 12 ? String(r.label).slice(0, 11) + '…' : String(r.label);
     return `
       <g>
-        <!-- Bayangan dasar -->
         <polygon points="${x + 3},${baseY + 2} ${x + barW + dx3d + 3},${baseY + dy3d + 2} ${x + barW + dx3d},${baseY + dy3d} ${x},${baseY}"
                  fill="rgba(15,23,42,0.14)"/>
-        <!-- Sisi Depan 3D -->
         <rect x="${x.toFixed(1)}" y="${yTop.toFixed(1)}" width="${barW.toFixed(1)}" height="${bH.toFixed(1)}"
               fill="url(#${gId})" stroke="${cSide}" stroke-width="0.6"/>
-        <!-- Sisi Atas 3D -->
         <polygon points="${x.toFixed(1)},${yTop.toFixed(1)} ${(x + dx3d).toFixed(1)},${(yTop + dy3d).toFixed(1)} ${(x + barW + dx3d).toFixed(1)},${(yTop + dy3d).toFixed(1)} ${(x + barW).toFixed(1)},${yTop.toFixed(1)}"
                  fill="${cTop}" stroke="${cSide}" stroke-width="0.6"/>
-        <!-- Sisi Kanan 3D -->
         <polygon points="${(x + barW).toFixed(1)},${yTop.toFixed(1)} ${(x + barW + dx3d).toFixed(1)},${(yTop + dy3d).toFixed(1)} ${(x + barW + dx3d).toFixed(1)},${(baseY + dy3d).toFixed(1)} ${(x + barW).toFixed(1)},${baseY.toFixed(1)}"
                  fill="${cSide}" stroke="${adjustHexColor(col, -48)}" stroke-width="0.6"/>
-        <!-- Nilai di atas balok 3D -->
         <text x="${(x + barW / 2 + dx3d * 0.45).toFixed(1)}" y="${(yTop + dy3d - 5).toFixed(1)}"
               text-anchor="middle" fill="#0f172a" font-size="11" font-weight="800">${r.display || r.value}</text>
-        <!-- Label Sumbu X -->
         <text x="${(x + barW / 2).toFixed(1)}" y="${baseY + 18}"
               text-anchor="middle" fill="#334155" font-size="10" font-weight="700">${escapeAttr(shortLbl)}</text>
       </g>
@@ -4024,18 +4059,13 @@ function chart3DHorizontalBars(title, rows, maxValue) {
     return `
       <g>
         <text x="${labelW - 10}" y="${y + 12}" text-anchor="end" fill="#1e293b" font-size="11" font-weight="600">${escapeAttr(lbl)}</text>
-        <!-- Track latar 3D -->
         <rect x="${labelW}" y="${y}" width="${barMaxW}" height="${barThick}" rx="2" fill="#e2e8f0"/>
-        <!-- Sisi Depan Balok 3D -->
         <rect x="${labelW}" y="${y}" width="${bW.toFixed(1)}" height="${barThick}" fill="url(#${gId})"/>
-        <!-- Bevel Atas 3D -->
         <polygon points="${labelW},${y} ${(labelW + dx3d).toFixed(1)},${y + dy3d} ${(labelW + bW + dx3d).toFixed(1)},${y + dy3d} ${(labelW + bW).toFixed(1)},${y}"
                  fill="${cTop}"/>
-        <!-- Tutup Ujung Kanan 3D -->
         <polygon points="${(labelW + bW).toFixed(1)},${y} ${(labelW + bW + dx3d).toFixed(1)},${y + dy3d} ${(labelW + bW + dx3d).toFixed(1)},${y + barThick + dy3d} ${(labelW + bW).toFixed(1)},${y + barThick}"
                  fill="${cEnd}"/>
-        <!-- Label Nilai -->
-        <text x="${(labelW + bW + dx3d + 8).toFixed(1)}" y="${y + 11}" fill="#0f172a" font-size="11" font-weight="800">${escapeAttr(r.display || r.value)}</text>
+        <text x="${(labelW + bW + dx3d + 7).toFixed(1)}" y="${y + 11}" fill="#0f172a" font-size="11" font-weight="800">${r.display || r.value}</text>
       </g>
     `;
   }).join('');
@@ -4051,57 +4081,71 @@ function chart3DHorizontalBars(title, rows, maxValue) {
   `;
 }
 
-// 4. GRAFIK AREA & GARIS 3D (3D Extruded Ribbon Line Chart dengan Batas KKTP)
-function chart3DAreaLine(title, rows, kktpLine = null, maxValue = 100) {
+// 4. GRAFIK AREA & GARIS 3 DIMENSI (3D Extruded Line & Area Chart dengan Garis Batas KKTP)
+function chart3DAreaLine(title, rows, kktp = null) {
   if (!rows.length) return `<div class="chart-card"><h3>${title}</h3><p style="font-size:0.82rem;color:#64748b;">Belum ada data.</p></div>`;
-  const max = Math.max(1, maxValue);
   const W = Math.max(580, rows.length * 46 + 90);
-  const H = 250;
-  const padL = 46, padR = 26, padT = 30, padB = 48;
-  const plotW = W - padL - padR;
+  const H = 260;
+  const padL = 46, padR = 30, padT = 32, padB = 56;
+  const dx3d = 10, dy3d = -7;
+  const plotW = W - padL - padR - dx3d;
   const plotH = H - padT - padB;
   const baseY = padT + plotH;
-  const gId = nextGradId('area3d');
 
+  const gArea = nextGradId('area3d');
+  const stepX = rows.length > 1 ? plotW / (rows.length - 1) : 0;
   const pts = rows.map((r, i) => {
-    const x = rows.length === 1 ? padL + plotW / 2 : padL + (i / (rows.length - 1)) * plotW;
-    const ratio = Math.max(0, Math.min(1, r.value / max));
-    const y = baseY - ratio * plotH;
-    return { x, y, label: r.label, display: r.display || r.value, color: r.color || '#1d4ed8' };
+    const val = Math.max(0, Math.min(100, Number(r.value) || 0));
+    const x = rows.length > 1 ? padL + i * stepX : padL + plotW / 2;
+    const y = baseY - (val / 100) * plotH;
+    return { ...r, val, x, y };
   });
 
-  const lineCoords = pts.map(p => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ');
-  const shadowCoords = pts.map(p => `${(p.x + 4).toFixed(1)},${(p.y + 5).toFixed(1)}`).join(' ');
-  const areaPath = `M ${pts[0].x.toFixed(1)} ${baseY} ` +
-    pts.map(p => `L ${p.x.toFixed(1)} ${p.y.toFixed(1)}`).join(' ') +
-    ` L ${pts[pts.length - 1].x.toFixed(1)} ${baseY} Z`;
-
-  let kktpSvg = '';
-  if (kktpLine !== null && kktpLine > 0 && kktpLine <= max) {
-    const ky = baseY - (kktpLine / max) * plotH;
-    kktpSvg = `
-      <line x1="${padL}" y1="${ky.toFixed(1)}" x2="${padL + plotW}" y2="${ky.toFixed(1)}"
-            stroke="#dc2626" stroke-width="1.5" stroke-dasharray="5,4"/>
-      <text x="${padL + plotW}" y="${(ky - 4).toFixed(1)}" text-anchor="end" fill="#dc2626" font-size="10" font-weight="800">KKTP: ${kktpLine}</text>
-    `;
-  }
-
-  const gridLines = [0, 25, 50, 75, 100].map(t => {
+  const gridSvg = [0, 25, 50, 75, 100].map(t => {
     const y = baseY - (t / 100) * plotH;
     return `
-      <line x1="${padL}" y1="${y.toFixed(1)}" x2="${padL + plotW}" y2="${y.toFixed(1)}" stroke="#e2e8f0" stroke-width="1"/>
-      <text x="${padL - 6}" y="${(y + 4).toFixed(1)}" text-anchor="end" fill="#64748b" font-size="10">${Math.round((t / 100) * max)}</text>
+      <line x1="${padL}" y1="${y.toFixed(1)}" x2="${padL + plotW + dx3d}" y2="${y.toFixed(1)}" stroke="#e2e8f0" stroke-width="1"/>
+      <text x="${padL - 6}" y="${(y + 4).toFixed(1)}" text-anchor="end" fill="#64748b" font-size="10.5">${t}</text>
     `;
   }).join('');
 
+  let kktpLine = '';
+  if (kktp !== null && !isNaN(kktp)) {
+    const ky = baseY - (Math.max(0, Math.min(100, kktp)) / 100) * plotH;
+    kktpLine = `
+      <line x1="${padL}" y1="${ky.toFixed(1)}" x2="${padL + plotW + dx3d}" y2="${ky.toFixed(1)}"
+            stroke="#dc2626" stroke-width="1.6" stroke-dasharray="5,4"/>
+      <text x="${padL + plotW + dx3d - 2}" y="${(ky - 4).toFixed(1)}" text-anchor="end" fill="#dc2626" font-size="10" font-weight="800">KKTP: ${kktp}</text>
+    `;
+  }
+
+  let areaSvg = '', ribbonSvg = '', frontLineSvg = '';
+  if (pts.length >= 2) {
+    const frontPath = pts.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x.toFixed(1)} ${p.y.toFixed(1)}`).join(' ');
+    const areaPath = `${frontPath} L ${pts[pts.length - 1].x.toFixed(1)} ${baseY} L ${pts[0].x.toFixed(1)} ${baseY} Z`;
+    areaSvg = `<path d="${areaPath}" fill="url(#${gArea})"/>`;
+
+    const segs = [];
+    for (let i = 0; i < pts.length - 1; i++) {
+      const p1 = pts[i], p2 = pts[i + 1];
+      segs.push(`
+        <polygon points="${p1.x.toFixed(1)},${p1.y.toFixed(1)} ${p2.x.toFixed(1)},${p2.y.toFixed(1)} ${(p2.x + dx3d).toFixed(1)},${(p2.y + dy3d).toFixed(1)} ${(p1.x + dx3d).toFixed(1)},${(p1.y + dy3d).toFixed(1)}"
+                 fill="#1e40af" opacity="0.82"/>
+      `);
+    }
+    ribbonSvg = segs.join('');
+    frontLineSvg = `<path d="${frontPath}" fill="none" stroke="#2563eb" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>`;
+  }
+
   const nodesSvg = pts.map(p => {
-    const shortLbl = String(p.label).length > 8 ? String(p.label).slice(0, 7) + '…' : String(p.label);
+    const col = (kktp !== null && p.val < kktp - 0.5) ? '#dc2626' : '#059669';
+    const shortLbl = String(p.label).length > 10 ? String(p.label).slice(0, 9) + '…' : String(p.label);
     return `
       <g>
-        <circle cx="${(p.x + 2).toFixed(1)}" cy="${(p.y + 3).toFixed(1)}" r="5" fill="rgba(15,23,42,0.2)"/>
-        <circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="5" fill="${p.color}" stroke="#ffffff" stroke-width="1.8"/>
-        <text x="${p.x.toFixed(1)}" y="${(p.y - 9).toFixed(1)}" text-anchor="middle" fill="#0f172a" font-size="10" font-weight="800">${p.display}</text>
-        <text x="${p.x.toFixed(1)}" y="${baseY + 16}" text-anchor="middle" fill="#334155" font-size="9.5" font-weight="600">${escapeAttr(shortLbl)}</text>
+        <circle cx="${(p.x + 2).toFixed(1)}" cy="${(p.y + 3).toFixed(1)}" r="5.2" fill="rgba(15,23,42,0.25)"/>
+        <circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="5" fill="${col}" stroke="#ffffff" stroke-width="1.8"/>
+        <text x="${(p.x + 3).toFixed(1)}" y="${(p.y + dy3d - 5).toFixed(1)}" text-anchor="middle" fill="#0f172a" font-size="10.5" font-weight="800">${p.val.toFixed(1)}</text>
+        <text x="${p.x.toFixed(1)}" y="${baseY + 18}" text-anchor="middle" fill="#334155" font-size="9.5" font-weight="600">${escapeAttr(shortLbl)}</text>
       </g>
     `;
   }).join('');
@@ -4111,59 +4155,23 @@ function chart3DAreaLine(title, rows, kktpLine = null, maxValue = 100) {
       <h3>${title}</h3>
       <svg class="chart-svg" viewBox="0 0 ${W} ${H}">
         <defs>
-          <linearGradient id="${gId}" x1="0%" y1="0%" x2="0%" y2="100%">
-            <stop offset="0%" stop-color="#2563eb" stop-opacity="0.34"/>
-            <stop offset="100%" stop-color="#2563eb" stop-opacity="0.03"/>
+          <linearGradient id="${gArea}" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stop-color="#3b82f6" stop-opacity="0.34"/>
+            <stop offset="100%" stop-color="#3b82f6" stop-opacity="0.03"/>
           </linearGradient>
         </defs>
-        ${gridLines}
-        ${kktpSvg}
-        <path d="${areaPath}" fill="url(#${gId})"/>
-        <!-- Pita Bayangan 3D -->
-        <polyline points="${shadowCoords}" fill="none" stroke="#1e3a8a" stroke-opacity="0.28" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
-        <!-- Garis Utama 3D -->
-        <polyline points="${lineCoords}" fill="none" stroke="#1d4ed8" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/>
+        ${gridSvg}
+        ${areaSvg}
+        ${ribbonSvg}
+        ${frontLineSvg}
+        ${kktpLine}
         ${nodesSvg}
       </svg>
     </div>
   `;
 }
 
-// ==================== RENDER LAPORAN & ANALISIS ====================
-function getKopSuratHTML(judulLaporan) {
-  const m = state.meta;
-  return `
-    <div style="border-bottom:2px solid #0f172a; padding-bottom:8px; margin-bottom:10px;">
-      <div style="text-align:center; font-weight:800; font-size:1rem;">${judulLaporan}</div>
-      <div style="text-align:center; font-weight:700; font-size:0.9rem;">${m.jenisTes} — ${m.sekolah.toUpperCase()}</div>
-      <div style="display:grid; grid-template-columns:1fr 1fr; font-size:0.78rem; margin-top:6px; gap:2px 16px;">
-        <div>Mata Pelajaran : <b>${m.mapel}</b></div>
-        <div>Kelas / Semester : <b>${m.kelas}</b></div>
-        <div>Materi Pokok : <b>${m.materi}</b></div>
-        <div>Tahun Pelajaran : <b>${m.tapel}</b></div>
-        <div>Tanggal Tes : <b>${m.tglTes}</b></div>
-        <div>KKTP / KKM : <b>${m.kktp}</b></div>
-      </div>
-    </div>
-  `;
-}
-
-function getSignatureHTML() {
-  const m = state.meta;
-  return `
-    <div style="display:flex; justify-content:space-between; margin-top:18px; font-size:0.8rem; page-break-inside:avoid;">
-      <div>
-        Mengetahui,<br>Kepala ${m.sekolah}<br><br><br><br>
-        <b><u>${m.kepsek}</u></b><br>NIP. ${m.nipKepsek}
-      </div>
-      <div>
-        ${m.tempat}, ${m.tglPeriksa}<br>Guru Mata Pelajaran<br><br><br><br>
-        <b><u>${m.guru}</u></b><br>NIP. ${m.nipGuru}
-      </div>
-    </div>
-  `;
-}
-
+// ==================== RENDER LAPORAN & ANALISIS KAU ====================
 function switchReport(tabName, btn) {
   currentReportTab = tabName;
   document.querySelectorAll('.sub-tab').forEach(b => b.classList.remove('active'));
@@ -4171,558 +4179,426 @@ function switchReport(tabName, btn) {
   renderReport();
 }
 
+function renderReportHeader(title) {
+  const m = state.meta;
+  return `
+    <div style="text-align:center; border-bottom:2px solid #0f172a; padding-bottom:8px; margin-bottom:10px;">
+      <div style="font-weight:800; font-size:1rem;">${title}</div>
+      <div style="font-size:0.85rem; font-weight:700;">${m.sekolah} • ${m.jenisTes}</div>
+      <div style="font-size:0.78rem; color:#475569;">Mapel: ${m.mapel} | Kelas: ${m.kelas} | Tapel: ${m.tapel} | KKTP: ${m.kktp}</div>
+    </div>
+  `;
+}
+
+function renderReportSignatures() {
+  const m = state.meta;
+  return `
+    <div style="display:flex; justify-content:space-between; margin-top:18px; font-size:0.8rem; page-break-inside:avoid;">
+      <div>
+        Mengetahui,<br>Kepala Sekolah<br><br><br><br>
+        <b><u>${m.kepsek}</u></b><br>NIP. ${m.nipKepsek}
+      </div>
+      <div>
+        ${m.tempat}, ${m.tglPeriksa}<br>Guru Kelas / Mata Pelajaran<br><br><br><br>
+        <b><u>${m.guru}</u></b><br>NIP. ${m.nipGuru}
+      </div>
+    </div>
+  `;
+}
+
 function renderReport() {
   const box = document.getElementById('reportContainer');
   const A = computeAllAnalytics();
-  const idLabel = getIdFieldLabel();
+  const N = A.N;
+  const kPG = A.kPG;
+  const kUR = A.kUR;
+  const idColTitle = getIdFieldLabel();
 
   if (currentReportTab === 'nilai_mc') {
-    const nilaiArr = A.pgMatrix.map(p => p.nilai);
-    const mean = nilaiArr.length ? (nilaiArr.reduce((a, b) => a + b, 0) / nilaiArr.length) : 0;
-    const maxN = nilaiArr.length ? Math.max(...nilaiArr) : 0;
-    const minN = nilaiArr.length ? Math.min(...nilaiArr) : 0;
     const jmlTuntas = A.pgMatrix.filter(p => p.tuntas === 'Tuntas').length;
+    const jmlRemed = N - jmlTuntas;
+    const meanNilai = N > 0 ? A.pgMatrix.reduce((s, p) => s + p.nilai, 0) / N : 0;
+    const maxNilai = N > 0 ? Math.max(...A.pgMatrix.map(p => p.nilai)) : 0;
+    const minNilai = N > 0 ? Math.min(...A.pgMatrix.map(p => p.nilai)) : 0;
 
     let rows = state.students.map((st, i) => {
       const p = A.pgMatrix[i];
-      return `<tr>
-        <td>${i + 1}</td>
-        <td style="font-family:monospace;">${escapeAttr(st.nis || '-')}</td>
-        <td><b>${escapeAttr(st.nama)}</b></td>
-        <td style="font-family:monospace;">${p.ans}</td>
-        <td>${p.skor}</td>
-        <td><b>${p.nilai.toFixed(1)}</b></td>
-        <td><span class="badge ${p.tuntas === 'Tuntas' ? 'badge-tuntas' : 'badge-remed'}">${p.tuntas}</span></td>
-      </tr>`;
+      const cells = p.row.map(v => `<td style="text-align:center; color:${v ? '#166534' : '#dc2626'}">${v}</td>`).join('');
+      return `<tr><td>${i + 1}</td><td style="font-family:monospace;">${escapeAttr(st.nis || '-')}</td><td><b>${escapeAttr(st.nama)}</b></td>${cells}<td><b>${p.skor}</b></td><td><b>${p.nilai.toFixed(1)}</b></td><td><span class="badge ${p.tuntas === 'Tuntas' ? 'badge-tuntas' : 'badge-remed'}">${p.tuntas}</span></td></tr>`;
     }).join('');
 
-    box.innerHTML = getKopSuratHTML('DAFTAR NILAI PILIHAN GANDA (NILAI MC)') + `
+    const hdrSoal = Array.from({ length: kPG }, (_, j) => `<th>${j + 1}</th>`).join('');
+    box.innerHTML = renderReportHeader('DAFTAR NILAI PILIHAN GANDA (SHEET: NILAI MC)') + `
       <div class="grid-3" style="margin-bottom:10px;">
-        <div class="stat-box"><div class="num">${mean.toFixed(1)}</div><div class="lbl">Rata-rata Kelas</div></div>
-        <div class="stat-box"><div class="num">${maxN.toFixed(0)} / ${minN.toFixed(0)}</div><div class="lbl">Tertinggi / Terendah</div></div>
-        <div class="stat-box"><div class="num">${jmlTuntas} / ${A.N}</div><div class="lbl">Tuntas (${A.N ? ((jmlTuntas / A.N) * 100).toFixed(0) : 0}%)</div></div>
+        <div class="stat-box"><div class="num">${meanNilai.toFixed(1)}</div><div class="lbl">Rata-rata PG (Max ${maxNilai.toFixed(0)} / Min ${minNilai.toFixed(0)})</div></div>
+        <div class="stat-box"><div class="num" style="color:#059669">${jmlTuntas} (${N ? Math.round(jmlTuntas / N * 100) : 0}%)</div><div class="lbl">Siswa Tuntas PG</div></div>
+        <div class="stat-box"><div class="num" style="color:#dc2626">${jmlRemed} (${N ? Math.round(jmlRemed / N * 100) : 0}%)</div><div class="lbl">Siswa Remedial PG</div></div>
       </div>
-      <div class="table-wrap">
-        <table>
-          <thead><tr><th>No</th><th>${idLabel}</th><th>Nama Siswa</th><th>Jawaban</th><th>Skor</th><th>Nilai</th><th>Keterangan</th></tr></thead>
-          <tbody>${rows}</tbody>
-        </table>
-      </div>
-    ` + getSignatureHTML();
+      <div class="table-wrap"><table><thead><tr><th>No</th><th>${idColTitle}</th><th>Nama Siswa</th>${hdrSoal}<th>Skor</th><th>Nilai</th><th>Ket</th></tr></thead><tbody>${rows}</tbody></table></div>
+    ` + renderReportSignatures();
   }
 
   else if (currentReportTab === 'analisis_mc') {
-    let rows = A.itemsPG.map(it => `<tr>
-      <td>${it.no}</td>
-      <td>${it.tk.toFixed(2)}</td>
-      <td>${it.katTK}</td>
-      <td>${it.dp.toFixed(2)}</td>
-      <td>${it.katDP}</td>
-      <td>${it.rxy.toFixed(2)}</td>
-      <td><span class="badge ${it.valid === 'Valid' ? 'badge-tuntas' : 'badge-remed'}">${it.valid}</span></td>
-      <td><span class="badge ${it.bankSoal === 'Diterima' ? 'badge-tuntas' : (it.bankSoal === 'Dipertimbangkan' ? 'badge-warn' : 'badge-remed')}">${it.bankSoal}</span></td>
-    </tr>`).join('');
+    const rows = A.itemsPG.map(it => `
+      <tr>
+        <td><b>${it.no}</b></td>
+        <td>${(it.tk * 100).toFixed(1)}%</td>
+        <td>${it.katTK}</td>
+        <td>${it.dp.toFixed(2)}</td>
+        <td>${it.katDP}</td>
+        <td>${it.rxy.toFixed(3)}</td>
+        <td>${A.rTabel.toFixed(3)}</td>
+        <td><span class="badge ${it.valid === 'Valid' ? 'badge-tuntas' : 'badge-remed'}">${it.valid}</span></td>
+        <td><b>${it.bankSoal}</b></td>
+      </tr>
+    `).join('');
 
-    box.innerHTML = getKopSuratHTML('ANALISIS BUTIR SOAL PILIHAN GANDA (Analisis MC)') + `
+    box.innerHTML = renderReportHeader('ANALISIS BUTIR SOAL PILIHAN GANDA (SHEET: Analisis MC)') + `
       <div class="grid-3" style="margin-bottom:10px;">
-        <div class="stat-box"><div class="num">${A.kr20.toFixed(3)}</div><div class="lbl">Reliabilitas (KR-20)</div></div>
-        <div class="stat-box"><div class="num">${A.rTabel.toFixed(3)}</div><div class="lbl">r Tabel (N=${A.N}, α=5%)</div></div>
-        <div class="stat-box"><div class="num">${A.relStatusPG}</div><div class="lbl">Kesimpulan Tes</div></div>
+        <div class="stat-box"><div class="num">${A.kr20.toFixed(3)}</div><div class="lbl">Reliabilitas Tes (KR-20)</div></div>
+        <div class="stat-box"><div class="num">${A.rTabel.toFixed(3)}</div><div class="lbl">r Tabel (N=${N}, α=5%)</div></div>
+        <div class="stat-box"><div class="num" style="color:${A.relStatusPG === 'Reliabel' ? '#059669' : '#dc2626'}">${A.relStatusPG}</div><div class="lbl">Kesimpulan Reliabilitas</div></div>
       </div>
-      <div class="table-wrap">
-        <table>
-          <thead><tr><th>No</th><th>TK</th><th>Kategori TK</th><th>DP</th><th>Kategori DP</th><th>r hitung</th><th>Validitas</th><th>Bank Soal</th></tr></thead>
-          <tbody>${rows}</tbody>
-        </table>
-      </div>
-    ` + getSignatureHTML();
+      <div class="table-wrap"><table><thead><tr><th>No Soal</th><th>Tingkat Kesukaran</th><th>Kriteria TK</th><th>Daya Pembeda</th><th>Kriteria DP</th><th>r Hitung</th><th>r Tabel</th><th>Validitas</th><th>Bank Soal</th></tr></thead><tbody>${rows}</tbody></table></div>
+    ` + renderReportSignatures();
   }
 
   else if (currentReportTab === 'grafik_mc') {
-    const tkMudah = A.itemsPG.filter(x => x.katTK === 'Mudah').length;
-    const tkSedang = A.itemsPG.filter(x => x.katTK === 'Sedang').length;
-    const tkSukar = A.itemsPG.filter(x => x.katTK === 'Sukar').length;
-    const validCnt = A.itemsPG.filter(x => x.valid === 'Valid').length;
-    const invalidCnt = A.itemsPG.length - validCnt;
-    const bsDiterima = A.itemsPG.filter(x => x.bankSoal === 'Diterima').length;
-    const bsDipertimbangkan = A.itemsPG.filter(x => x.bankSoal === 'Dipertimbangkan').length;
-    const bsDitolak = A.itemsPG.filter(x => x.bankSoal === 'Ditolak').length;
-
-    const soalRows = A.itemsPG.map(x => ({
-      label: `Soal ${x.no} (${x.katTK})`,
-      value: Math.round(x.tk * 100),
-      display: `${Math.round(x.tk * 100)}%`,
-      color: x.valid === 'Valid' ? '#1d4ed8' : '#f59e0b'
-    }));
-
-    const studentTrendRows = state.students.slice(0, 25).map((st, idx) => ({
-      label: st.nama.split(' ')[0],
-      value: Number(A.pgMatrix[idx].nilai.toFixed(1)),
-      display: A.pgMatrix[idx].nilai.toFixed(0),
-      color: A.pgMatrix[idx].tuntas === 'Tuntas' ? '#059669' : '#dc2626'
-    }));
-
-    box.innerHTML = getKopSuratHTML('GRAFIK ANALISIS PILIHAN GANDA 3D (Grafik PG)') + `
-      <div class="grid-2">
-        ${chart3DPie('1. Komposisi Tingkat Kesukaran (Pie 3D)', [
-          { label: 'Mudah (≥ 0.71)', value: tkMudah, color: '#10b981' },
-          { label: 'Sedang (0.31–0.70)', value: tkSedang, color: '#3b82f6' },
-          { label: 'Sukar (≤ 0.30)', value: tkSukar, color: '#ef4444' }
-        ])}
-        ${chart3DPie('2. Rekomendasi Bank Soal PG (Pie 3D)', [
-          { label: 'Diterima Baik', value: bsDiterima, color: '#059669' },
-          { label: 'Dipertimbangkan', value: bsDipertimbangkan, color: '#f59e0b' },
-          { label: 'Ditolak / Dibuang', value: bsDitolak, color: '#dc2626' }
-        ])}
-      </div>
-      ${chart3DColumn('3. Perbandingan Validitas & Daya Pembeda Butir Soal (Batang 3D)', [
-        { label: 'Soal Valid', value: validCnt, display: `${validCnt} Soal`, color: '#1d4ed8' },
-        { label: 'Tidak Valid', value: invalidCnt, display: `${invalidCnt} Soal`, color: '#dc2626' },
-        { label: 'Diterima', value: bsDiterima, display: `${bsDiterima} Soal`, color: '#059669' },
-        { label: 'Revisi', value: bsDipertimbangkan, display: `${bsDipertimbangkan} Soal`, color: '#d97706' }
-      ], Math.max(4, A.itemsPG.length))}
-      ${chart3DAreaLine('4. Profil Sebaran Nilai PG Siswa & Garis Batas KKTP (Area 3D)', studentTrendRows, state.meta.kktp, 100)}
-      ${chart3DHorizontalBars('5. Persentase Siswa Menjawab Benar Tiap Nomor Soal PG (Batang Horizontal 3D)', soalRows, 100)}
-    ` + getSignatureHTML();
+    const gTK = chart3DPie('1. Grafik 3D Sebaran Tingkat Kesukaran Soal PG', [
+      { label: 'Mudah (≥71%)', value: A.itemsPG.filter(x => x.katTK === 'Mudah').length, color: '#059669' },
+      { label: 'Sedang (31–70%)', value: A.itemsPG.filter(x => x.katTK === 'Sedang').length, color: '#1d4ed8' },
+      { label: 'Sukar (≤30%)', value: A.itemsPG.filter(x => x.katTK === 'Sukar').length, color: '#dc2626' }
+    ]);
+    const gVal = chart3DPie('2. Grafik 3D Validitas Butir Soal PG (r Hitung vs r Tabel)', [
+      { label: 'Valid', value: A.itemsPG.filter(x => x.valid === 'Valid').length, color: '#059669' },
+      { label: 'Tidak Valid', value: A.itemsPG.filter(x => x.valid !== 'Valid').length, color: '#dc2626' }
+    ]);
+    const gBank = chart3DPie('3. Grafik 3D Keputusan Bank Soal PG', [
+      { label: 'Diterima', value: A.itemsPG.filter(x => x.bankSoal === 'Diterima').length, color: '#059669' },
+      { label: 'Dipertimbangkan', value: A.itemsPG.filter(x => x.bankSoal === 'Dipertimbangkan').length, color: '#d97706' },
+      { label: 'Ditolak', value: A.itemsPG.filter(x => x.bankSoal === 'Ditolak').length, color: '#dc2626' }
+    ]);
+    const gDP = chart3DColumn('4. Grafik Batang 3D Daya Pembeda Soal PG', [
+      { label: 'Diterima Baik', value: A.itemsPG.filter(x => x.katDP === 'Soal diterima baik').length, color: '#059669' },
+      { label: 'Perlu Diperbaiki', value: A.itemsPG.filter(x => x.katDP === 'Soal diterima tapi perlu diperbaiki').length, color: '#1d4ed8' },
+      { label: 'Diperbaiki', value: A.itemsPG.filter(x => x.katDP === 'Soal diperbaiki').length, color: '#d97706' },
+      { label: 'Dibuang', value: A.itemsPG.filter(x => x.katDP === 'Soal tidak dipakai/dibuang').length, color: '#dc2626' }
+    ], Math.max(1, kPG));
+    const gButir = chart3DHorizontalBars('5. Grafik 3D Persentase Menjawab Benar per Nomor Soal PG', A.itemsPG.map(it => ({
+      label: `Soal PG No. ${it.no}`,
+      value: Math.round(it.tk * 100),
+      display: `${Math.round(it.tk * 100)}% (${it.katTK})`,
+      color: it.tk >= 0.71 ? '#059669' : (it.tk >= 0.31 ? '#1d4ed8' : '#dc2626')
+    })), 100);
+    box.innerHTML = renderReportHeader('GRAFIK 3D ANALISIS PILIHAN GANDA (SHEET: Grafik MC)') +
+      `<div class="grid-2">${gTK}${gVal}${gBank}${gDP}</div>${gButir}` + renderReportSignatures();
   }
 
   else if (currentReportTab === 'grafik_bs') {
     if (!A.kBS) {
-      box.innerHTML = getKopSuratHTML('GRAFIK ANALISIS BENAR - SALAH 3D') + `<p>Belum ada soal Benar-Salah (jumlah soal B-S = 0).</p>` + getSignatureHTML();
+      box.innerHTML = renderReportHeader('GRAFIK 3D ANALISIS BENAR-SALAH') + `<p>Tidak ada soal Benar-Salah pada konfigurasi ujian ini.</p>`;
       return;
     }
-    const totBenar = A.itemsBS.reduce((a, b) => a + b.benar, 0);
-    const totSalah = A.itemsBS.reduce((a, b) => a + b.salah, 0);
-    const totKosong = A.itemsBS.reduce((a, b) => a + b.kosong, 0);
-    const totGanda = A.itemsBS.reduce((a, b) => a + b.ganda, 0);
-    const totBelumDinilai = A.itemsBS.reduce((a, b) => a + b.belumDinilai, 0);
-    const keyMissing = A.itemsBS.some(x => !x.keyReady);
-    const bsBarRows = A.itemsBS.map(x => ({
-      label: `Soal No.${x.no}`,
-      value: x.keyReady ? Math.round(x.tk * 100) : 0,
-      display: x.keyReady ? `${x.benar}/${A.N} (${Math.round(x.tk * 100)}%)` : 'Kunci belum diisi',
-      color: x.keyReady ? '#0284c7' : '#94a3b8'
-    }));
-
-    box.innerHTML = getKopSuratHTML('GRAFIK ANALISIS BENAR - SALAH 3D') +
-      (keyMissing ? `<div style="background:#fef3c7;border:1px solid #f59e0b;color:#92400e;padding:8px 10px;border-radius:8px;font-size:0.8rem;margin-bottom:10px;">⚠️ Sebagian kunci Benar-Salah (B/S) belum diisi pada tab <b>Data & Kunci</b>, sehingga butir tersebut belum dihitung sebagai jawaban benar.</div>` : '') +
-      `<div class="grid-2">
-        ${chart3DPie('1. Proporsi Respons Jawaban Benar-Salah (Pie 3D)', [
-          { label: 'Jawaban Benar', value: totBenar, color: '#059669' },
-          { label: 'Jawaban Salah', value: totSalah, color: '#dc2626' },
-          { label: 'Kosong (V)', value: totKosong, color: '#f59e0b' },
-          { label: 'Ganda / Semua (X)', value: totGanda, color: '#7c3aed' },
-          ...(totBelumDinilai ? [{ label: 'Kunci Belum Diisi', value: totBelumDinilai, color: '#64748b' }] : [])
-        ])}
-        ${chart3DColumn('2. Rekap Total Respons Butir B-S (Batang 3D)', [
-          { label: 'Benar', value: totBenar, color: '#059669' },
-          { label: 'Salah', value: totSalah, color: '#dc2626' },
-          { label: 'Kosong (V)', value: totKosong, color: '#f59e0b' },
-          { label: 'Ganda (X)', value: totGanda, color: '#7c3aed' }
-        ], Math.max(1, A.N * A.kBS))}
-      </div>
-      ${chart3DHorizontalBars('3. Persentase Ketuntasan Tiap Butir Soal Benar-Salah (Batang Horizontal 3D)', bsBarRows, 100)}
-    ` + getSignatureHTML();
+    const totB = A.itemsBS.reduce((a, x) => a + x.benar, 0);
+    const totS = A.itemsBS.reduce((a, x) => a + x.salah, 0);
+    const totV = A.itemsBS.reduce((a, x) => a + x.kosong, 0);
+    const totX = A.itemsBS.reduce((a, x) => a + x.ganda, 0);
+    const totU = A.itemsBS.reduce((a, x) => a + x.belumDinilai, 0);
+    const keyMissing = A.itemsBS.filter(x => !x.keyReady).length;
+    const warnBanner = keyMissing ? `<div style="background:#fef3c7;color:#92400e;border:1px solid #f59e0b;border-radius:8px;padding:8px 10px;font-size:0.8rem;margin-bottom:10px;">⚠️ ${keyMissing} nomor soal B-S belum memiliki kunci B/S pada tab Data & Kunci sehingga belum dapat dinilai benar/salah.</div>` : '';
+    const gDist = chart3DPie('1. Grafik 3D Distribusi Respons Jawaban Benar-Salah', [
+      { label: 'Benar', value: totB, color: '#059669' },
+      { label: 'Salah', value: totS, color: '#dc2626' },
+      { label: 'Belum Ada Kunci', value: totU, color: '#64748b' },
+      { label: 'Kosong (V)', value: totV, color: '#d97706' },
+      { label: 'Semua/Ganda (X)', value: totX, color: '#7c3aed' }
+    ]);
+    const gPerSoal = chart3DHorizontalBars('2. Grafik 3D Capaian Menjawab Benar per Nomor Soal B-S', A.itemsBS.map(it => ({
+      label: `B-S No. ${it.no}`,
+      value: Math.round(it.tk * 100),
+      display: it.keyReady ? `${Math.round(it.tk * 100)}% (${it.benar}/${A.N})` : 'Belum ada kunci B/S',
+      color: !it.keyReady ? '#64748b' : (it.tk >= 0.71 ? '#059669' : (it.tk >= 0.31 ? '#1d4ed8' : '#dc2626'))
+    })), 100);
+    const gSiswa = chart3DAreaLine('3. Grafik 3D Tren Nilai Benar-Salah Siswa vs KKTP', state.students.map((st, i) => ({
+      label: `${i + 1}. ${st.nama}`,
+      value: A.bsMatrix[i].nilai
+    })), A.kktp);
+    box.innerHTML = renderReportHeader('GRAFIK 3D ANALISIS BENAR - SALAH') + warnBanner + `<div class="grid-2">${gDist}${gSiswa}</div>${gPerSoal}` + renderReportSignatures();
   }
 
   else if (currentReportTab === 'grafik_ur') {
-    if (!A.kUR) {
-      box.innerHTML = getKopSuratHTML('GRAFIK ANALISIS URAIAN 3D') + `<p>Belum ada soal Uraian (jumlah soal Uraian = 0).</p>` + getSignatureHTML();
+    if (!kUR) {
+      box.innerHTML = renderReportHeader('GRAFIK 3D ANALISIS URAIAN') + `<p>Tidak ada soal Uraian pada konfigurasi ujian ini.</p>`;
       return;
     }
-    const validUR = A.itemsUR.filter(x => x.valid === 'Valid').length;
-    const invUR = A.itemsUR.length - validUR;
-    const urRows = A.itemsUR.map(x => ({
-      label: `Uraian No.${x.no}`,
-      value: Math.round(x.tk * 100),
-      display: `${Math.round(x.tk * 100)}% (${x.katTK})`,
-      color: x.valid === 'Valid' ? '#7c3aed' : '#d97706'
-    }));
-
-    const urStudentTrend = state.students.slice(0, 25).map((st, idx) => ({
-      label: st.nama.split(' ')[0],
-      value: Number(A.urMatrix[idx].nilai.toFixed(1)),
-      display: A.urMatrix[idx].nilai.toFixed(0),
-      color: A.urMatrix[idx].tuntas === 'Tuntas' ? '#7c3aed' : '#dc2626'
-    }));
-
-    box.innerHTML = getKopSuratHTML('GRAFIK ANALISIS SOAL URAIAN 3D') + `
-      <div class="grid-2">
-        ${chart3DPie('1. Komposisi Validitas Butir Uraian (Pie 3D)', [
-          { label: 'Butir Valid', value: validUR, color: '#7c3aed' },
-          { label: 'Tidak Valid', value: invUR, color: '#dc2626' }
-        ])}
-        ${chart3DColumn('2. Tingkat Penguasaan Tiap Nomor Uraian (Batang 3D)', urRows, 100)}
-      </div>
-      ${chart3DAreaLine('3. Tren Nilai Uraian Peserta Didik & Batas KKTP (Area 3D)', urStudentTrend, state.meta.kktp, 100)}
-      ${chart3DHorizontalBars('4. Detail Daya Serap Tiap Nomor Soal Uraian (Batang Horizontal 3D)', urRows, 100)}
-    ` + getSignatureHTML();
+    const gTK = chart3DPie('1. Grafik 3D Sebaran Tingkat Kesukaran Soal Uraian', [
+      { label: 'Mudah (≥71%)', value: A.itemsUR.filter(x => x.katTK === 'Mudah').length, color: '#059669' },
+      { label: 'Sedang (31–70%)', value: A.itemsUR.filter(x => x.katTK === 'Sedang').length, color: '#1d4ed8' },
+      { label: 'Sukar (≤30%)', value: A.itemsUR.filter(x => x.katTK === 'Sukar').length, color: '#dc2626' }
+    ]);
+    const gVal = chart3DPie('2. Grafik 3D Validitas Butir Soal Uraian', [
+      { label: 'Valid', value: A.itemsUR.filter(x => x.valid === 'Valid').length, color: '#059669' },
+      { label: 'Tidak Valid', value: A.itemsUR.filter(x => x.valid !== 'Valid').length, color: '#dc2626' }
+    ]);
+    const gButir = chart3DColumn('3. Grafik Batang 3D Tingkat Penguasaan per Soal Uraian (%)', A.itemsUR.map(it => ({
+      label: `Soal ${it.no}`,
+      value: Math.round(it.tk * 100),
+      display: `${Math.round(it.tk * 100)}%`,
+      color: it.tk >= 0.71 ? '#059669' : (it.tk >= 0.31 ? '#1d4ed8' : '#dc2626')
+    })), 100);
+    const gSiswa = chart3DAreaLine('4. Grafik 3D Tren Nilai Uraian Siswa vs KKTP', state.students.map((st, i) => ({
+      label: `${i + 1}. ${st.nama}`,
+      value: A.urMatrix[i].nilai
+    })), A.kktp);
+    box.innerHTML = renderReportHeader('GRAFIK 3D ANALISIS SOAL URAIAN (SHEET: Grafik UR)') +
+      `<div class="grid-2">${gTK}${gVal}</div>${gButir}${gSiswa}` + renderReportSignatures();
   }
 
   else if (currentReportTab === 'nilai_ur') {
-    let thNo = '';
-    for (let j = 0; j < A.kUR; j++) {
-      const noU = A.kPG + A.kBS + j + 1;
-      thNo += `<th>No.${noU}<br><small>(Max ${state.config.maxUR[j] || 4})</small></th>`;
-    }
-    let rows = state.students.map((st, i) => {
+    if (kUR === 0) { box.innerHTML = '<p>Tidak ada soal Uraian.</p>'; return; }
+    const hdrU = Array.from({ length: kUR }, (_, j) => `<th>No.${kPG + (A.kBS || 0) + j + 1} (Max ${state.config.maxUR[j]})</th>`).join('');
+    const rows = state.students.map((st, i) => {
       const u = A.urMatrix[i];
-      const tds = u.row.map(v => `<td>${v}</td>`).join('');
-      return `<tr>
-        <td>${i + 1}</td>
-        <td style="font-family:monospace;">${escapeAttr(st.nis || '-')}</td>
-        <td><b>${escapeAttr(st.nama)}</b></td>
-        ${tds}
-        <td><b>${u.skor}</b></td>
-        <td><b>${u.nilai.toFixed(1)}</b></td>
-        <td><span class="badge ${u.tuntas === 'Tuntas' ? 'badge-tuntas' : 'badge-remed'}">${u.tuntas}</span></td>
-      </tr>`;
+      const cells = u.row.map(v => `<td style="text-align:center;">${v}</td>`).join('');
+      return `<tr><td>${i + 1}</td><td style="font-family:monospace;">${escapeAttr(st.nis || '-')}</td><td><b>${escapeAttr(st.nama)}</b></td>${cells}<td><b>${u.skor}</b></td><td><b>${u.nilai.toFixed(1)}</b></td><td><span class="badge ${u.tuntas === 'Tuntas' ? 'badge-tuntas' : 'badge-remed'}">${u.tuntas}</span></td></tr>`;
     }).join('');
-
-    box.innerHTML = getKopSuratHTML('DAFTAR NILAI SOAL URAIAN (NILAI UR)') + `
-      <div class="table-wrap">
-        <table>
-          <thead><tr><th>No</th><th>${idLabel}</th><th>Nama Siswa</th>${thNo}<th>Skor</th><th>Nilai</th><th>Keterangan</th></tr></thead>
-          <tbody>${rows}</tbody>
-        </table>
-      </div>
-    ` + getSignatureHTML();
+    box.innerHTML = renderReportHeader('DAFTAR NILAI URAIAN (SHEET: NILAI UR)') +
+      `<div class="table-wrap"><table><thead><tr><th>No</th><th>${idColTitle}</th><th>Nama Siswa</th>${hdrU}<th>Skor</th><th>Nilai</th><th>Ket</th></tr></thead><tbody>${rows}</tbody></table></div>` +
+      renderReportSignatures();
   }
 
   else if (currentReportTab === 'analisis_ur') {
-    let rows = A.itemsUR.map(it => `<tr>
-      <td>${it.no}</td>
-      <td>${it.tk.toFixed(2)}</td>
-      <td>${it.katTK}</td>
-      <td>${it.dp.toFixed(2)}</td>
-      <td>${it.katDP}</td>
-      <td>${it.rxy.toFixed(2)}</td>
-      <td><span class="badge ${it.valid === 'Valid' ? 'badge-tuntas' : 'badge-remed'}">${it.valid}</span></td>
-      <td><span class="badge ${it.bankSoal === 'Diterima' ? 'badge-tuntas' : (it.bankSoal === 'Dipertimbangkan' ? 'badge-warn' : 'badge-remed')}">${it.bankSoal}</span></td>
-    </tr>`).join('');
-
-    box.innerHTML = getKopSuratHTML('ANALISIS BUTIR SOAL URAIAN (Analisis UR)') + `
+    if (kUR === 0) { box.innerHTML = '<p>Tidak ada soal Uraian.</p>'; return; }
+    const rows = A.itemsUR.map(it => `
+      <tr>
+        <td><b>${it.no}</b></td>
+        <td>${(it.tk * 100).toFixed(1)}%</td>
+        <td>${it.katTK}</td>
+        <td>${it.dp.toFixed(2)}</td>
+        <td>${it.katDP}</td>
+        <td>${it.rxy.toFixed(3)}</td>
+        <td>${A.rTabel.toFixed(3)}</td>
+        <td><span class="badge ${it.valid === 'Valid' ? 'badge-tuntas' : 'badge-remed'}">${it.valid}</span></td>
+        <td><b>${it.bankSoal}</b></td>
+      </tr>
+    `).join('');
+    box.innerHTML = renderReportHeader('ANALISIS BUTIR SOAL URAIAN (SHEET: Analisis UR)') + `
       <div class="grid-3" style="margin-bottom:10px;">
-        <div class="stat-box"><div class="num">${A.cronbachUR.toFixed(3)}</div><div class="lbl">Cronbach's Alpha</div></div>
-        <div class="stat-box"><div class="num">${A.rTabel.toFixed(3)}</div><div class="lbl">r Tabel (N=${A.N}, α=5%)</div></div>
-        <div class="stat-box"><div class="num">${A.relStatusUR}</div><div class="lbl">Kesimpulan Tes</div></div>
+        <div class="stat-box"><div class="num">${A.cronbachUR.toFixed(3)}</div><div class="lbl">Reliabilitas Cronbach Alpha</div></div>
+        <div class="stat-box"><div class="num">${A.rTabel.toFixed(3)}</div><div class="lbl">r Tabel (N=${N})</div></div>
+        <div class="stat-box"><div class="num" style="color:${A.relStatusUR === 'Reliabel' ? '#059669' : '#dc2626'}">${A.relStatusUR}</div><div class="lbl">Kesimpulan</div></div>
       </div>
-      <div class="table-wrap">
-        <table>
-          <thead><tr><th>No</th><th>TK</th><th>Kategori TK</th><th>DP</th><th>Kategori DP</th><th>r hitung</th><th>Validitas</th><th>Bank Soal</th></tr></thead>
-          <tbody>${rows}</tbody>
-        </table>
-      </div>
-    ` + getSignatureHTML();
+      <div class="table-wrap"><table><thead><tr><th>No Soal</th><th>TK</th><th>Kriteria TK</th><th>DP</th><th>Kriteria DP</th><th>r Hitung</th><th>r Tabel</th><th>Validitas</th><th>Bank Soal</th></tr></thead><tbody>${rows}</tbody></table></div>
+    ` + renderReportSignatures();
   }
 
   else if (currentReportTab === 'nil_gab') {
-    let rows = state.students.map((st, i) => {
-      const g = A.gabungan[i];
-      return `<tr>
-        <td>${i + 1}</td>
-        <td style="font-family:monospace;">${escapeAttr(st.nis || '-')}</td>
-        <td><b>${escapeAttr(st.nama)}</b></td>
-        <td>${g.nPG.toFixed(1)}</td>
-        <td>${g.nUR.toFixed(1)}</td>
-        <td><b>${g.nGab.toFixed(1)}</b></td>
-        <td><span class="badge ${g.ketGab === 'Tuntas' ? 'badge-tuntas' : 'badge-remed'}">${g.ketGab}</span></td>
-        <td><input type="number" placeholder="-" value="${st.remedial !== null ? st.remedial : ''}"
-          oninput="state.students[${i}].remedial=this.value===''?null:parseFloat(this.value); persistNow();"
-          onchange="saveState();" style="width:65px; padding:3px 5px;" /></td>
-        <td><b>${g.nAkhir.toFixed(1)}</b></td>
-        <td><span class="badge ${g.ketAkhir === 'Tuntas' ? 'badge-tuntas' : 'badge-remed'}">${g.ketAkhir}</span></td>
-      </tr>`;
-    }).join('');
+    const tuntasAkhir = A.gabungan.filter(g => g.ketAkhir === 'Tuntas').length;
+    const meanAkhir = N > 0 ? A.gabungan.reduce((s, g) => s + g.nAkhir, 0) / N : 0;
+    const gTrenAkhir = chart3DAreaLine('Grafik 3D Sebaran Nilai Akhir Siswa vs KKTP', state.students.map((st, i) => ({
+      label: `${i + 1}. ${st.nama}`,
+      value: A.gabungan[i].nAkhir
+    })), A.kktp);
+    const gTuntasPie = chart3DPie('Proporsi Ketuntasan Akhir Kelas', [
+      { label: 'Tuntas', value: tuntasAkhir, color: '#059669' },
+      { label: 'Remedial', value: N - tuntasAkhir, color: '#dc2626' }
+    ]);
 
-    box.innerHTML = getKopSuratHTML('DAFTAR NILAI GABUNGAN & REMEDIAL (Nil Gab)') + `
-      <p style="font-size:0.78rem; color:var(--muted);">Bobot PG/Objektif: <b>${Math.round(state.config.bobotPG * 100)}%</b> | Bobot Uraian: <b>${Math.round(state.config.bobotUR * 100)}%</b>. Isi kolom <b>Nilai Remedial</b> untuk menghitung Nilai Akhir otomatis.</p>
-      <div class="table-wrap">
-        <table>
-          <thead><tr><th>No</th><th>${idLabel}</th><th>Nama Siswa</th><th>Nilai Obj</th><th>Nilai UR</th><th>Nilai Gab</th><th>Ket Awal</th><th>Nilai Remed</th><th>Nilai Akhir</th><th>Ket Akhir</th></tr></thead>
-          <tbody>${rows}</tbody>
-        </table>
+    const rows = state.students.map((st, i) => {
+      const g = A.gabungan[i];
+      return `
+        <tr>
+          <td>${i + 1}</td>
+          <td style="font-family:monospace;">${escapeAttr(st.nis || '-')}</td>
+          <td><b>${escapeAttr(st.nama)}</b></td>
+          <td>${g.nPG.toFixed(1)}</td>
+          <td>${g.nUR.toFixed(1)}</td>
+          <td><b>${g.nGab.toFixed(1)}</b></td>
+          <td><span class="badge ${g.ketGab === 'Tuntas' ? 'badge-tuntas' : 'badge-remed'}">${g.ketGab}</span></td>
+          <td><input type="number" value="${g.nRem !== null ? g.nRem : ''}" placeholder="-"
+            oninput="state.students[${i}].remedial=this.value===''?null:parseFloat(this.value); persistNow();"
+            onchange="saveState();" style="width:65px; padding:3px 6px;" /></td>
+          <td><b>${g.nAkhir.toFixed(1)}</b></td>
+          <td><span class="badge ${g.ketAkhir === 'Tuntas' ? 'badge-tuntas' : 'badge-remed'}">${g.ketAkhir}</span></td>
+        </tr>
+      `;
+    }).join('');
+    box.innerHTML = renderReportHeader('DAFTAR NILAI GABUNGAN & NILAI AKHIR (SHEET: Nil Gab)') + `
+      <div class="grid-3" style="margin-bottom:10px;">
+        <div class="stat-box"><div class="num">${meanAkhir.toFixed(1)}</div><div class="lbl">Rata-Rata Nilai Akhir</div></div>
+        <div class="stat-box"><div class="num" style="color:#059669">${tuntasAkhir} / ${N}</div><div class="lbl">Ketuntasan Akhir (${N ? Math.round(tuntasAkhir / N * 100) : 0}%)</div></div>
+        <div class="stat-box"><div class="num">${Math.round((kUR === 0 ? 1 : state.config.bobotPG) * 100)}% : ${Math.round((kUR === 0 ? 0 : state.config.bobotUR) * 100)}%</div><div class="lbl">Bobot PG : Uraian</div></div>
       </div>
-    ` + getSignatureHTML();
+      <div class="grid-2">${gTuntasPie}${gTrenAkhir}</div>
+      <div class="table-wrap"><table><thead><tr><th>No</th><th>${idColTitle}</th><th>Nama Siswa</th><th>Nilai PG</th><th>Nilai UR</th><th>Nil Gab</th><th>Ket Awal</th><th>Nilai Remed</th><th>Nilai Akhir</th><th>Ket Akhir</th></tr></thead><tbody>${rows}</tbody></table></div>
+    ` + renderReportSignatures();
   }
 
   else if (currentReportTab === 'remed') {
-    const selOptions = state.students.map((s, idx) => `<option value="${idx}" ${idx === selectedRemedStudent ? 'selected' : ''}>${idx + 1}. ${s.nama}</option>`).join('');
-    const st = state.students[selectedRemedStudent] || state.students[0];
-    const g = A.gabungan[selectedRemedStudent] || { nGab: 0 };
-    const pRow = A.pgMatrix[selectedRemedStudent] ? A.pgMatrix[selectedRemedStudent].row : [];
-    const uRow = A.urMatrix[selectedRemedStudent] ? A.urMatrix[selectedRemedStudent].row : [];
+    const remedList = state.students.map((st, idx) => ({ st, idx, g: A.gabungan[idx] })).filter(x => x.g.ketGab === 'Remedial');
+    const options = state.students.map((st, idx) => `<option value="${idx}" ${idx === selectedRemedStudent ? 'selected' : ''}>${idx + 1}. [${st.nis || '-'}] ${st.nama} (Nil Gab: ${A.gabungan[idx].nGab.toFixed(1)})</option>`).join('');
+    const target = state.students[selectedRemedStudent] || state.students[0];
+    const tIdx = state.students.indexOf(target);
+    const pRow = A.pgMatrix[tIdx].row;
+    const salahNo = [];
+    pRow.forEach((v, q) => { if (v === 0) salahNo.push(q + 1); });
 
-    let remedRows = '';
-    for (let j = 0; j < A.kPG; j++) {
-      if (pRow[j] === 0) {
-        remedRows += `<tr><td>PG No. ${j + 1}</td><td>Skor 0 / 1 (Salah / Kosong / Ganda)</td><td>Mengulang soal PG nomor ${j + 1}</td></tr>`;
-      }
-    }
-    for (let j = 0; j < A.kUR; j++) {
-      const noU = A.kPG + A.kBS + j + 1;
-      const maxS = state.config.maxUR[j] || 4;
-      if ((uRow[j] || 0) < maxS) {
-        remedRows += `<tr><td>Uraian No. ${noU}</td><td>Skor ${uRow[j] || 0} / ${maxS}</td><td>Memperbaiki jawaban soal Uraian nomor ${noU}</td></tr>`;
-      }
-    }
-    if (!remedRows) {
-      remedRows = `<tr><td colspan="3" style="text-align:center;color:#166534;"><b>Semua butir soal sudah tuntas sempurna!</b></td></tr>`;
-    }
-
-    box.innerHTML = getKopSuratHTML('PROGRAM REMEDIAL INDIVIDU SISWA (Sheet: Remed)') + `
-      <div style="margin-bottom:10px;">
-        <label>Pilih Nama Siswa:</label>
-        <select onchange="selectedRemedStudent=parseInt(this.value); renderReport();">${selOptions}</select>
+    box.innerHTML = renderReportHeader('PROGRAM REMEDIAL & PENGAYAAN INDIVIDU (SHEET: Remed)') + `
+      <div style="margin-bottom:12px;">
+        <label>Pilih Siswa untuk Cetak Slip Analisis Remedial:</label>
+        <select onchange="selectedRemedStudent=parseInt(this.value); renderReport();">${options}</select>
       </div>
-      <div style="background:#f8fafc; padding:10px; border-radius:8px; border:1px solid #e2e8f0; margin-bottom:10px; font-size:0.82rem;">
-        Nama Peserta Didik: <b>${st ? st.nama : '-'}</b> (${idLabel}: <b>${st ? (st.nis || '-') : '-'}</b>) &nbsp;|&nbsp;
-        Nilai Awal: <b>${g.nGab.toFixed(1)}</b> &nbsp;|&nbsp; KKTP: <b>${state.meta.kktp}</b>
+      <div style="border:1px solid #cbd5e1; border-radius:10px; padding:12px; background:#f8fafc;">
+        <p style="margin:4px 0;"><b>Nama Siswa:</b> ${target.nama} (${idColTitle}: ${target.nis || '-'})</p>
+        <p style="margin:4px 0;"><b>Nilai PG / Uraian / Gabungan:</b> ${A.gabungan[tIdx].nPG.toFixed(1)} / ${A.gabungan[tIdx].nUR.toFixed(1)} / <b>${A.gabungan[tIdx].nGab.toFixed(1)}</b> (KKTP: ${A.kktp})</p>
+        <p style="margin:4px 0;"><b>Status Pembelajaran:</b> <span class="badge ${A.gabungan[tIdx].ketGab === 'Tuntas' ? 'badge-tuntas' : 'badge-remed'}">${A.gabungan[tIdx].ketGab === 'Tuntas' ? 'PENGAYAAN (TUNTAS)' : 'WAJIB REMEDIAL'}</span></p>
+        <p style="margin:4px 0; color:#dc2626;"><b>Nomor Soal PG yang Belum Dikuasai (Salah):</b> ${salahNo.length > 0 ? salahNo.join(', ') : 'Tidak ada (Semua Benar)'}</p>
+        <p style="margin:8px 0 0 0; font-size:0.8rem; color:#475569;">Total Siswa Remedial di Kelas Ini: <b>${remedList.length} siswa</b> (${remedList.map(r => r.st.nama).join(', ') || 'Nihil'})</p>
       </div>
-      <div class="table-wrap">
-        <table>
-          <thead><tr><th>Nomor Soal</th><th>Capaian Siswa</th><th>Bentuk Tugas / Pelaksanaan Remedial</th></tr></thead>
-          <tbody>${remedRows}</tbody>
-        </table>
-      </div>
-    ` + getSignatureHTML();
+    ` + renderReportSignatures();
   }
 
   else if (currentReportTab === 'perbaikan') {
-    const soalDibuang = [...A.itemsPG, ...A.itemsUR].filter(it => it.bankSoal === 'Ditolak');
-    const soalRevisi = [...A.itemsPG, ...A.itemsUR].filter(it => it.bankSoal === 'Dipertimbangkan');
-    const siswaRemed = state.students.map((s, i) => ({ s, g: A.gabungan[i] })).filter(x => x.g.ketGab === 'Remedial');
+    const buangPG = A.itemsPG.filter(it => it.bankSoal === 'Ditolak' || it.katDP.includes('dibuang'));
+    const revisiPG = A.itemsPG.filter(it => it.bankSoal === 'Dipertimbangkan');
+    const baikPG = A.itemsPG.filter(it => it.bankSoal === 'Diterima');
 
-    box.innerHTML = getKopSuratHTML('LAPORAN TINDAK LANJUT & PERBAIKAN (Sheet: Perbaikan)') + `
-      <div class="grid-2">
-        <div class="stat-box">
-          <div class="num">${siswaRemed.length} Siswa</div>
-          <div class="lbl">Peserta Perlu Remedial (Nilai < ${state.meta.kktp})</div>
-        </div>
-        <div class="stat-box">
-          <div class="num">${A.N - siswaRemed.length} Siswa</div>
-          <div class="lbl">Peserta Pengayaan (Nilai ≥ ${state.meta.kktp})</div>
-        </div>
+    box.innerHTML = renderReportHeader('REKOMENDASI PERBAIKAN BUTIR SOAL (SHEET: Perbaikan)') + `
+      <div class="grid-3" style="margin-bottom:12px;">
+        <div class="stat-box"><div class="num" style="color:#059669">${baikPG.length}</div><div class="lbl">Soal PG Diterima Baik</div></div>
+        <div class="stat-box"><div class="num" style="color:#d97706">${revisiPG.length}</div><div class="lbl">Soal PG Perlu Revisi</div></div>
+        <div class="stat-box"><div class="num" style="color:#dc2626">${buangPG.length}</div><div class="lbl">Soal PG Ditolak / Diganti</div></div>
       </div>
-      <h3 style="margin:12px 0 6px 0; font-size:0.9rem;">A. Tindak Lanjut Butir Soal (Bank Soal)</h3>
-      <ul style="font-size:0.82rem; padding-left:18px; line-height:1.5;">
-        <li><b>Soal Ditolak / Harus Diganti (${soalDibuang.length} soal):</b> ${soalDibuang.map(x => 'No.' + x.no).join(', ') || 'Tidak ada'}</li>
-        <li><b>Soal Perlu Revisi Redaksi / Pengecoh (${soalRevisi.length} soal):</b> ${soalRevisi.map(x => 'No.' + x.no).join(', ') || 'Tidak ada'}</li>
-      </ul>
-      <h3 style="margin:12px 0 6px 0; font-size:0.9rem;">B. Daftar Peserta Remedial Klasikal / Kelompok</h3>
       <div class="table-wrap">
         <table>
-          <thead><tr><th>No</th><th>${idLabel}</th><th>Nama Siswa</th><th>Nilai Awal</th><th>Tindak Lanjut</th></tr></thead>
+          <thead><tr><th>Kategori Keputusan</th><th>Nomor Soal PG</th><th>Tindak Lanjut Guru</th></tr></thead>
           <tbody>
-            ${siswaRemed.map((x, idx) => `<tr><td>${idx + 1}</td><td style="font-family:monospace;">${escapeAttr(x.s.nis || '-')}</td><td><b>${escapeAttr(x.s.nama)}</b></td><td>${x.g.nGab.toFixed(1)}</td><td>Bimbingan ulang & tes perbaikan</td></tr>`).join('') || '<tr><td colspan="5" style="text-align:center;">Seluruh siswa telah mencapai KKTP!</td></tr>'}
+            <tr><td><span class="badge badge-tuntas">Diterima Bank Soal</span></td><td>${baikPG.map(x => x.no).join(', ') || '-'}</td><td>Simpan ke Bank Soal Sekolah</td></tr>
+            <tr><td><span class="badge badge-warn">Dipertimbangkan / Revisi</span></td><td>${revisiPG.map(x => x.no).join(', ') || '-'}</td><td>Perbaiki redaksi soal & pengecoh opsi</td></tr>
+            <tr><td><span class="badge badge-remed">Ditolak / Dibuang</span></td><td>${buangPG.map(x => x.no).join(', ') || '-'}</td><td>Ganti dengan butir soal baru sesuai kisi-kisi</td></tr>
           </tbody>
         </table>
       </div>
-    ` + getSignatureHTML();
+    ` + renderReportSignatures();
   }
 
   else if (currentReportTab === 'leger_mapel') {
-    renderLegerMapelReport(box, idLabel);
+    const curKelas = (state.meta.kelas || '').trim();
+    const classSessions = workspace.sessions.filter(s => (s.meta.kelas || '').trim() === curKelas);
+    const analyticsBySes = classSessions.map(s => ({
+      ses: s,
+      ana: computeAllAnalyticsForSession(s)
+    }));
+
+    const studentMap = new Map();
+    analyticsBySes.forEach(({ ses, ana }) => {
+      ses.students.forEach((st, idx) => {
+        const key = `${(st.nis || '').trim()}|${(st.nama || '').trim().toUpperCase()}`;
+        if (!studentMap.has(key)) {
+          studentMap.set(key, { nis: st.nis || '-', nama: st.nama, scores: {} });
+        }
+        studentMap.get(key).scores[ses.id] = ana.gabungan[idx] ? ana.gabungan[idx].nAkhir : null;
+      });
+    });
+
+    const roster = Array.from(studentMap.values());
+    const mapelHeaders = classSessions.map(s => `<th>${escapeAttr(s.meta.mapel)}</th>`).join('');
+    const rows = roster.map((r, i) => {
+      let sum = 0, cnt = 0;
+      const cells = classSessions.map(s => {
+        const val = r.scores[s.id];
+        if (val !== null && val !== undefined) {
+          sum += val;
+          cnt++;
+          const kktpMapel = s.meta.kktp || 70;
+          const isOk = val >= (kktpMapel - 0.5);
+          return `<td style="text-align:center; color:${isOk ? '#166534' : '#dc2626'}; font-weight:700;">${val.toFixed(1)}</td>`;
+        }
+        return `<td style="text-align:center; color:#94a3b8;">-</td>`;
+      }).join('');
+      const avg = cnt > 0 ? (sum / cnt).toFixed(1) : '-';
+      return `<tr><td>${i + 1}</td><td style="font-family:monospace;">${escapeAttr(r.nis)}</td><td><b>${escapeAttr(r.nama)}</b></td>${cells}<td style="text-align:center;"><b>${sum.toFixed(1)}</b></td><td style="text-align:center;"><b>${avg}</b></td></tr>`;
+    }).join('');
+
+    const gMapelAvg = chart3DColumn(`Grafik Batang 3D Rata-Rata Nilai Antar Mata Pelajaran (${curKelas})`, analyticsBySes.map(({ ses, ana }) => {
+      const avg = ana.N > 0 ? ana.gabungan.reduce((a, g) => a + g.nAkhir, 0) / ana.N : 0;
+      return {
+        label: ses.meta.mapel,
+        value: Number(avg.toFixed(1)),
+        display: avg.toFixed(1),
+        color: avg >= (ses.meta.kktp || 70) ? '#059669' : '#d97706'
+      };
+    }), 100);
+
+    box.innerHTML = renderReportHeader(`LEGER NILAI LINTAS MATA PELAJARAN — ${curKelas.toUpperCase()}`) +
+      `<p style="font-size:0.8rem; color:var(--muted); margin-top:0;">Menampilkan rekapitulasi Nilai Akhir seluruh mata pelajaran yang tersimpan pada kelas <b>${escapeAttr(curKelas)}</b> (${classSessions.length} Mata Pelajaran).</p>` +
+      gMapelAvg +
+      `<div class="table-wrap"><table><thead><tr><th>No</th><th>${idColTitle}</th><th>Nama Siswa</th>${mapelHeaders}<th>Jumlah</th><th>Rata-rata</th></tr></thead><tbody>${rows}</tbody></table></div>` +
+      renderReportSignatures();
   }
 
   else if (currentReportTab === 'rekap_kelas') {
-    renderRekapAntarKelasReport(box);
+    const summaryRows = workspace.sessions.map((s, idx) => {
+      const ana = computeAllAnalyticsForSession(s);
+      const meanAkhir = ana.N > 0 ? ana.gabungan.reduce((a, g) => a + g.nAkhir, 0) / ana.N : 0;
+      const tuntas = ana.gabungan.filter(g => g.ketAkhir === 'Tuntas').length;
+      const pctTuntas = ana.N > 0 ? Math.round((tuntas / ana.N) * 100) : 0;
+      return { idx, s, ana, meanAkhir, tuntas, pctTuntas };
+    });
+
+    const tableRows = summaryRows.map(r => `
+      <tr>
+        <td>${r.idx + 1}</td>
+        <td><b>${escapeAttr(r.s.meta.kelas)}</b></td>
+        <td><b>${escapeAttr(r.s.meta.mapel)}</b></td>
+        <td>${escapeAttr(r.s.meta.guru)}</td>
+        <td style="text-align:center;">${r.ana.N}</td>
+        <td style="text-align:center;">${r.s.meta.kktp}</td>
+        <td style="text-align:center;"><b>${r.meanAkhir.toFixed(1)}</b></td>
+        <td style="text-align:center;"><span class="badge ${r.pctTuntas >= 75 ? 'badge-tuntas' : 'badge-warn'}">${r.tuntas}/${r.ana.N} (${r.pctTuntas}%)</span></td>
+        <td><button class="btn btn-primary btn-xs" onclick="switchActiveSession('${r.s.id}')">Buka Sesi</button></td>
+      </tr>
+    `).join('');
+
+    const gRekap = chart3DColumn('Grafik Batang 3D Perbandingan Rata-Rata Nilai Semua Kelas & Mapel', summaryRows.map(r => ({
+      label: `${r.s.meta.kelas} - ${r.s.meta.mapel}`,
+      value: Number(r.meanAkhir.toFixed(1)),
+      display: r.meanAkhir.toFixed(1),
+      color: r.meanAkhir >= r.s.meta.kktp ? '#1d4ed8' : '#dc2626'
+    })), 100);
+
+    box.innerHTML = renderReportHeader('REKAPITULASI HASIL UJIAN ANTAR KELAS & MATA PELAJARAN') +
+      gRekap +
+      `<div class="table-wrap"><table><thead><tr><th>No</th><th>Kelas</th><th>Mata Pelajaran</th><th>Guru</th><th>Peserta</th><th>KKTP</th><th>Rata-rata</th><th>Ketuntasan</th><th>Aksi</th></tr></thead><tbody>${tableRows}</tbody></table></div>` +
+      renderReportSignatures();
   }
 }
 
-// ==================== LAPORAN LEGER MULTI-PELAJARAN DALAM 1 KELAS ====================
-function renderLegerMapelReport(box, idLabel) {
-  const curKelas = (state.meta.kelas || '').trim();
-  const classSessions = workspace.sessions.filter(s => (s.meta.kelas || '').trim() === curKelas);
-
-  const sessionAnalytics = classSessions.map(ses => ({
-    ses,
-    analytics: computeAllAnalyticsForSession(ses)
-  }));
-
-  const studentMap = new Map();
-  sessionAnalytics.forEach(({ ses, analytics }, sIdx) => {
-    ses.students.forEach((st, i) => {
-      const key = (st.nis || '').trim() ? `ID:${st.nis.trim()}` : `NM:${(st.nama || '').trim().toUpperCase()}`;
-      if (!studentMap.has(key)) {
-        studentMap.set(key, {
-          nis: st.nis || '-',
-          nama: st.nama || '-',
-          scores: {}
-        });
-      }
-      const entry = studentMap.get(key);
-      if ((!entry.nis || entry.nis === '-') && st.nis) entry.nis = st.nis;
-      entry.scores[sIdx] = analytics.gabungan[i].nAkhir;
-    });
-  });
-
-  const rowsList = Array.from(studentMap.values()).map(item => {
-    let sum = 0, count = 0;
-    sessionAnalytics.forEach((_, sIdx) => {
-      if (item.scores[sIdx] !== undefined) {
-        sum += item.scores[sIdx];
-        count++;
-      }
-    });
-    return {
-      ...item,
-      total: sum,
-      avg: count > 0 ? sum / count : 0,
-      count
-    };
-  });
-
-  const sortedByAvg = [...rowsList].sort((a, b) => b.avg - a.avg);
-  const rankMap = new Map();
-  sortedByAvg.forEach((r, idx) => rankMap.set(r, idx + 1));
-
-  const mapelHeaders = sessionAnalytics.map(({ ses }) => `<th>${escapeAttr(ses.meta.mapel || 'Mapel')}</th>`).join('');
-  const tbodyRows = rowsList.map((r, idx) => {
-    const mapelCols = sessionAnalytics.map((_, sIdx) => {
-      const val = r.scores[sIdx];
-      return val !== undefined ? `<td>${val.toFixed(1)}</td>` : `<td style="color:#94a3b8;">-</td>`;
-    }).join('');
-    return `<tr>
-      <td>${idx + 1}</td>
-      <td style="font-family:monospace;">${escapeAttr(r.nis)}</td>
-      <td><b>${escapeAttr(r.nama)}</b></td>
-      ${mapelCols}
-      <td><b>${r.total.toFixed(1)}</b></td>
-      <td><b>${r.avg.toFixed(1)}</b></td>
-      <td><span class="badge badge-info">#${rankMap.get(r)}</span></td>
-    </tr>`;
-  }).join('');
-
-  // Grafik 3D Perbandingan Rata-rata Antar Mata Pelajaran di Kelas Ini
-  const mapelChartRows = sessionAnalytics.map(({ ses, analytics }, idx) => {
-    const palette = ['#1d4ed8', '#059669', '#7c3aed', '#d97706', '#0284c7', '#db2777', '#0d9488'];
-    const vals = analytics.gabungan.map(g => g.nAkhir);
-    const mean = vals.length ? (vals.reduce((a, b) => a + b, 0) / vals.length) : 0;
-    return {
-      label: ses.meta.mapel || `Mapel ${idx + 1}`,
-      value: Number(mean.toFixed(1)),
-      display: mean.toFixed(1),
-      color: palette[idx % palette.length]
-    };
-  });
-
-  box.innerHTML = getKopSuratHTML(`LEGER NILAI GABUNGAN ANTAR MATA PELAJARAN — ${curKelas.toUpperCase()}`) + `
-    <p style="font-size:0.78rem; color:var(--muted); margin-top:0;">
-      Menggabungkan nilai akhir dari <b>${classSessions.length} mata pelajaran</b> yang tersimpan pada kelas <b>${escapeAttr(curKelas)}</b>.
-    </p>
-    ${chart3DColumn('Grafik 3D Rata-rata Nilai Akhir per Mata Pelajaran', mapelChartRows, 100)}
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>No</th>
-            <th>${idLabel}</th>
-            <th>Nama Siswa</th>
-            ${mapelHeaders}
-            <th>Jumlah</th>
-            <th>Rata-rata</th>
-            <th>Peringkat</th>
-          </tr>
-        </thead>
-        <tbody>${tbodyRows}</tbody>
-      </table>
-    </div>
-  ` + getSignatureHTML();
-}
-
-// ==================== LAPORAN REKAP ANTAR KELAS & MATA PELAJARAN ====================
-function renderRekapAntarKelasReport(box) {
-  const palette = ['#1d4ed8', '#059669', '#7c3aed', '#d97706', '#0284c7', '#dc2626'];
-  const summaryRows = workspace.sessions.map((ses, idx) => {
-    const an = computeAllAnalyticsForSession(ses);
-    const vals = an.gabungan.map(g => g.nAkhir);
-    const mean = vals.length ? vals.reduce((a, b) => a + b, 0) / vals.length : 0;
-    const maxV = vals.length ? Math.max(...vals) : 0;
-    const minV = vals.length ? Math.min(...vals) : 0;
-    const tuntasCnt = an.gabungan.filter(g => g.ketAkhir === 'Tuntas').length;
-    const pctTuntas = an.N > 0 ? (tuntasCnt / an.N) * 100 : 0;
-    return { ses, an, mean, maxV, minV, tuntasCnt, pctTuntas, idx };
-  });
-
-  const colChartData = summaryRows.map((r, i) => ({
-    label: `${r.ses.meta.kelas} (${r.ses.meta.mapel})`,
-    value: Number(r.mean.toFixed(1)),
-    display: r.mean.toFixed(1),
-    color: palette[i % palette.length]
-  }));
-
-  const barChartData = summaryRows.map((r, i) => ({
-    label: `${r.ses.meta.kelas} - ${r.ses.meta.mapel}`,
-    value: Math.round(r.pctTuntas),
-    display: `${r.tuntasCnt}/${r.an.N} (${r.pctTuntas.toFixed(0)}%)`,
-    color: palette[i % palette.length]
-  }));
-
-  const tbody = summaryRows.map(({ ses, an, mean, maxV, minV, tuntasCnt, pctTuntas, idx }) => `
-    <tr>
-      <td>${idx + 1}</td>
-      <td><b>${escapeAttr(ses.meta.kelas || '-')}</b></td>
-      <td><b>${escapeAttr(ses.meta.mapel || '-')}</b></td>
-      <td>${escapeAttr(ses.meta.guru || '-')}</td>
-      <td>${an.N}</td>
-      <td>${ses.meta.kktp}</td>
-      <td><b>${mean.toFixed(1)}</b></td>
-      <td>${maxV.toFixed(1)} / ${minV.toFixed(1)}</td>
-      <td>${tuntasCnt} / ${an.N} (${pctTuntas.toFixed(0)}%)</td>
-      <td><button class="btn btn-primary btn-xs" onclick="switchActiveSession('${ses.id}')">Buka Sesi</button></td>
-    </tr>
-  `).join('');
-
-  box.innerHTML = getKopSuratHTML('REKAPITULASI HASIL EVALUASI ANTAR KELAS & MATA PELAJARAN') + `
-    ${chart3DColumn('1. Perbandingan Rata-rata Nilai Akhir Antar Kelas & Mapel (Batang 3D)', colChartData, 100)}
-    ${chart3DHorizontalBars('2. Persentase Ketuntasan Klasikal Antar Kelas & Mapel (Batang Horizontal 3D)', barChartData, 100)}
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>No</th>
-            <th>Kelas</th>
-            <th>Mata Pelajaran</th>
-            <th>Guru Pengajar</th>
-            <th>Peserta</th>
-            <th>KKTP</th>
-            <th>Rata-rata</th>
-            <th>Tertinggi / Terendah</th>
-            <th>Ketuntasan</th>
-            <th>Aksi</th>
-          </tr>
-        </thead>
-        <tbody>${tbody}</tbody>
-      </table>
-    </div>
-  ` + getSignatureHTML();
-}
-
-function printCurrentReport() {
+async function printCurrentReport() {
   renderReport();
-  const pa = document.getElementById('printArea');
-  pa.style.display = 'block';
-  pa.innerHTML = `<section class="print-page">${document.getElementById('reportContainer').innerHTML}</section>`;
-  window.print();
-  pa.style.display = 'none';
+  const reportHtml = document.getElementById('reportContainer').innerHTML;
+  await triggerPrintPages(`<section class="print-page report-sheet">${reportHtml}</section>`);
 }
 
-// ==================== EKSPOR EXCEL MULTI-SHEET (.XLSX) ====================
-function exportKoranulExcel() {
-  if (typeof XLSX === 'undefined') return alert('Library Excel sedang dimuat, pastikan koneksi internet aktif saat pertama kali memuat.');
+// ==================== EKSPOR MULTI-SHEET EXCEL (.XLSX) SESUAI FORMAT KAU ====================
+function exportKAUExcel() {
+  if (typeof XLSX === 'undefined') {
+    alert('Library Excel sedang dimuat atau perangkat offline tanpa cache XLSX.');
+    return;
+  }
   const wb = XLSX.utils.book_new();
   const A = computeAllAnalytics();
   const m = state.meta;
+  const kPG = A.kPG;
+  const kBS = A.kBS || 0;
+  const kUR = A.kUR;
   const idLabel = getIdFieldLabel();
 
-  const dataSheet = [
-    ['IDENTITAS SEKOLAH & UJIAN (KORANUL OMR)'],
+  const wsData = [
+    ['IDENTITAS SEKOLAH & UJIAN (KAU - Koreksi & Analisis Ulangan)'],
     ['NAMA SEKOLAH', m.sekolah],
-    ['KEPALA SEKOLAH', m.kepsek],
-    ['NIP KEPALA SEKOLAH', m.nipKepsek],
-    ['GURU PENGAJAR', m.guru],
-    ['NIP GURU', m.nipGuru],
+    ['KEPALA SEKOLAH', m.kepsek, 'NIP', m.nipKepsek],
+    ['NAMA GURU', m.guru, 'NIP', m.nipGuru],
     ['MATA PELAJARAN', m.mapel],
     ['JENIS TES', m.jenisTes],
     ['MATERI POKOK', m.materi],
@@ -4732,164 +4608,84 @@ function exportKoranulExcel() {
     ['TANGGAL PERIKSA', m.tglPeriksa],
     ['KKTP / KKM', m.kktp],
     ['TEMPAT TTD', m.tempat],
-    ['BENTUK GELEMBUNG LJK', state.config.bubbleShape === 'square' ? 'Persegi / Kotak' : 'Lingkaran'],
+    ['BENTUK GELEMBUNG LJK', state.config.bubbleShape === 'square' ? 'Persegi / Kotak (Silang X)' : 'Lingkaran'],
     ['JENIS IDENTITAS LJK', `${idLabel} (${state.config.idDigits} Digit)`],
-    ['JUMLAH SOAL PG', A.kPG],
-    ['JUMLAH SOAL B-S', A.kBS],
-    ['JUMLAH SOAL URAIAN', A.kUR],
+    ['JUMLAH SOAL PG', kPG],
+    ['JUMLAH SOAL BENAR-SALAH', kBS],
+    ['JUMLAH SOAL URAIAN', kUR],
     ['KUNCI PG', state.config.kunciPG],
-    ['KUNCI B-S', state.config.kunciBS || '']
+    ['KUNCI BENAR-SALAH', state.config.kunciBS || '']
   ];
-  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(dataSheet), 'data');
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(wsData), 'data');
 
-  const mcHeader = ['No', idLabel, 'Nama Siswa', 'String Jawaban'];
-  for (let j = 1; j <= A.kPG; j++) mcHeader.push(`No.${j}`);
-  const mcRows = [mcHeader];
+  const hdrMC = ['No', idLabel, 'Nama Siswa', ...Array.from({ length: kPG }, (_, j) => `S${j + 1}`)];
+  const aoaDataMC = [hdrMC];
   state.students.forEach((st, i) => {
-    const ans = A.pgMatrix[i].ans.split('');
-    mcRows.push([i + 1, st.nis || '', st.nama, A.pgMatrix[i].ans, ...ans]);
+    const ans = (st.pg || '').toUpperCase().padEnd(kPG, 'V').split('').slice(0, kPG);
+    aoaDataMC.push([i + 1, st.nis || '', st.nama, ...ans]);
   });
-  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(mcRows), 'DATA MC');
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(aoaDataMC), 'DATA MC');
 
-  if (A.kBS > 0) {
-    const bsHeader = ['No', idLabel, 'Nama Siswa', 'Jawaban B-S', 'Skor B-S', 'Nilai B-S'];
-    for (let j = 0; j < A.kBS; j++) bsHeader.push(`No.${getBSQuestionNo(j)}`);
-    const bsRows = [bsHeader];
-    state.students.forEach((st, i) => {
-      const mBS = A.bsMatrix[i];
-      bsRows.push([i + 1, st.nis || '', st.nama, mBS.ans, mBS.skor, Number(mBS.nilai.toFixed(2)), ...mBS.ans.split('')]);
-    });
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(bsRows), 'DATA BS');
-
-    const aBSRows = [['No Soal', 'Benar', 'Salah', 'Kosong (V)', 'Ganda (X)', 'Belum Dinilai', 'Tingkat Kesukaran (TK)']];
-    A.itemsBS.forEach(it => {
-      aBSRows.push([it.no, it.benar, it.salah, it.kosong, it.ganda, it.belumDinilai, Number(it.tk.toFixed(3))]);
-    });
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(aBSRows), 'Analisis BS');
-  }
-
-  const nMcRows = [['No', idLabel, 'Nama Siswa', 'Skor PG', 'Nilai PG', 'Keterangan']];
+  const aoaNilaiMC = [['No', idLabel, 'Nama Siswa', ...Array.from({ length: kPG }, (_, j) => j + 1), 'Skor', 'Nilai', 'Keterangan']];
   state.students.forEach((st, i) => {
     const p = A.pgMatrix[i];
-    nMcRows.push([i + 1, st.nis || '', st.nama, p.skor, Number(p.nilai.toFixed(2)), p.tuntas]);
+    aoaNilaiMC.push([i + 1, st.nis || '', st.nama, ...p.row, p.skor, Number(p.nilai.toFixed(2)), p.tuntas]);
   });
-  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(nMcRows), 'NILAI MC');
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(aoaNilaiMC), 'NILAI MC');
 
-  const aMcRows = [
-    ['Reliabilitas KR-20', Number(A.kr20.toFixed(3)), 'r Tabel', A.rTabel, 'Status', A.relStatusPG],
+  const aoaAnalisisMC = [
+    ['ANALISIS BUTIR SOAL PILIHAN GANDA'],
+    ['Reliabilitas (KR-20)', Number(A.kr20.toFixed(4)), 'r Tabel', A.rTabel, 'Status', A.relStatusPG],
     [],
-    ['No Soal', 'Tingkat Kesukaran (TK)', 'Kategori TK', 'Daya Pembeda (DP)', 'Kategori DP', 'r hitung', 'Validitas', 'Bank Soal']
+    ['No Soal', 'Tingkat Kesukaran', 'Kriteria TK', 'Daya Pembeda', 'Kriteria DP', 'r Hitung', 'r Tabel', 'Validitas', 'Bank Soal']
   ];
   A.itemsPG.forEach(it => {
-    aMcRows.push([it.no, Number(it.tk.toFixed(3)), it.katTK, Number(it.dp.toFixed(3)), it.katDP, Number(it.rxy.toFixed(3)), it.valid, it.bankSoal]);
+    aoaAnalisisMC.push([it.no, Number(it.tk.toFixed(3)), it.katTK, Number(it.dp.toFixed(3)), it.katDP, Number(it.rxy.toFixed(3)), A.rTabel, it.valid, it.bankSoal]);
   });
-  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(aMcRows), 'analisi MC');
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(aoaAnalisisMC), 'Analisis MC');
 
-  const urHeader = ['No', idLabel, 'Nama Siswa'];
-  for (let j = 0; j < A.kUR; j++) urHeader.push(`No.${A.kPG + A.kBS + j + 1} (Max ${state.config.maxUR[j] || 4})`);
-  const dUrRows = [urHeader];
-  state.students.forEach((st, i) => {
-    dUrRows.push([i + 1, st.nis || '', st.nama, ...A.urMatrix[i].row]);
-  });
-  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(dUrRows), 'DATA UR');
-
-  const nUrRows = [['No', idLabel, 'Nama Siswa', 'Skor Uraian', 'Nilai Uraian', 'Keterangan']];
-  state.students.forEach((st, i) => {
-    const u = A.urMatrix[i];
-    nUrRows.push([i + 1, st.nis || '', st.nama, u.skor, Number(u.nilai.toFixed(2)), u.tuntas]);
-  });
-  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(nUrRows), 'NILAI UR');
-
-  const aUrRows = [
-    ["Cronbach's Alpha", Number(A.cronbachUR.toFixed(3)), 'r Tabel', A.rTabel, 'Status', A.relStatusUR],
-    [],
-    ['No Soal', 'Tingkat Kesukaran (TK)', 'Kategori TK', 'Daya Pembeda (DP)', 'Kategori DP', 'r hitung', 'Validitas', 'Bank Soal']
-  ];
-  A.itemsUR.forEach(it => {
-    aUrRows.push([it.no, Number(it.tk.toFixed(3)), it.katTK, Number(it.dp.toFixed(3)), it.katDP, Number(it.rxy.toFixed(3)), it.valid, it.bankSoal]);
-  });
-  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(aUrRows), 'Analisis UR');
-
-  const gabRows = [['No', idLabel, 'Nama Siswa', 'Nilai Objektif', 'Nilai Uraian', 'Nilai Gabungan', 'Keterangan Awal', 'Nilai Remedial', 'Nilai Akhir', 'Keterangan Akhir']];
-  state.students.forEach((st, i) => {
-    const g = A.gabungan[i];
-    gabRows.push([i + 1, st.nis || '', st.nama, Number(g.nPG.toFixed(2)), Number(g.nUR.toFixed(2)), Number(g.nGab.toFixed(2)), g.ketGab, g.nRem ?? '', Number(g.nAkhir.toFixed(2)), g.ketAkhir]);
-  });
-  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(gabRows), 'Nil Gab');
-
-  const remedSheet = [['No', idLabel, 'Nama Siswa', 'Nilai Awal', 'Butir Soal Belum Tuntas']];
-  state.students.forEach((st, i) => {
-    const wrongPG = [];
-    A.pgMatrix[i].row.forEach((v, j) => { if (v === 0) wrongPG.push(`PG ${j + 1}`); });
-    A.urMatrix[i].row.forEach((v, j) => {
-      const noU = A.kPG + A.kBS + j + 1;
-      if (v < (state.config.maxUR[j] || 4)) wrongPG.push(`UR ${noU}`);
+  if (kBS > 0) {
+    const aoaBS = [['No', idLabel, 'Nama Siswa', ...Array.from({ length: kBS }, (_, j) => `No.${getBSQuestionNo(j)}`), 'Skor BS', 'Nilai BS']];
+    state.students.forEach((st, i) => {
+      const b = A.bsMatrix[i];
+      aoaBS.push([i + 1, st.nis || '', st.nama, ...b.ans.slice(0, kBS).split(''), b.skor, Number(b.nilai.toFixed(2))]);
     });
-    remedSheet.push([i + 1, st.nis || '', st.nama, Number(A.gabungan[i].nGab.toFixed(2)), wrongPG.join(', ') || 'Tuntas Semua']);
-  });
-  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(remedSheet), 'Remed');
-
-  const soalDibuang = [...A.itemsPG, ...A.itemsUR].filter(it => it.bankSoal === 'Ditolak').map(x => 'No.' + x.no).join(', ');
-  const soalRevisi = [...A.itemsPG, ...A.itemsUR].filter(it => it.bankSoal === 'Dipertimbangkan').map(x => 'No.' + x.no).join(', ');
-  const perbRows = [
-    ['LAPORAN TINDAK LANJUT & PERBAIKAN'],
-    ['Soal Ditolak / Harus Diganti', soalDibuang || 'Tidak ada'],
-    ['Soal Perlu Revisi', soalRevisi || 'Tidak ada'],
-    [],
-    ['No', idLabel, 'Nama Siswa Remedial', 'Nilai Gabungan', 'Tindak Lanjut']
-  ];
-  state.students.forEach((st, i) => {
-    if (A.gabungan[i].ketGab === 'Remedial') {
-      perbRows.push([i + 1, st.nis || '', st.nama, Number(A.gabungan[i].nGab.toFixed(2)), 'Bimbingan ulang & tes perbaikan']);
-    }
-  });
-  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(perbRows), 'Perbaikan');
-
-  const curKelas = (m.kelas || '').trim();
-  const classSessions = workspace.sessions.filter(s => (s.meta.kelas || '').trim() === curKelas);
-  if (classSessions.length > 0) {
-    const sesAn = classSessions.map(s => ({ s, an: computeAllAnalyticsForSession(s) }));
-    const stMap = new Map();
-    sesAn.forEach(({ s, an }, sIdx) => {
-      s.students.forEach((st, i) => {
-        const key = (st.nis || '').trim() ? `ID:${st.nis.trim()}` : `NM:${(st.nama || '').trim().toUpperCase()}`;
-        if (!stMap.has(key)) stMap.set(key, { nis: st.nis || '', nama: st.nama || '', scores: {} });
-        stMap.get(key).scores[sIdx] = Number(an.gabungan[i].nAkhir.toFixed(2));
-      });
-    });
-    const legerHeader = ['No', idLabel, 'Nama Siswa', ...classSessions.map(s => s.meta.mapel || 'Mapel'), 'Jumlah', 'Rata-rata'];
-    const legerRows = [legerHeader];
-    Array.from(stMap.values()).forEach((item, idx) => {
-      let sum = 0, cnt = 0;
-      const mCols = classSessions.map((_, sIdx) => {
-        const v = item.scores[sIdx];
-        if (v !== undefined) { sum += v; cnt++; return v; }
-        return '';
-      });
-      legerRows.push([idx + 1, item.nis, item.nama, ...mCols, Number(sum.toFixed(2)), cnt > 0 ? Number((sum / cnt).toFixed(2)) : 0]);
-    });
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(legerRows), 'Leger_Kelas');
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(aoaBS), 'DATA BS');
   }
 
-  const rekapRows = [['No', 'Kelas', 'Mata Pelajaran', 'Guru Pengajar', 'Peserta', 'KKTP', 'Rata-rata Akhir', 'Tertinggi', 'Terendah', 'Jumlah Tuntas', 'Persentase Tuntas (%)']];
-  workspace.sessions.forEach((ses, idx) => {
-    const an = computeAllAnalyticsForSession(ses);
-    const vals = an.gabungan.map(g => g.nAkhir);
-    const mean = vals.length ? vals.reduce((a, b) => a + b, 0) / vals.length : 0;
-    const maxV = vals.length ? Math.max(...vals) : 0;
-    const minV = vals.length ? Math.min(...vals) : 0;
-    const tuntasCnt = an.gabungan.filter(g => g.ketAkhir === 'Tuntas').length;
-    const pct = an.N > 0 ? (tuntasCnt / an.N) * 100 : 0;
-    rekapRows.push([idx + 1, ses.meta.kelas, ses.meta.mapel, ses.meta.guru, an.N, ses.meta.kktp, Number(mean.toFixed(2)), Number(maxV.toFixed(2)), Number(minV.toFixed(2)), tuntasCnt, Number(pct.toFixed(1))]);
-  });
-  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(rekapRows), 'Rekap_Multi_Kelas_Mapel');
+  if (kUR > 0) {
+    const aoaDataUR = [['No', idLabel, 'Nama Siswa', ...Array.from({ length: kUR }, (_, j) => `No.${kPG + kBS + j + 1}`), 'Skor', 'Nilai', 'Keterangan']];
+    state.students.forEach((st, i) => {
+      const u = A.urMatrix[i];
+      aoaDataUR.push([i + 1, st.nis || '', st.nama, ...u.row, u.skor, Number(u.nilai.toFixed(2)), u.tuntas]);
+    });
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(aoaDataUR), 'NILAI UR');
 
-  const safeKelas = m.kelas.replace(/[^a-zA-Z0-9_-]/g, '_');
-  const safeMapel = m.mapel.replace(/[^a-zA-Z0-9_-]/g, '_');
-  XLSX.writeFile(wb, `KORANUL_${safeKelas}_${safeMapel}.xlsx`);
+    const aoaAnUR = [
+      ['ANALISIS BUTIR SOAL URAIAN'],
+      ['Reliabilitas (Cronbach Alpha)', Number(A.cronbachUR.toFixed(4)), 'r Tabel', A.rTabel, 'Status', A.relStatusUR],
+      [],
+      ['No Soal', 'Tingkat Kesukaran', 'Kriteria TK', 'Daya Pembeda', 'Kriteria DP', 'r Hitung', 'r Tabel', 'Validitas', 'Bank Soal']
+    ];
+    A.itemsUR.forEach(it => {
+      aoaAnUR.push([it.no, Number(it.tk.toFixed(3)), it.katTK, Number(it.dp.toFixed(3)), it.katDP, Number(it.rxy.toFixed(3)), A.rTabel, it.valid, it.bankSoal]);
+    });
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(aoaAnUR), 'Analisis UR');
+  }
+
+  const aoaGab = [['No', idLabel, 'Nama Siswa', 'Nilai PG/Obj', 'Nilai Uraian', 'Nilai Gabungan', 'Ket Awal', 'Nilai Remedial', 'Nilai Akhir', 'Ket Akhir']];
+  state.students.forEach((st, i) => {
+    const g = A.gabungan[i];
+    aoaGab.push([i + 1, st.nis || '', st.nama, Number(g.nPG.toFixed(1)), Number(g.nUR.toFixed(1)), Number(g.nGab.toFixed(1)), g.ketGab, g.nRem ?? '', Number(g.nAkhir.toFixed(1)), g.ketAkhir]);
+  });
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(aoaGab), 'Nil Gab');
+
+  const safeKelas = (m.kelas || 'Kelas').replace(/[^a-zA-Z0-9_-]+/g, '_');
+  const safeMapel = (m.mapel || 'Mapel').replace(/[^a-zA-Z0-9_-]+/g, '_');
+  XLSX.writeFile(wb, `KAU_${safeKelas}_${safeMapel}.xlsx`);
 }
 
-// ==================== NAVIGASI TAB ====================
+// ==================== NAVIGASI TAB UTAMA ====================
 function switchTab(tabId, btn) {
   document.querySelectorAll('.tab-page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
@@ -4903,6 +4699,9 @@ function switchTab(tabId, btn) {
   if (tabId === 'ljk') renderLJKPreview();
   if (tabId === 'input') renderInputJawabanTable();
   if (tabId === 'laporan') renderReport();
+  if (tabId === 'scan' && !loadedScanImage) {
+    drawScannerIdleCanvas();
+  }
 }
 
 window.addEventListener('DOMContentLoaded', initApp);
