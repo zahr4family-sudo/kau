@@ -159,23 +159,51 @@
     }
     .chart-card h3 { margin: 0 0 8px 0; font-size: 0.9rem; color: var(--primary-dark); }
     .chart-svg { width: 100%; height: auto; display: block; }
-
-    @media print {
-      body { background: #fff !important; padding: 0 !important; }
-      body * { visibility: hidden; }
-      #printArea, #printArea * {
+   @media print {
+      html, body {
+        background: #fff !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        height: auto !important;
+        overflow: visible !important;
+      }
+      body > *:not(#printArea) {
+        display: none !important;
+      }
+      #printArea {
+        display: block !important;
+        position: static !important;
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        background: #fff !important;
+        visibility: visible !important;
+      }
+      #printArea * {
         visibility: visible !important;
         -webkit-print-color-adjust: exact !important;
         print-color-adjust: exact !important;
       }
-      #printArea {
-        position: absolute; left: 0; top: 0; width: 100%; background: #fff !important;
-      }
       #printArea .print-page {
-        width: 100%; box-sizing: border-box; page-break-after: always; break-after: page; padding: 0; margin: 0;
+        width: 100%;
+        box-sizing: border-box;
+        page-break-after: always;
+        break-after: page;
+        padding: 0;
+        margin: 0;
       }
-      #printArea .print-page:last-child { page-break-after: auto; break-after: auto; }
-      #printArea img { width: 100%; height: auto; display: block; }
+      #printArea .print-page:last-child {
+        page-break-after: auto;
+        break-after: auto;
+      }
+      #printArea img {
+        width: 100%;
+        max-height: 315mm;
+        object-fit: contain;
+        height: auto;
+        display: block;
+        margin: 0 auto;
+      }
       #printArea .table-wrap { max-height: none !important; overflow: visible !important; border: none !important; }
       #printArea .chart-card {
         border: 1px solid #cbd5e1 !important;
@@ -188,7 +216,7 @@
         display: block !important;
       }
       @page { size: 215mm 330mm; margin: 6mm; }
-    }
+    } 
   </style>
 </head>
 <body>
